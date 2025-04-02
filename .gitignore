@@ -1,0 +1,16 @@
+# Compiler files
+cache/
+out/
+vendor/
+
+# Ignores development broadcast logs
+/broadcast
+
+# Docs
+docs/
+
+.idea
+
+# Dotenv file
+.env*
+!.env.example

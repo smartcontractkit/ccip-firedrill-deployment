@@ -1,0 +1,400 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "ctrl",
+        "type": "address",
+        "internalType": "contract FiredrillEntrypoint"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "acceptOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "emitCCIPMessageSent",
+    "inputs": [
+      {
+        "name": "sender",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "index",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getDestChainConfig",
+    "inputs": [
+      {
+        "name": "destChainSelector",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "sequenceNumber",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "allowlistEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "router",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getDynamicConfig",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct FiredrillOnRamp.DynamicConfig",
+        "components": [
+          {
+            "name": "feeQuoter",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "reentrancyGuardEntered",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "messageInterceptor",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "feeAggregator",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "allowlistAdmin",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getStaticConfig",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct FiredrillOnRamp.StaticConfig",
+        "components": [
+          {
+            "name": "chainSelector",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "rmnRemote",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "nonceManager",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "tokenAdminRegistry",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isActive",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "pendingOwner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "typeAndVersion",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "event",
+    "name": "CCIPMessageSent",
+    "inputs": [
+      {
+        "name": "destChainSelector",
+        "type": "uint64",
+        "indexed": true,
+        "internalType": "uint64"
+      },
+      {
+        "name": "sequenceNumber",
+        "type": "uint64",
+        "indexed": true,
+        "internalType": "uint64"
+      },
+      {
+        "name": "message",
+        "type": "tuple",
+        "indexed": false,
+        "internalType": "struct FiredrillOnRamp.EVM2AnyRampMessage",
+        "components": [
+          {
+            "name": "header",
+            "type": "tuple",
+            "internalType": "struct FiredrillOnRamp.RampMessageHeader",
+            "components": [
+              {
+                "name": "messageId",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "sourceChainSelector",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "destChainSelector",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "sequenceNumber",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "nonce",
+                "type": "uint64",
+                "internalType": "uint64"
+              }
+            ]
+          },
+          {
+            "name": "sender",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "data",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "receiver",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "extraArgs",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "feeToken",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "feeTokenAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "feeValueJuels",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "tokenAmounts",
+            "type": "tuple[]",
+            "internalType": "struct FiredrillOnRamp.EVM2AnyTokenTransfer[]",
+            "components": [
+              {
+                "name": "sourcePoolAddress",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destTokenAddress",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "extraData",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destExecData",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferStarted",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "OwnableInvalidOwner",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  }
+]

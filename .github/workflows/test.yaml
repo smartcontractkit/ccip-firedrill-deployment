@@ -1,0 +1,24 @@
+name: Go Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        # https://github.com/smartcontractkit/.github/tree/main/actions/setup-golang
+        uses: smartcontractkit/.github/actions/setup-golang@setup-golang/0.3.2
+        with:
+          use-go-cache: true
+
+      - name: Go test
+        run: go test -p 4 ./...
