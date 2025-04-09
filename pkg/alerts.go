@@ -5,8 +5,9 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
-	firedrill "github.com/smartcontractkit/ccip-firedrill-deployment/deployment"
 	chainsel "github.com/smartcontractkit/chain-selectors"
+
+	firedrill "github.com/smartcontractkit/ccip-firedrill-deployment/deployment"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	"github.com/smartcontractkit/chainlink/deployment"
@@ -100,14 +101,14 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.Chain, version str
 		network.Contracts.CommitStores = append(network.Contracts.CommitStores, contractsDestSrc.CommitStores...)
 		network.Contracts.OffRamps = append(network.Contracts.OffRamps, contractsDestSrc.OffRamps...)
 	case deployment.Version1_6_0.String():
-		contractsSrc := lookupCCIPv1_6(ccipView, srcChain)
+		contractsSrc := lookupCCIPv1_6(ccipView, srcChain, destChain)
 		if len(contractsSrc.OffRamps) == 0 {
 			return GlobalInput{}, fmt.Errorf("no off ramps found for %s", srcChain.Name)
 		}
 		network.Contracts.Routers = append(network.Contracts.Routers, contractsSrc.Routers...)
 		network.Contracts.OffRamps = append(network.Contracts.OffRamps, contractsSrc.OffRamps...)
 
-		contractsDest := lookupCCIPv1_6(ccipView, destChain)
+		contractsDest := lookupCCIPv1_6(ccipView, destChain, srcChain)
 		if len(contractsDest.OffRamps) == 0 {
 			return GlobalInput{}, fmt.Errorf("no off ramps found for %s", destChain.Name)
 		}
@@ -140,22 +141,22 @@ func lookupCCIPv1_5(ccipView view.CCIPView, srcChain chainsel.Chain, destChain c
 	return GlobalInputContracts{}
 }
 
-func lookupCCIPv1_6(ccipView view.CCIPView, chain chainsel.Chain) GlobalInputContracts {
+func lookupCCIPv1_6(ccipView view.CCIPView, srcChain chainsel.Chain, destChain chainsel.Chain) GlobalInputContracts {
 	contracts := GlobalInputContracts{}
-	chainView := ccipView.Chains[chain.Name]
-	for _, offRampView := range chainView.OffRamp {
-		sourceChainConfig, ok := offRampView.SourceChainConfigs[chain.Selector]
-		if !ok {
-			return GlobalInputContracts{}
+	destChainView := ccipView.Chains[destChain.Name]
+	for _, offRampView := range destChainView.OffRamp {
+		sourceChainConfig, ok := offRampView.SourceChainConfigs[srcChain.Selector]
+		if !ok || sourceChainConfig.Router == (common.Address{}) {
+			continue
 		}
 		contracts.OffRamps = append(
 			contracts.OffRamps,
-			GlobalInputContract{Address: offRampView.Address, Network: chain.Name},
+			GlobalInputContract{Address: offRampView.Address, Network: destChain.Name},
 		)
 		// There shouldn't be several matching offramps
 		return GlobalInputContracts{
-			Routers:  []GlobalInputContract{{Address: sourceChainConfig.Router, Network: chain.Name}},
-			OffRamps: []GlobalInputContract{{Address: offRampView.Address, Network: chain.Name}},
+			Routers:  []GlobalInputContract{{Address: sourceChainConfig.Router, Network: destChain.Name}},
+			OffRamps: []GlobalInputContract{{Address: offRampView.Address, Network: destChain.Name}},
 		}
 	}
 	return GlobalInputContracts{}
