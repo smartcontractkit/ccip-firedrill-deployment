@@ -35,8 +35,9 @@ contract FiredrillEntrypoint is Ownable2Step, HasStatus, ITypeAndVersion {
         i_compound = new FiredrillCompound(this);
         i_receiver = new FiredrillRevertMessageReceiver(this);
         s_active = true;
-        s_init_send = 0;
-        s_init_commit = 0;
+        s_init_send = 1;
+        s_init_commit = 1;
+        s_init_exec = 1;
     }
 
     function deactivate() public onlyOwner {
