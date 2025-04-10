@@ -23,9 +23,7 @@ contract FiredrillEntrypoint is Ownable2Step, HasStatus, ITypeAndVersion {
     // deactivation will be reflected in rdd-monster and alerts will stop triggering
     bool private s_active;
 
-    uint64 private s_init_send;
-    uint64 private s_init_commit;
-    uint64 private s_init_exec;
+    uint64 private s_send_last;
 
     constructor(uint64 chainSelector) Ownable(msg.sender) {
         i_chainSelector = chainSelector;
@@ -35,9 +33,6 @@ contract FiredrillEntrypoint is Ownable2Step, HasStatus, ITypeAndVersion {
         i_compound = new FiredrillCompound(this);
         i_receiver = new FiredrillRevertMessageReceiver(this);
         s_active = true;
-        s_init_send = 1;
-        s_init_commit = 1;
-        s_init_exec = 1;
     }
 
     function deactivate() public onlyOwner {
@@ -52,17 +47,19 @@ contract FiredrillEntrypoint is Ownable2Step, HasStatus, ITypeAndVersion {
         i_offRamp.emitSourceChainConfigSet(); // register OffRamp
     }
 
-    function drill_PendingCommit_PendingQueue_TxSpike(uint8 n) public onlyOwner {
-        for (uint64 i = 0; i < n; i++) {
-            i_onRamp.emitCCIPMessageSent(msg.sender, s_init_send + i);
+    function drill_PendingCommit_PendingQueue_TxSpike(uint8 from, uint8 to) public onlyOwner {
+        require(from <= to, "nothing to send");
+        require(from > s_send_last, "message already sent");
+        for (uint64 i = from; i <= to; i++) {
+            i_onRamp.emitCCIPMessageSent(msg.sender, i);
         }
-        s_init_send += n;
+        s_send_last = to;
     }
 
-    function drill_PendingExecution() public onlyOwner {
-        require(s_init_commit < s_init_send, "nothing to commit");
-        i_offRamp.emitCommitReportAccepted(s_init_commit, s_init_send);
-        s_init_commit = s_init_send;
+    function drill_PendingExecution(uint8 from, uint8 to) public onlyOwner {
+        require(from <= to, "nothing to send");
+        require(to <= s_send_last, "not yet sent");
+        i_offRamp.emitCommitReportAccepted(from, to);
     }
 
     function drill_PriceRegistries() public onlyOwner {

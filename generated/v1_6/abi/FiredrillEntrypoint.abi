@@ -55,7 +55,12 @@
     "name": "drill_PendingCommit_PendingQueue_TxSpike",
     "inputs": [
       {
-        "name": "n",
+        "name": "from",
+        "type": "uint8",
+        "internalType": "uint8"
+      },
+      {
+        "name": "to",
         "type": "uint8",
         "internalType": "uint8"
       }
@@ -66,7 +71,18 @@
   {
     "type": "function",
     "name": "drill_PendingExecution",
-    "inputs": [],
+    "inputs": [
+      {
+        "name": "from",
+        "type": "uint8",
+        "internalType": "uint8"
+      },
+      {
+        "name": "to",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
