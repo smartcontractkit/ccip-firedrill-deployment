@@ -146,6 +146,10 @@ contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
         return i_ctrl.token();
     }
 
+    function getARM() public view returns (address) {
+        return i_ctrl.compound();
+    }
+
     function typeAndVersion() external pure returns (string memory) {
         return "Router 1.2.0";
     }

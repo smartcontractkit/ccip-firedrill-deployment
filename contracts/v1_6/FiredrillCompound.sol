@@ -44,7 +44,7 @@ contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
         });
     }
 
-    // ========== Router methods ==========
+    // ========== Router ==========
     function getOnRamp(uint64) external view returns (address) {
         return address(i_ctrl.onRamp());
     }
@@ -59,13 +59,19 @@ contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
     }
     // ==================================
 
-    // ========== FeeQuoter methods ==========
+    // ========== FeeQuoter ==========
     function getStaticConfig() external view returns (StaticConfig memory) {
         return StaticConfig({
             maxFeeJuelsPerMsg: 1,
             linkToken: i_ctrl.token(),
             tokenPriceStalenessThreshold: 0
         });
+    }
+    // ==================================
+
+    // ========== ARMProxy ==========
+    function getARM() public view returns (address) {
+        return i_ctrl.compound();
     }
     // ==================================
 
