@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 
 	"github.com/ethereum/go-ethereum/common"
-	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/generated/v1_5/gethwrappers/firedrill_entrypoint"
-	"github.com/smartcontractkit/ccip-firedrill-deployment/generated/v1_6/gethwrappers/firedrill_entrypoint"
 	chain_selectors "github.com/smartcontractkit/chain-selectors"
 
 	"github.com/smartcontractkit/chainlink/deployment"
 	"github.com/smartcontractkit/chainlink/deployment/common/view/types"
+
+	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
 )
 
 var _ deployment.ViewState = CCIPViewFiredrill

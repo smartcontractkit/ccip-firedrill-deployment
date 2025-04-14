@@ -8,16 +8,16 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/smartcontractkit/ccip-firedrill-deployment/generated/v1_5/gethwrappers/firedrill_off_ramp"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/utils/tests"
 	"github.com/smartcontractkit/chainlink/deployment"
 	"github.com/smartcontractkit/chainlink/deployment/environment/memory"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
+
+	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_off_ramp"
 )
 
 func TestDeployFiredrillContracts(t *testing.T) {

@@ -1,0 +1,11 @@
+# Compiler files
+cache/
+out/
+vendor/
+lib/
+
+# Ignores development broadcast logs
+/broadcast
+
+# Docs
+docs/

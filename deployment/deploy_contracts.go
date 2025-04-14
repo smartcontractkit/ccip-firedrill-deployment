@@ -7,11 +7,11 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/generated/v1_5/gethwrappers/firedrill_entrypoint"
-	"github.com/smartcontractkit/ccip-firedrill-deployment/generated/v1_6/gethwrappers/firedrill_entrypoint"
-
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	"github.com/smartcontractkit/chainlink/deployment"
+
+	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
 )
 
 const FiredrillEntrypointType deployment.ContractType = "FiredrillEntrypoint"
