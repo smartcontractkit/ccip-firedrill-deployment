@@ -7,11 +7,11 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/generated/v1_5/gethwrappers/firedrill_entrypoint"
-	"github.com/smartcontractkit/ccip-firedrill-deployment/generated/v1_6/gethwrappers/firedrill_entrypoint"
-
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	"github.com/smartcontractkit/chainlink/deployment"
+
+	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
 )
 
 const FiredrillEntrypointType deployment.ContractType = "FiredrillEntrypoint"
@@ -61,6 +61,11 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 	}
 	if config.ChainSelector == 0 {
 		return errors.New("missing ChainSelector")
+	}
+	_, ok := e.Chains[config.ChainSelector]
+	if !ok {
+		return fmt.Errorf("missing chain for selector %d. If this is first deployment for this chain, "+
+			"you need to specify empty address book, i.e. in addresses.json: `\"%d\": {}`", config.ChainSelector, config.ChainSelector)
 	}
 	if config.SourceChainSelector == 0 {
 		return errors.New("missing SourceChainSelector")
@@ -154,6 +159,6 @@ func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.Addre
 	if err != nil {
 		return err
 	}
-	lggr.Info("FiredrillEntrypoint register events mined", "address", firedrillEntrypointAddr, "tx", tx.Hash(), "blockNum", blockNum)
+	lggr.Infof("FiredrillEntrypoint register events mined. Address: %s, tx: %s, blockNum: %d", firedrillEntrypointAddr, tx.Hash(), blockNum)
 	return nil
 }
