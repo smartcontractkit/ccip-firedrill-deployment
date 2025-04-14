@@ -65,7 +65,7 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 	_, ok := e.Chains[config.ChainSelector]
 	if !ok {
 		return fmt.Errorf("missing chain for selector %d. If this is first deployment for this chain, "+
-			"you need to specify empty address book, i.e. in addresses.json: `\"your_chain_selector\": {}`", config.ChainSelector)
+			"you need to specify empty address book, i.e. in addresses.json: `\"%d\": {}`", config.ChainSelector, config.ChainSelector)
 	}
 	if config.SourceChainSelector == 0 {
 		return errors.New("missing SourceChainSelector")
