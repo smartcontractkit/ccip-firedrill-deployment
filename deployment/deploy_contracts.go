@@ -159,6 +159,6 @@ func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.Addre
 	if err != nil {
 		return err
 	}
-	lggr.Info("FiredrillEntrypoint register events mined", "address", firedrillEntrypointAddr, "tx", tx.Hash(), "blockNum", blockNum)
+	lggr.Infof("FiredrillEntrypoint register events mined. Address: %s, tx: %s, blockNum: %d", firedrillEntrypointAddr, tx.Hash(), blockNum)
 	return nil
 }
