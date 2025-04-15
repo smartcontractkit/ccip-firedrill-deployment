@@ -1,0 +1,167 @@
+use anchor_lang::prelude::*;
+use shared::ids::entrypoint::ID;
+use shared::FiredrillEntrypoint;
+
+use firedrill_compound::program::FiredrillCompound;
+use firedrill_offramp::cpi::accounts::EmitCommitReport as OffRampCommitReport;
+use firedrill_offramp::program::FiredrillOfframp;
+use firedrill_onramp::cpi::accounts::EmitMessage as OnRampEmitMessage;
+use firedrill_onramp::program::FiredrillOnramp;
+
+#[program]
+pub mod firedrill_entrypoint {
+    use super::*;
+
+    pub fn initialize(
+        ctx: Context<Initialize>,
+        chain_selector: u64,
+        token: Pubkey,
+        on_ramp: Pubkey,
+    ) -> Result<()> {
+        let state = &mut ctx.accounts.entrypoint;
+        state.owner = ctx.accounts.owner.key();
+        state.chain_selector = chain_selector;
+        state.active = true;
+        state.token = token;
+        state.on_ramp = on_ramp;
+        state.send_last = 0;
+        Ok(())
+    }
+
+    pub fn deactivate(ctx: Context<OnlyOwner>) -> Result<()> {
+        ctx.accounts.entrypoint.active = false;
+        Ok(())
+    }
+
+    pub fn prepare_register(ctx: Context<PrepareRegister>) -> Result<()> {
+        firedrill_offramp::cpi::emit_source_chain_added(CpiContext::new(
+            ctx.accounts.offramp_program.to_account_info(),
+            firedrill_offramp::cpi::accounts::EmitConfig {
+                offramp: ctx.accounts.offramp.to_account_info(),
+                entrypoint: ctx.accounts.entrypoint.to_account_info(),
+                owner: ctx.accounts.owner.to_account_info(),
+            },
+        ))
+    }
+
+    pub fn drill_pending_commit_queue_tx_spike(
+        ctx: Context<OnlyOwner>,
+        from: u8,
+        to: u8,
+    ) -> Result<()> {
+        let ep = &mut ctx.accounts.entrypoint;
+
+        require!(from <= to, CustomError::NothingToSend);
+        require!(from > ep.send_last, CustomError::AlreadySent);
+
+        for i in from..=to {
+            firedrill_onramp::cpi::emit_ccip_message_sent(
+                CpiContext::new(
+                    ctx.accounts.onramp_program.to_account_info(),
+                    OnRampEmitMessage {
+                        entrypoint: ep.clone().to_account_info(),
+                        onramp: ctx.accounts.onramp.to_account_info(),
+                        owner: ctx.accounts.owner.to_account_info(),
+                        caller_program: ep.clone().to_account_info(),
+                    },
+                ),
+                ctx.program_id.key(),
+                i as u64,
+            )?;
+        }
+
+        ep.send_last = to;
+        Ok(())
+    }
+
+    pub fn drill_pending_execution(ctx: Context<OnlyOwner>, from: u8, to: u8) -> Result<()> {
+        require!(from <= to, CustomError::NothingToSend);
+        require!(
+            to <= ctx.accounts.entrypoint.send_last,
+            CustomError::NotYetSent
+        );
+
+        firedrill_offramp::cpi::emit_commit_report_accepted(
+            CpiContext::new(
+                ctx.accounts.offramp_program.to_account_info(),
+                OffRampCommitReport {
+                    entrypoint: ctx.accounts.entrypoint.to_account_info(),
+                    offramp: ctx.accounts.offramp.to_account_info(),
+                    owner: ctx.accounts.owner.to_account_info(),
+                },
+            ),
+            from.into(),
+            to.into(),
+        )?;
+
+        Ok(())
+    }
+
+    pub fn drill_price_registries(ctx: Context<OnlyOwner>) -> Result<()> {
+        firedrill_compound::cpi::emit_usd_per_token_updated(CpiContext::new(
+            ctx.accounts.compound_program.to_account_info(),
+            firedrill_compound::cpi::accounts::EmitUsdPerToken {
+                entrypoint: ctx.accounts.entrypoint.to_account_info(),
+                compound: ctx.accounts.compound.to_account_info(),
+            },
+        ))?;
+
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(init, payer = payer, space = 8 + 32 + 8 + 1 + 1)]
+    pub entrypoint: Account<'info, FiredrillEntrypoint>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct PrepareRegister<'info> {
+    #[account(mut, has_one = owner)]
+    pub entrypoint: Account<'info, FiredrillEntrypoint>,
+
+    /// CHECK: account is passed to the OffRamp CPI, verified inside that program
+    #[account(mut)]
+    pub offramp: AccountInfo<'info>,
+
+    /// CHECK: only passed to CPI, validated in called program
+    pub owner: Signer<'info>,
+
+    /// CHECK: CPI target program
+    pub offramp_program: Program<'info, FiredrillOfframp>,
+}
+
+#[derive(Accounts)]
+pub struct OnlyOwner<'info> {
+    #[account(mut, has_one = owner)]
+    pub entrypoint: Account<'info, FiredrillEntrypoint>,
+    pub owner: Signer<'info>,
+
+    /// CHECK: CPI
+    pub onramp: AccountInfo<'info>,
+
+    /// CHECK: CPI
+    pub offramp: AccountInfo<'info>,
+
+    /// CHECK: CPI
+    pub compound: AccountInfo<'info>,
+
+    pub onramp_program: Program<'info, FiredrillOnramp>,
+    pub offramp_program: Program<'info, FiredrillOfframp>,
+    pub compound_program: Program<'info, FiredrillCompound>,
+}
+
+#[error_code]
+pub enum CustomError {
+    #[msg("Nothing to send.")]
+    NothingToSend,
+    #[msg("Message already sent.")]
+    AlreadySent,
+    #[msg("Message not yet sent.")]
+    NotYetSent,
+}
