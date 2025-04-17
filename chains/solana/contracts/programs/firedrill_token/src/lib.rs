@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use shared::ids::token::ID;
+use shared::common::seed;
 
 #[program]
 pub mod firedrill_token {}
@@ -9,14 +10,11 @@ pub struct FiredrillToken {}
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = payer, space = 8 + 32)]
+    #[account(init, seeds = [seed::TOKEN], bump, payer = authority, space = 8)]
     pub token: Account<'info, FiredrillToken>,
 
-    /// CHECK: We're just saving the pubkey
-    pub entrypoint: AccountInfo<'info>,
-
     #[account(mut)]
-    pub payer: Signer<'info>,
+    pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
 }

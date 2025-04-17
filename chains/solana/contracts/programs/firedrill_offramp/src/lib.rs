@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use solana_program::keccak::hash;
 
 use shared::ids::offramp::ID;
+use shared::common::seed;
 
 mod state;
 use crate::state::*;
@@ -18,7 +19,7 @@ pub mod firedrill_offramp {
 
     pub fn initialize(ctx: Context<Initialize>, chain_selector: u64, token: Pubkey, on_ramp: Pubkey) -> Result<()> {
         let offramp = &mut ctx.accounts.offramp;
-        offramp.owner = ctx.accounts.owner.key();
+        offramp.owner = ctx.accounts.authority.key();
         offramp.chain_selector = chain_selector;
         offramp.token = token;
         offramp.on_ramp = on_ramp;
@@ -127,14 +128,11 @@ pub struct FiredrillOffRamp {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = payer, space = 8 + 32 + 8 + 32 + 32)]
+    #[account(init, seeds = [seed::OFFRAMP], bump, payer = authority, space = 8 + 32 + 8 + 32 + 32)]
     pub offramp: Account<'info, FiredrillOffRamp>,
 
     #[account(mut)]
-    pub payer: Signer<'info>,
-
-    #[account()]
-    pub owner: Signer<'info>,
+    pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
 }

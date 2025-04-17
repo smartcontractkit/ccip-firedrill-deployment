@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use shared::ids::compound::ID;
+use shared::common::seed;
 
 #[program]
 pub mod firedrill_compound {
@@ -7,7 +8,7 @@ pub mod firedrill_compound {
 
     pub fn initialize(ctx: Context<Initialize>, token: Pubkey) -> Result<()> {
         let compound = &mut ctx.accounts.compound;
-        compound.owner = ctx.accounts.owner.key();
+        compound.owner = ctx.accounts.authority.key();
         compound.token = token;
         Ok(())
     }
@@ -39,14 +40,11 @@ pub mod firedrill_compound {
 
  #[derive(Accounts)]
  pub struct Initialize<'info> {
-     #[account(init, payer = payer, space = 8 + 32 + 32)]
+     #[account(init, seeds = [seed::COMPOUND], bump, payer = authority, space = 8 + 32 + 32)]
      pub compound: Account<'info, FiredrillCompound>,
 
      #[account(mut)]
-     pub payer: Signer<'info>,
-
-     #[account()]
-     pub owner: Signer<'info>,
+     pub authority: Signer<'info>,
 
      pub system_program: Program<'info, System>,
  }

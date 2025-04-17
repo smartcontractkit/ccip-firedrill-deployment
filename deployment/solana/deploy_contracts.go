@@ -102,7 +102,6 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 			firedrillTokenAddress,
 			firedrillOnrampAddress,
 			chain.DeployerKey.PublicKey(),
-			firedrillCompoundAddress,
 			solana.SystemProgramID,
 		).ValidateAndBuild()
 		if err2 != nil {
@@ -128,7 +127,6 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 			firedrillCompoundAddress,
 			firedrillEntrypointPDA,
 			chain.DeployerKey.PublicKey(),
-			firedrillEntrypointAddress,
 			solana.SystemProgramID,
 		).ValidateAndBuild()
 		if err2 != nil {
@@ -156,7 +154,6 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 			firedrillOnrampAddress,
 			firedrillOfframpPDA,
 			chain.DeployerKey.PublicKey(),
-			firedrillOfframpAddress,
 			solana.SystemProgramID,
 		).ValidateAndBuild()
 		if err2 != nil {
@@ -189,7 +186,6 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 			firedrillTokenAddress,
 			firedrillOnrampPDA,
 			chain.DeployerKey.PublicKey(),
-			firedrillOnrampAddress,
 			solana.SystemProgramID,
 		).ValidateAndBuild()
 		if err2 != nil {

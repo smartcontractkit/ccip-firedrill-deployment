@@ -15,20 +15,18 @@ type Initialize struct {
 	ChainSelector *uint64
 	Token         *ag_solanago.PublicKey
 
-	// [0] = [WRITE, SIGNER] onramp
+	// [0] = [WRITE] onramp
 	//
-	// [1] = [WRITE, SIGNER] payer
+	// [1] = [WRITE, SIGNER] authority
 	//
-	// [2] = [SIGNER] owner
-	//
-	// [3] = [] systemProgram
+	// [2] = [] systemProgram
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewInitializeInstructionBuilder creates a new `Initialize` instruction builder.
 func NewInitializeInstructionBuilder() *Initialize {
 	nd := &Initialize{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
 	return nd
 }
@@ -47,7 +45,7 @@ func (inst *Initialize) SetToken(token ag_solanago.PublicKey) *Initialize {
 
 // SetOnrampAccount sets the "onramp" account.
 func (inst *Initialize) SetOnrampAccount(onramp ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(onramp).WRITE().SIGNER()
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(onramp).WRITE()
 	return inst
 }
 
@@ -56,37 +54,26 @@ func (inst *Initialize) GetOnrampAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(0)
 }
 
-// SetPayerAccount sets the "payer" account.
-func (inst *Initialize) SetPayerAccount(payer ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(payer).WRITE().SIGNER()
+// SetAuthorityAccount sets the "authority" account.
+func (inst *Initialize) SetAuthorityAccount(authority ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(authority).WRITE().SIGNER()
 	return inst
 }
 
-// GetPayerAccount gets the "payer" account.
-func (inst *Initialize) GetPayerAccount() *ag_solanago.AccountMeta {
+// GetAuthorityAccount gets the "authority" account.
+func (inst *Initialize) GetAuthorityAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(1)
-}
-
-// SetOwnerAccount sets the "owner" account.
-func (inst *Initialize) SetOwnerAccount(owner ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(owner).SIGNER()
-	return inst
-}
-
-// GetOwnerAccount gets the "owner" account.
-func (inst *Initialize) GetOwnerAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
 }
 
 // SetSystemProgramAccount sets the "systemProgram" account.
 func (inst *Initialize) SetSystemProgramAccount(systemProgram ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(systemProgram)
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(systemProgram)
 	return inst
 }
 
 // GetSystemProgramAccount gets the "systemProgram" account.
 func (inst *Initialize) GetSystemProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(3)
+	return inst.AccountMetaSlice.Get(2)
 }
 
 func (inst Initialize) Build() *Instruction {
@@ -123,12 +110,9 @@ func (inst *Initialize) Validate() error {
 			return errors.New("accounts.Onramp is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.Payer is not set")
+			return errors.New("accounts.Authority is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
-			return errors.New("accounts.Owner is not set")
-		}
-		if inst.AccountMetaSlice[3] == nil {
 			return errors.New("accounts.SystemProgram is not set")
 		}
 	}
@@ -150,11 +134,10 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=4]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("       onramp", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("        payer", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("        owner", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(ag_format.Meta("systemProgram", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("    authority", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("systemProgram", inst.AccountMetaSlice.Get(2)))
 					})
 				})
 		})
@@ -194,14 +177,12 @@ func NewInitializeInstruction(
 	token ag_solanago.PublicKey,
 	// Accounts:
 	onramp ag_solanago.PublicKey,
-	payer ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey,
+	authority ag_solanago.PublicKey,
 	systemProgram ag_solanago.PublicKey) *Initialize {
 	return NewInitializeInstructionBuilder().
 		SetChainSelector(chainSelector).
 		SetToken(token).
 		SetOnrampAccount(onramp).
-		SetPayerAccount(payer).
-		SetOwnerAccount(owner).
+		SetAuthorityAccount(authority).
 		SetSystemProgramAccount(systemProgram)
 }

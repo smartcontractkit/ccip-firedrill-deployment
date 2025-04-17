@@ -1,4 +1,9 @@
 // Fixed seeds - different contexts must use different PDA seeds
+pub const ENTRYPOINT: &[u8] = b"entrypoint";
+pub const OFFRAMP: &[u8] = b"offramp";
+pub const ONRAMP: &[u8] = b"onramp";
+pub const COMPOUND: &[u8] = b"compound";
+pub const TOKEN: &[u8] = b"token";
 pub const CONFIG: &[u8] = b"config";
 pub const ALLOWED_PRICE_UPDATER: &[u8] = b"allowed_price_updater";
 pub const DEST_CHAIN: &[u8] = b"dest_chain";

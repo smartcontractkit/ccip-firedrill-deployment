@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use shared::ids::entrypoint::ID as ENTRYPOINT_ID;
 use shared::ids::onramp::ID;
+use shared::common::seed;
 
 pub mod messages;
 use crate::messages::*;
@@ -13,7 +14,7 @@ pub mod firedrill_onramp {
 
     pub fn initialize(ctx: Context<Initialize>, chain_selector: u64, token: Pubkey) -> Result<()> {
         let onramp = &mut ctx.accounts.onramp;
-        onramp.owner = ctx.accounts.owner.key();
+        onramp.owner = ctx.accounts.authority.key();
         onramp.chain_selector = chain_selector;
         onramp.token = token;
         Ok(())
@@ -67,14 +68,11 @@ pub struct FiredrillOnRamp {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = payer, space = 8 + 32 + 8 + 32)]
+    #[account(init, seeds = [seed::ONRAMP], bump, payer = authority, space = 8 + 32 + 8 + 32)]
     pub onramp: Account<'info, FiredrillOnRamp>,
 
     #[account(mut)]
-    pub payer: Signer<'info>,
-
-    #[account()]
-    pub owner: Signer<'info>,
+    pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
 }

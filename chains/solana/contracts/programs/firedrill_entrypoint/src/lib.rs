@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use shared::ids::entrypoint::ID;
+use shared::common::seed;
 
 use firedrill_compound::program::FiredrillCompound;
 use firedrill_offramp::cpi::accounts::EmitCommitReport as OffRampCommitReport;
@@ -21,7 +22,7 @@ pub mod firedrill_entrypoint {
         receiver: Pubkey,
     ) -> Result<()> {
         let state = &mut ctx.accounts.entrypoint;
-        state.owner = ctx.accounts.owner.key();
+        state.owner = ctx.accounts.authority.key();
         state.chain_selector = chain_selector;
         state.token = token;
         state.on_ramp = on_ramp;
@@ -120,11 +121,10 @@ pub struct FiredrillEntrypoint {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = payer, space = 8 + 32 + 8 + 32 + 32 + 1)]
+    #[account(init, seeds = [seed::ENTRYPOINT], bump, payer = authority, space = 8 + 32 + 8 + 32 + 32 + 1)]
     pub entrypoint: Account<'info, FiredrillEntrypoint>,
     #[account(mut)]
-    pub payer: Signer<'info>,
-    pub owner: Signer<'info>,
+    pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
