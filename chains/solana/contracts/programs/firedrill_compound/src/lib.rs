@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
-use shared::ids::compound::ID;
-use shared::common::seed;
+use shared::seed;
+
+declare_id!("F1G3cHLWhRtFQTnc7JaLNiEc5mFnkgDXo3Fobr8NcAiA");
 
 #[program]
 pub mod firedrill_compound {
@@ -51,8 +52,9 @@ pub mod firedrill_compound {
 
 #[derive(Accounts)]
 pub struct EmitUsdPerToken<'info> {
-    #[account(mut)]
+    #[account(mut, has_one = owner)]
     pub compound: Account<'info, FiredrillCompound>,
+    pub owner: Signer<'info>,
 }
 
 #[event]

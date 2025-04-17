@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
-use shared::ids::token::ID;
-use shared::common::seed;
+use shared::seed;
+
+declare_id!("F5jMhWDPMrCbnCaw6mf91NtsRV4ccEuwGsrJUpBckQoD");
 
 #[program]
 pub mod firedrill_token {}

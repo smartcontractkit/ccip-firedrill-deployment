@@ -14,13 +14,15 @@ import (
 type EmitUsdPerTokenUpdated struct {
 
 	// [0] = [WRITE] compound
+	//
+	// [1] = [SIGNER] owner
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewEmitUsdPerTokenUpdatedInstructionBuilder creates a new `EmitUsdPerTokenUpdated` instruction builder.
 func NewEmitUsdPerTokenUpdatedInstructionBuilder() *EmitUsdPerTokenUpdated {
 	nd := &EmitUsdPerTokenUpdated{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -34,6 +36,17 @@ func (inst *EmitUsdPerTokenUpdated) SetCompoundAccount(compound ag_solanago.Publ
 // GetCompoundAccount gets the "compound" account.
 func (inst *EmitUsdPerTokenUpdated) GetCompoundAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetOwnerAccount sets the "owner" account.
+func (inst *EmitUsdPerTokenUpdated) SetOwnerAccount(owner ag_solanago.PublicKey) *EmitUsdPerTokenUpdated {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(owner).SIGNER()
+	return inst
+}
+
+// GetOwnerAccount gets the "owner" account.
+func (inst *EmitUsdPerTokenUpdated) GetOwnerAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst EmitUsdPerTokenUpdated) Build() *Instruction {
@@ -59,6 +72,9 @@ func (inst *EmitUsdPerTokenUpdated) Validate() error {
 		if inst.AccountMetaSlice[0] == nil {
 			return errors.New("accounts.Compound is not set")
 		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Owner is not set")
+		}
 	}
 	return nil
 }
@@ -75,8 +91,9 @@ func (inst *EmitUsdPerTokenUpdated) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=1]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("compound", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("   owner", inst.AccountMetaSlice.Get(1)))
 					})
 				})
 		})
@@ -92,7 +109,9 @@ func (obj *EmitUsdPerTokenUpdated) UnmarshalWithDecoder(decoder *ag_binary.Decod
 // NewEmitUsdPerTokenUpdatedInstruction declares a new EmitUsdPerTokenUpdated instruction with the provided parameters and accounts.
 func NewEmitUsdPerTokenUpdatedInstruction(
 	// Accounts:
-	compound ag_solanago.PublicKey) *EmitUsdPerTokenUpdated {
+	compound ag_solanago.PublicKey,
+	owner ag_solanago.PublicKey) *EmitUsdPerTokenUpdated {
 	return NewEmitUsdPerTokenUpdatedInstructionBuilder().
-		SetCompoundAccount(compound)
+		SetCompoundAccount(compound).
+		SetOwnerAccount(owner)
 }

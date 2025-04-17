@@ -17,16 +17,14 @@ type EmitCcipMessageSent struct {
 
 	// [0] = [WRITE] onramp
 	//
-	// [1] = [] callerProgram
-	//
-	// [2] = [SIGNER] owner
+	// [1] = [SIGNER] owner
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewEmitCcipMessageSentInstructionBuilder creates a new `EmitCcipMessageSent` instruction builder.
 func NewEmitCcipMessageSentInstructionBuilder() *EmitCcipMessageSent {
 	nd := &EmitCcipMessageSent{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -54,26 +52,15 @@ func (inst *EmitCcipMessageSent) GetOnrampAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(0)
 }
 
-// SetCallerProgramAccount sets the "callerProgram" account.
-func (inst *EmitCcipMessageSent) SetCallerProgramAccount(callerProgram ag_solanago.PublicKey) *EmitCcipMessageSent {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(callerProgram)
-	return inst
-}
-
-// GetCallerProgramAccount gets the "callerProgram" account.
-func (inst *EmitCcipMessageSent) GetCallerProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
-}
-
 // SetOwnerAccount sets the "owner" account.
 func (inst *EmitCcipMessageSent) SetOwnerAccount(owner ag_solanago.PublicKey) *EmitCcipMessageSent {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(owner).SIGNER()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(owner).SIGNER()
 	return inst
 }
 
 // GetOwnerAccount gets the "owner" account.
 func (inst *EmitCcipMessageSent) GetOwnerAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst EmitCcipMessageSent) Build() *Instruction {
@@ -110,9 +97,6 @@ func (inst *EmitCcipMessageSent) Validate() error {
 			return errors.New("accounts.Onramp is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.CallerProgram is not set")
-		}
-		if inst.AccountMetaSlice[2] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
 	}
@@ -134,10 +118,9 @@ func (inst *EmitCcipMessageSent) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("       onramp", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("callerProgram", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("        owner", inst.AccountMetaSlice.Get(2)))
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("onramp", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta(" owner", inst.AccountMetaSlice.Get(1)))
 					})
 				})
 		})
@@ -177,12 +160,10 @@ func NewEmitCcipMessageSentInstruction(
 	index uint64,
 	// Accounts:
 	onramp ag_solanago.PublicKey,
-	callerProgram ag_solanago.PublicKey,
 	owner ag_solanago.PublicKey) *EmitCcipMessageSent {
 	return NewEmitCcipMessageSentInstructionBuilder().
 		SetSender(sender).
 		SetIndex(index).
 		SetOnrampAccount(onramp).
-		SetCallerProgramAccount(callerProgram).
 		SetOwnerAccount(owner)
 }

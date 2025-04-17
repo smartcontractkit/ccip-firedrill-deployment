@@ -1,8 +1,7 @@
 use anchor_lang::prelude::*;
 use solana_program::keccak::hash;
 
-use shared::ids::offramp::ID;
-use shared::common::seed;
+use shared::seed;
 
 mod state;
 use crate::state::*;
@@ -12,6 +11,8 @@ use crate::event::*;
 
 mod context;
 use crate::context::*;
+
+declare_id!("F3bceNrAhvhCmpbGx2HdBDzLpt91dQdn5yR8m7QwyiQC");
 
 #[program]
 pub mod firedrill_offramp {

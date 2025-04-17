@@ -2,7 +2,7 @@ use crate::program::FiredrillOfframp;
 use crate::{CcipOfframpError, Config};
 use anchor_lang::prelude::*;
 use bytemuck::{Pod, Zeroable};
-use shared::common::seed;
+use shared::seed;
 
 /// Static space allocated to any account: must always be added to space calculations.
 pub const ANCHOR_DISCRIMINATOR: usize = 8;

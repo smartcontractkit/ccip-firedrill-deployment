@@ -1,12 +1,12 @@
 use anchor_lang::prelude::*;
-use shared::ids::entrypoint::ID as ENTRYPOINT_ID;
-use shared::ids::onramp::ID;
-use shared::common::seed;
+use shared::seed;
 
 pub mod messages;
 use crate::messages::*;
 
 use ethnum::U256;
+
+declare_id!("F4U8NchY73WXvMiLcfReLVUueXCtg9s5TGunmER3xLkJ");
 
 #[program]
 pub mod firedrill_onramp {
@@ -25,11 +25,6 @@ pub mod firedrill_onramp {
         sender: Pubkey,
         index: u64,
     ) -> Result<()> {
-        require!(
-            ctx.accounts.caller_program.key() == ENTRYPOINT_ID,
-            CustomError::NotEntrypointCaller
-        );
-
         let onramp = &ctx.accounts.onramp;
         let message = SVM2AnyRampMessage {
             header: RampMessageHeader {
@@ -79,11 +74,8 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct EmitMessage<'info> {
-    #[account(mut)]
+    #[account(mut, has_one = owner)]
     pub onramp: Account<'info, FiredrillOnRamp>,
-    /// CHECK: Must be FiredrillEntrypoint
-    pub caller_program: AccountInfo<'info>,
-
     pub owner: Signer<'info>,
 }
 

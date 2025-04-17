@@ -1,12 +1,13 @@
 use anchor_lang::prelude::*;
-use shared::ids::entrypoint::ID;
-use shared::common::seed;
+use shared::seed;
 
 use firedrill_compound::program::FiredrillCompound;
 use firedrill_offramp::cpi::accounts::EmitCommitReport as OffRampCommitReport;
 use firedrill_offramp::program::FiredrillOfframp;
 use firedrill_onramp::cpi::accounts::EmitMessage as OnRampEmitMessage;
 use firedrill_onramp::program::FiredrillOnramp;
+
+declare_id!("F2dazhBjqX19HZBLvEHoToeggmDMj8xu3gaKkZ9YEpkU");
 
 #[program]
 pub mod firedrill_entrypoint {
@@ -60,7 +61,6 @@ pub mod firedrill_entrypoint {
                     OnRampEmitMessage {
                         onramp: ctx.accounts.onramp.to_account_info(),
                         owner: ctx.accounts.owner.to_account_info(),
-                        caller_program: ep.clone().to_account_info(),
                     },
                 ),
                 ctx.program_id.key(),
@@ -99,6 +99,7 @@ pub mod firedrill_entrypoint {
             ctx.accounts.compound_program.to_account_info(),
             firedrill_compound::cpi::accounts::EmitUsdPerToken {
                 compound: ctx.accounts.compound.to_account_info(),
+                owner: ctx.accounts.owner.to_account_info(),
             },
         ))?;
 
