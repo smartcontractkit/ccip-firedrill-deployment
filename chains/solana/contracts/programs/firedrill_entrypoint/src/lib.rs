@@ -121,7 +121,7 @@ pub struct FiredrillEntrypoint {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, seeds = [seed::ENTRYPOINT], bump, payer = authority, space = 8 + 32 + 8 + 32 + 32 + 1)]
+    #[account(init, seeds = [seed::ENTRYPOINT], bump, payer = authority, space = 8 + 32 + 8 + 32 + 32 + 32 + 32 + 32 + 1)]
     pub entrypoint: Account<'info, FiredrillEntrypoint>,
     #[account(mut)]
     pub authority: Signer<'info>,

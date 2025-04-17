@@ -5,6 +5,7 @@ pub const ONRAMP: &[u8] = b"onramp";
 pub const COMPOUND: &[u8] = b"compound";
 pub const TOKEN: &[u8] = b"token";
 pub const CONFIG: &[u8] = b"config";
+
 pub const ALLOWED_PRICE_UPDATER: &[u8] = b"allowed_price_updater";
 pub const DEST_CHAIN: &[u8] = b"dest_chain";
 pub const FEE_BILLING_TOKEN_CONFIG: &[u8] = b"fee_billing_token_config";

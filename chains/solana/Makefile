@@ -41,7 +41,7 @@ lint-go-fix:
 
 .PHONY: anchor-go-gen
 anchor-go-gen:
-	cd ./contracts && rm -rf ./target && anchor build && cd .. && ./scripts/anchor-go-gen.sh
+	cd ./contracts && rm -rf ./gobindings && anchor build && cd .. && ./scripts/anchor-go-gen.sh
 
 .PHONY: format
 format:

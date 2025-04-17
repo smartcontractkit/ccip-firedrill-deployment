@@ -11,7 +11,7 @@ func FindFiredrillOfframpPDA(firedrillOfframpProgram solana.PublicKey) (solana.P
 }
 
 func FindFiredrillOfframpConfigPDA(firedrillOfframpProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
-	return solana.FindProgramAddress([][]byte{[]byte("offramp_config")}, firedrillOfframpProgram)
+	return solana.FindProgramAddress([][]byte{[]byte("config")}, firedrillOfframpProgram)
 }
 
 func FindFiredrillEntrypointPDA(firedrillEntrypointProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
@@ -23,5 +23,5 @@ func FindFiredrillOnrampPDA(firedrillOnrampProgram solana.PublicKey) (solana.Pub
 }
 
 func FindFiredrillTokenPDA(firedrillOnrampProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
-	return solana.FindProgramAddress([][]byte{[]byte("onramp")}, firedrillOnrampProgram)
+	return solana.FindProgramAddress([][]byte{[]byte("token")}, firedrillOnrampProgram)
 }
