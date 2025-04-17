@@ -10,7 +10,7 @@ import (
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
-func CallDrillPrepareRegister(client *deployment.SolChain, view shared.FiredrillEntrypointView) error {
+func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillEntrypointView) error {
 	entrypointAddress := solana.MustPublicKeyFromBase58(view.Address)
 	firedrill_entrypoint.SetProgramID(entrypointAddress)
 	entrypointPDA, _, _ := FindFiredrillEntrypointPDA(entrypointAddress)
@@ -32,7 +32,7 @@ func CallDrillPrepareRegister(client *deployment.SolChain, view shared.Firedrill
 	return nil
 }
 
-func CallDrillPendingCommit(from uint8, to uint8, client *deployment.SolChain, view shared.FiredrillEntrypointView) error {
+func CallDrillPendingCommit(from uint8, to uint8, client deployment.SolChain, view shared.FiredrillEntrypointView) error {
 	entrypointAddress := solana.MustPublicKeyFromBase58(view.Address)
 	firedrill_entrypoint.SetProgramID(entrypointAddress)
 	entrypointPDA, _, _ := FindFiredrillEntrypointPDA(entrypointAddress)
@@ -63,7 +63,7 @@ func CallDrillPendingCommit(from uint8, to uint8, client *deployment.SolChain, v
 	return nil
 }
 
-func CallDrillPendingExec(from uint8, to uint8, client *deployment.SolChain, view shared.FiredrillEntrypointView) error {
+func CallDrillPendingExec(from uint8, to uint8, client deployment.SolChain, view shared.FiredrillEntrypointView) error {
 	entrypointAddress := solana.MustPublicKeyFromBase58(view.Address)
 	firedrill_entrypoint.SetProgramID(entrypointAddress)
 	entrypointPDA, _, _ := FindFiredrillEntrypointPDA(entrypointAddress)
