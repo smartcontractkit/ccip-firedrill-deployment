@@ -42,17 +42,23 @@ type GlobalInputContract struct {
 	Network string `yaml:"network"`
 }
 
-func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.Chain, version string, ccipFiredrillView firedrill.CCIPFiredrillView, ccipView view.CCIPView) (GlobalInput, error) {
-	isTestnet := strings.Contains(destChain.Name, "testnet") || strings.Contains(destChain.Name, "devnet")
-	var srcChain chainsel.Chain
+func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.ChainDetails, version string, ccipFiredrillView firedrill.CCIPFiredrillView, ccipView view.CCIPView) (GlobalInput, error) {
+	isTestnet := strings.Contains(destChain.ChainName, "testnet") || strings.Contains(destChain.ChainName, "devnet")
+	var srcChain chainsel.ChainDetails
 	if isTestnet {
-		srcChain = chainsel.ETHEREUM_TESTNET_SEPOLIA
+		srcChain = chainsel.ChainDetails{
+			ChainSelector: chainsel.ETHEREUM_TESTNET_SEPOLIA.Selector,
+			ChainName:     chainsel.ETHEREUM_TESTNET_SEPOLIA.Name,
+		}
 	} else {
-		srcChain = chainsel.ETHEREUM_MAINNET
+		srcChain = chainsel.ChainDetails{
+			ChainSelector: chainsel.ETHEREUM_MAINNET.Selector,
+			ChainName:     chainsel.ETHEREUM_MAINNET.Name,
+		}
 	}
-	firedrillChainView, ok := ccipFiredrillView.Chains[destChain.Name]
+	firedrillChainView, ok := ccipFiredrillView.Chains[destChain.ChainName]
 	if !ok {
-		return GlobalInput{}, fmt.Errorf("no firedrills known for chain %s", destChain.Name)
+		return GlobalInput{}, fmt.Errorf("no firedrills known for chain %s", destChain.ChainName)
 	}
 	var network GlobalInputNetwork
 	for _, entrypointView := range firedrillChainView.FiredrillEntrypoint {
@@ -63,36 +69,36 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.Chain, version str
 		lggr.Infof("Adding active firedrill entrypoint %+v", entrypointView)
 		network.Contracts.FiredrillTokens = append(
 			network.Contracts.FiredrillTokens,
-			GlobalInputContract{Address: entrypointView.Token, Network: destChain.Name},
+			GlobalInputContract{Address: entrypointView.Token, Network: destChain.ChainName},
 		)
 		network.Contracts.FiredrillOnRamps = append(
 			network.Contracts.FiredrillOnRamps,
-			GlobalInputContract{Address: entrypointView.OnRamp, Network: destChain.Name},
+			GlobalInputContract{Address: entrypointView.OnRamp, Network: destChain.ChainName},
 		)
 		network.Contracts.FiredrillOffRamps = append(
 			network.Contracts.FiredrillOffRamps,
-			GlobalInputContract{Address: entrypointView.OffRamp, Network: destChain.Name},
+			GlobalInputContract{Address: entrypointView.OffRamp, Network: destChain.ChainName},
 		)
 		network.Contracts.FiredrillCompounds = append(
 			network.Contracts.FiredrillCompounds,
-			GlobalInputContract{Address: entrypointView.Compound, Network: destChain.Name},
+			GlobalInputContract{Address: entrypointView.Compound, Network: destChain.ChainName},
 		)
 	}
 	if len(network.Contracts.FiredrillCompounds) == 0 {
-		return GlobalInput{}, fmt.Errorf("no active firedrills %s known for chain %s", version, destChain.Name)
+		return GlobalInput{}, fmt.Errorf("no active firedrills %s known for chain %s", version, destChain.ChainName)
 	}
 	switch version {
 	case deployment.Version1_5_0.String():
 		contractsSrcDest := lookupCCIPv1_5(ccipView, srcChain, destChain)
 		if len(contractsSrcDest.OffRamps) == 0 {
-			return GlobalInput{}, fmt.Errorf("no off ramps found for %s -> %s", srcChain.Name, destChain.Name)
+			return GlobalInput{}, fmt.Errorf("no off ramps found for %s -> %s", srcChain.ChainName, destChain.ChainName)
 		}
 		network.Contracts.Routers = append(network.Contracts.Routers, contractsSrcDest.Routers...)
 		network.Contracts.CommitStores = append(network.Contracts.CommitStores, contractsSrcDest.CommitStores...)
 		network.Contracts.OffRamps = append(network.Contracts.OffRamps, contractsSrcDest.OffRamps...)
 		contractsDestSrc := lookupCCIPv1_5(ccipView, destChain, srcChain)
 		if len(contractsSrcDest.OffRamps) == 0 {
-			return GlobalInput{}, fmt.Errorf("no off ramps found for %s <- %s", srcChain.Name, destChain.Name)
+			return GlobalInput{}, fmt.Errorf("no off ramps found for %s <- %s", srcChain.ChainName, destChain.ChainName)
 		}
 		network.Contracts.Routers = append(network.Contracts.Routers, contractsDestSrc.Routers...)
 		network.Contracts.CommitStores = append(network.Contracts.CommitStores, contractsDestSrc.CommitStores...)
@@ -100,14 +106,14 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.Chain, version str
 	case deployment.Version1_6_0.String():
 		contractsSrc := lookupCCIPv1_6(ccipView, srcChain, destChain)
 		if len(contractsSrc.OffRamps) == 0 {
-			return GlobalInput{}, fmt.Errorf("no off ramps found for %s", srcChain.Name)
+			return GlobalInput{}, fmt.Errorf("no off ramps found for %s", srcChain.ChainName)
 		}
 		network.Contracts.Routers = append(network.Contracts.Routers, contractsSrc.Routers...)
 		network.Contracts.OffRamps = append(network.Contracts.OffRamps, contractsSrc.OffRamps...)
 
 		contractsDest := lookupCCIPv1_6(ccipView, destChain, srcChain)
 		if len(contractsDest.OffRamps) == 0 {
-			return GlobalInput{}, fmt.Errorf("no off ramps found for %s", destChain.Name)
+			return GlobalInput{}, fmt.Errorf("no off ramps found for %s", destChain.ChainName)
 		}
 		network.Contracts.Routers = append(network.Contracts.Routers, contractsDest.Routers...)
 		network.Contracts.OffRamps = append(network.Contracts.OffRamps, contractsDest.OffRamps...)
@@ -123,37 +129,37 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.Chain, version str
 	return g, nil
 }
 
-func lookupCCIPv1_5(ccipView view.CCIPView, srcChain chainsel.Chain, destChain chainsel.Chain) GlobalInputContracts {
-	destChainView := ccipView.Chains[destChain.Name]
+func lookupCCIPv1_5(ccipView view.CCIPView, srcChain chainsel.ChainDetails, destChain chainsel.ChainDetails) GlobalInputContracts {
+	destChainView := ccipView.Chains[destChain.ChainName]
 	for _, offRampView := range destChainView.EVM2EVMOffRamp {
-		if offRampView.StaticConfig.SourceChainSelector == srcChain.Selector {
+		if offRampView.StaticConfig.SourceChainSelector == srcChain.ChainSelector {
 			// There shouldn't be several matching offramps
 			return GlobalInputContracts{
-				Routers:      []GlobalInputContract{{Address: strings.ToLower(offRampView.DynamicConfig.Router.Hex()), Network: destChain.Name}},
-				CommitStores: []GlobalInputContract{{Address: strings.ToLower(offRampView.StaticConfig.CommitStore.Hex()), Network: destChain.Name}},
-				OffRamps:     []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.Name}},
+				Routers:      []GlobalInputContract{{Address: strings.ToLower(offRampView.DynamicConfig.Router.Hex()), Network: destChain.ChainName}},
+				CommitStores: []GlobalInputContract{{Address: strings.ToLower(offRampView.StaticConfig.CommitStore.Hex()), Network: destChain.ChainName}},
+				OffRamps:     []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.ChainName}},
 			}
 		}
 	}
 	return GlobalInputContracts{}
 }
 
-func lookupCCIPv1_6(ccipView view.CCIPView, srcChain chainsel.Chain, destChain chainsel.Chain) GlobalInputContracts {
+func lookupCCIPv1_6(ccipView view.CCIPView, srcChain chainsel.ChainDetails, destChain chainsel.ChainDetails) GlobalInputContracts {
 	contracts := GlobalInputContracts{}
-	destChainView := ccipView.Chains[destChain.Name]
+	destChainView := ccipView.Chains[destChain.ChainName]
 	for _, offRampView := range destChainView.OffRamp {
-		sourceChainConfig, ok := offRampView.SourceChainConfigs[srcChain.Selector]
+		sourceChainConfig, ok := offRampView.SourceChainConfigs[srcChain.ChainSelector]
 		if !ok || sourceChainConfig.Router == (common.Address{}) {
 			continue
 		}
 		contracts.OffRamps = append(
 			contracts.OffRamps,
-			GlobalInputContract{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.Name},
+			GlobalInputContract{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.ChainName},
 		)
 		// There shouldn't be several matching offramps
 		return GlobalInputContracts{
-			Routers:  []GlobalInputContract{{Address: strings.ToLower(sourceChainConfig.Router.Hex()), Network: destChain.Name}},
-			OffRamps: []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.Name}},
+			Routers:  []GlobalInputContract{{Address: strings.ToLower(sourceChainConfig.Router.Hex()), Network: destChain.ChainName}},
+			OffRamps: []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.ChainName}},
 		}
 	}
 	return GlobalInputContracts{}
