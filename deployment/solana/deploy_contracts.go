@@ -10,6 +10,7 @@ import (
 	solRpc "github.com/gagliardetto/solana-go/rpc"
 	"github.com/smartcontractkit/chainlink/deployment"
 
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/failing_receiver"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_compound"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_offramp"
@@ -94,13 +95,20 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	firedrillTokenAddress := solana.MustPublicKeyFromBase58(firedrillTokenProgramID)
 	firedrill_token.SetProgramID(firedrillTokenAddress)
 
+	firedrillReceiverProgramID, err := chain.DeployProgram(env.Logger, "failing_receiver", false)
+	if err != nil {
+		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
+	}
+	firedrillReceiverAddress := solana.MustPublicKeyFromBase58(firedrillReceiverProgramID)
+	failing_receiver.SetProgramID(firedrillReceiverAddress)
+
 	var firedrillCompoundAccount firedrill_compound.FiredrillCompound
-	firedrillCompoundPDA, _, _ := FindFiredrillOfframpConfigPDA(firedrillOfframpAddress)
+	firedrillCompoundPDA, _, _ := FindFiredrillCompoundPDA(firedrillCompoundAddress)
 	err = chain.GetAccountDataBorshInto(env.GetContext(), firedrillCompoundPDA, &firedrillCompoundAccount)
 	if err != nil {
 		initTx, err2 := firedrill_compound.NewInitializeInstruction(
 			firedrillTokenAddress,
-			firedrillOnrampAddress,
+			firedrillCompoundPDA,
 			chain.DeployerKey.PublicKey(),
 			solana.SystemProgramID,
 		).ValidateAndBuild()
@@ -124,7 +132,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 			firedrillOnrampAddress,
 			firedrillOfframpAddress,
 			firedrillCompoundAddress,
-			firedrillCompoundAddress,
+			firedrillReceiverAddress,
 			firedrillEntrypointPDA,
 			chain.DeployerKey.PublicKey(),
 			solana.SystemProgramID,
