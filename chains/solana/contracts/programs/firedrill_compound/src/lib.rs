@@ -1,15 +1,21 @@
 use anchor_lang::prelude::*;
 use shared::ids::compound::ID;
-use shared::FiredrillEntrypoint;
 
 #[program]
 pub mod firedrill_compound {
     use super::*;
 
-    pub fn emit_usd_per_token_updated(ctx: Context<EmitUsdPerToken>) -> Result<()> {
-        let entrypoint = &ctx.accounts.entrypoint;
+    pub fn initialize(ctx: Context<Initialize>, token: Pubkey) -> Result<()> {
+        let compound = &mut ctx.accounts.compound;
+        compound.owner = ctx.accounts.owner.key();
+        compound.token = token;
+        Ok(())
+    }
 
-        let token = entrypoint.token;
+    pub fn emit_usd_per_token_updated(ctx: Context<EmitUsdPerToken>) -> Result<()> {
+        let compound = &ctx.accounts.compound;
+
+        let token = compound.token;
         let mut value = [0u8; 28];
         let val = 1u128.to_le_bytes(); // 16 bytes
         value[..16].copy_from_slice(&val);
@@ -25,13 +31,30 @@ pub mod firedrill_compound {
     }
 }
 
+ #[account]
+ pub struct FiredrillCompound {
+     pub owner: Pubkey,
+     pub token: Pubkey,
+ }
+
+ #[derive(Accounts)]
+ pub struct Initialize<'info> {
+     #[account(init, payer = payer, space = 8 + 32 + 32)]
+     pub compound: Account<'info, FiredrillCompound>,
+
+     #[account(mut)]
+     pub payer: Signer<'info>,
+
+     #[account()]
+     pub owner: Signer<'info>,
+
+     pub system_program: Program<'info, System>,
+ }
+
 #[derive(Accounts)]
 pub struct EmitUsdPerToken<'info> {
-    /// CHECK: Only used for event emission context
-    pub compound: AccountInfo<'info>,
-
-    /// Must be passed in to read `.token`
-    pub entrypoint: Account<'info, FiredrillEntrypoint>,
+    #[account(mut)]
+    pub compound: Account<'info, FiredrillCompound>,
 }
 
 #[event]

@@ -38,12 +38,12 @@ type GlobalInputContracts struct {
 }
 
 type GlobalInputContract struct {
-	Address common.Address `yaml:"address"`
-	Network string         `yaml:"network"`
+	Address string `yaml:"address"`
+	Network string `yaml:"network"`
 }
 
 func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.Chain, version string, ccipFiredrillView firedrill.CCIPFiredrillView, ccipView view.CCIPView) (GlobalInput, error) {
-	isTestnet := strings.Contains(destChain.Name, "testnet")
+	isTestnet := strings.Contains(destChain.Name, "testnet") || strings.Contains(destChain.Name, "devnet")
 	var srcChain chainsel.Chain
 	if isTestnet {
 		srcChain = chainsel.ETHEREUM_TESTNET_SEPOLIA
@@ -56,9 +56,6 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.Chain, version str
 	}
 	var network GlobalInputNetwork
 	for _, entrypointView := range firedrillChainView.FiredrillEntrypoint {
-		if !entrypointView.Active {
-			continue
-		}
 		entrypointVersion := deployment.MustTypeAndVersionFromString(entrypointView.TypeAndVersion)
 		if entrypointVersion.Version.String() != version {
 			continue
@@ -132,9 +129,9 @@ func lookupCCIPv1_5(ccipView view.CCIPView, srcChain chainsel.Chain, destChain c
 		if offRampView.StaticConfig.SourceChainSelector == srcChain.Selector {
 			// There shouldn't be several matching offramps
 			return GlobalInputContracts{
-				Routers:      []GlobalInputContract{{Address: offRampView.DynamicConfig.Router, Network: destChain.Name}},
-				CommitStores: []GlobalInputContract{{Address: offRampView.StaticConfig.CommitStore, Network: destChain.Name}},
-				OffRamps:     []GlobalInputContract{{Address: offRampView.Address, Network: destChain.Name}},
+				Routers:      []GlobalInputContract{{Address: strings.ToLower(offRampView.DynamicConfig.Router.Hex()), Network: destChain.Name}},
+				CommitStores: []GlobalInputContract{{Address: strings.ToLower(offRampView.StaticConfig.CommitStore.Hex()), Network: destChain.Name}},
+				OffRamps:     []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.Name}},
 			}
 		}
 	}
@@ -151,12 +148,12 @@ func lookupCCIPv1_6(ccipView view.CCIPView, srcChain chainsel.Chain, destChain c
 		}
 		contracts.OffRamps = append(
 			contracts.OffRamps,
-			GlobalInputContract{Address: offRampView.Address, Network: destChain.Name},
+			GlobalInputContract{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.Name},
 		)
 		// There shouldn't be several matching offramps
 		return GlobalInputContracts{
-			Routers:  []GlobalInputContract{{Address: sourceChainConfig.Router, Network: destChain.Name}},
-			OffRamps: []GlobalInputContract{{Address: offRampView.Address, Network: destChain.Name}},
+			Routers:  []GlobalInputContract{{Address: strings.ToLower(sourceChainConfig.Router.Hex()), Network: destChain.Name}},
+			OffRamps: []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.Name}},
 		}
 	}
 	return GlobalInputContracts{}

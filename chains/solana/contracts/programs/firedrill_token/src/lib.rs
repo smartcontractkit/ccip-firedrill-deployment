@@ -2,20 +2,10 @@ use anchor_lang::prelude::*;
 use shared::ids::token::ID;
 
 #[program]
-pub mod firedrill_token {
-    use super::*;
-
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        let token = &mut ctx.accounts.token;
-        token.entrypoint = ctx.accounts.entrypoint.key();
-        Ok(())
-    }
-}
+pub mod firedrill_token {}
 
 #[account]
-pub struct FiredrillToken {
-    pub entrypoint: Pubkey,
-}
+pub struct FiredrillToken {}
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {

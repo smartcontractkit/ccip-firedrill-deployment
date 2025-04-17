@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use shared::ids::entrypoint::ID as ENTRYPOINT_ID;
 use shared::ids::onramp::ID;
-use shared::FiredrillEntrypoint;
 
 pub mod messages;
 use crate::messages::*;
@@ -12,9 +11,11 @@ use ethnum::U256;
 pub mod firedrill_onramp {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, _entrypoint: Pubkey) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, chain_selector: u64, token: Pubkey) -> Result<()> {
         let onramp = &mut ctx.accounts.onramp;
         onramp.owner = ctx.accounts.owner.key();
+        onramp.chain_selector = chain_selector;
+        onramp.token = token;
         Ok(())
     }
 
@@ -28,12 +29,12 @@ pub mod firedrill_onramp {
             CustomError::NotEntrypointCaller
         );
 
-        let entrypoint = &ctx.accounts.entrypoint;
+        let onramp = &ctx.accounts.onramp;
         let message = SVM2AnyRampMessage {
             header: RampMessageHeader {
                 message_id: [0u8; 32],
-                source_chain_selector: entrypoint.chain_selector,
-                dest_chain_selector: entrypoint.chain_selector,
+                source_chain_selector: onramp.chain_selector,
+                dest_chain_selector: onramp.chain_selector,
                 sequence_number: index,
                 nonce: 1,
             },
@@ -41,14 +42,14 @@ pub mod firedrill_onramp {
             data: vec![],
             receiver: sender.to_bytes().to_vec(),
             extra_args: vec![],
-            fee_token: entrypoint.token,
+            fee_token: onramp.token,
             token_amounts: vec![],
             fee_token_amount: U256::from(0u64).into(),
             fee_value_juels: U256::from(0u64).into(),
         };
 
         emit!(CCIPMessageSent {
-            dest_chain_selector: entrypoint.chain_selector,
+            dest_chain_selector: onramp.chain_selector,
             sequence_number: index,
             message,
         });
@@ -60,12 +61,13 @@ pub mod firedrill_onramp {
 #[account]
 pub struct FiredrillOnRamp {
     pub owner: Pubkey,
-    pub ctrl: Pubkey,
+    pub chain_selector: u64,
+    pub token: Pubkey,
 }
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = payer, space = 8 + 32)]
+    #[account(init, payer = payer, space = 8 + 32 + 8 + 32)]
     pub onramp: Account<'info, FiredrillOnRamp>,
 
     #[account(mut)]
@@ -81,8 +83,6 @@ pub struct Initialize<'info> {
 pub struct EmitMessage<'info> {
     #[account(mut)]
     pub onramp: Account<'info, FiredrillOnRamp>,
-    #[account(constraint = onramp.ctrl == entrypoint.key())]
-    pub entrypoint: Account<'info, FiredrillEntrypoint>,
     /// CHECK: Must be FiredrillEntrypoint
     pub caller_program: AccountInfo<'info>,
 

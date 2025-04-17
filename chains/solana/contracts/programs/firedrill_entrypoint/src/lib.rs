@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
 use shared::ids::entrypoint::ID;
-use shared::FiredrillEntrypoint;
 
 use firedrill_compound::program::FiredrillCompound;
 use firedrill_offramp::cpi::accounts::EmitCommitReport as OffRampCommitReport;
@@ -17,19 +16,19 @@ pub mod firedrill_entrypoint {
         chain_selector: u64,
         token: Pubkey,
         on_ramp: Pubkey,
+        off_ramp: Pubkey,
+        compound: Pubkey,
+        receiver: Pubkey,
     ) -> Result<()> {
         let state = &mut ctx.accounts.entrypoint;
         state.owner = ctx.accounts.owner.key();
         state.chain_selector = chain_selector;
-        state.active = true;
         state.token = token;
         state.on_ramp = on_ramp;
+        state.off_ramp = off_ramp;
+        state.compound = compound;
+        state.receiver = receiver;
         state.send_last = 0;
-        Ok(())
-    }
-
-    pub fn deactivate(ctx: Context<OnlyOwner>) -> Result<()> {
-        ctx.accounts.entrypoint.active = false;
         Ok(())
     }
 
@@ -38,7 +37,6 @@ pub mod firedrill_entrypoint {
             ctx.accounts.offramp_program.to_account_info(),
             firedrill_offramp::cpi::accounts::EmitConfig {
                 offramp: ctx.accounts.offramp.to_account_info(),
-                entrypoint: ctx.accounts.entrypoint.to_account_info(),
                 owner: ctx.accounts.owner.to_account_info(),
             },
         ))
@@ -59,7 +57,6 @@ pub mod firedrill_entrypoint {
                 CpiContext::new(
                     ctx.accounts.onramp_program.to_account_info(),
                     OnRampEmitMessage {
-                        entrypoint: ep.clone().to_account_info(),
                         onramp: ctx.accounts.onramp.to_account_info(),
                         owner: ctx.accounts.owner.to_account_info(),
                         caller_program: ep.clone().to_account_info(),
@@ -85,7 +82,6 @@ pub mod firedrill_entrypoint {
             CpiContext::new(
                 ctx.accounts.offramp_program.to_account_info(),
                 OffRampCommitReport {
-                    entrypoint: ctx.accounts.entrypoint.to_account_info(),
                     offramp: ctx.accounts.offramp.to_account_info(),
                     owner: ctx.accounts.owner.to_account_info(),
                 },
@@ -101,7 +97,6 @@ pub mod firedrill_entrypoint {
         firedrill_compound::cpi::emit_usd_per_token_updated(CpiContext::new(
             ctx.accounts.compound_program.to_account_info(),
             firedrill_compound::cpi::accounts::EmitUsdPerToken {
-                entrypoint: ctx.accounts.entrypoint.to_account_info(),
                 compound: ctx.accounts.compound.to_account_info(),
             },
         ))?;
@@ -110,9 +105,22 @@ pub mod firedrill_entrypoint {
     }
 }
 
+#[account]
+#[derive(Debug)]
+pub struct FiredrillEntrypoint {
+    pub owner: Pubkey,
+    pub chain_selector: u64,
+    pub token: Pubkey,
+    pub on_ramp: Pubkey,
+    pub off_ramp: Pubkey,
+    pub compound: Pubkey,
+    pub receiver: Pubkey,
+    pub send_last: u8,
+}
+
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = payer, space = 8 + 32 + 8 + 1 + 1)]
+    #[account(init, payer = payer, space = 8 + 32 + 8 + 32 + 32 + 1)]
     pub entrypoint: Account<'info, FiredrillEntrypoint>,
     #[account(mut)]
     pub payer: Signer<'info>,

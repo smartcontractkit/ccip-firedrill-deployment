@@ -2,7 +2,6 @@ use anchor_lang::prelude::*;
 use solana_program::keccak::hash;
 
 use shared::ids::offramp::ID;
-use shared::FiredrillEntrypoint;
 
 mod state;
 use crate::state::*;
@@ -17,6 +16,15 @@ use crate::context::*;
 pub mod firedrill_offramp {
     use super::*;
 
+    pub fn initialize(ctx: Context<Initialize>, chain_selector: u64, token: Pubkey, on_ramp: Pubkey) -> Result<()> {
+        let offramp = &mut ctx.accounts.offramp;
+        offramp.owner = ctx.accounts.owner.key();
+        offramp.chain_selector = chain_selector;
+        offramp.token = token;
+        offramp.on_ramp = on_ramp;
+        Ok(())
+    }
+
     /// Initializes the CCIP Offramp Config account.
     ///
     /// The initialization of the Offramp is responsibility of Admin, nothing more than calling these
@@ -30,14 +38,13 @@ pub mod firedrill_offramp {
     pub fn initialize_config(
         ctx: Context<InitializeConfig>,
         svm_chain_selector: u64,
-        enable_execution_after: i64,
     ) -> Result<()> {
         let mut config = ctx.accounts.config.load_init()?;
         require!(config.version == 0, CcipOfframpError::InvalidVersion); // assert uninitialized state - AccountLoader doesn't work with constraint
         config.version = 1;
         config.default_code_version = CodeVersion::V1.into();
         config.svm_chain_selector = svm_chain_selector;
-        config.enable_manual_execution_after = enable_execution_after;
+        config.enable_manual_execution_after = 1;
         config.owner = ctx.accounts.authority.key();
         config.ocr3 = [
             Ocr3Config::new(OcrPluginType::Commit),
@@ -46,16 +53,16 @@ pub mod firedrill_offramp {
 
         emit!(ConfigSet {
             svm_chain_selector,
-            enable_manual_execution_after: enable_execution_after,
+            enable_manual_execution_after: 1,
         });
 
         Ok(())
     }
 
     pub fn emit_source_chain_added(ctx: Context<EmitConfig>) -> Result<()> {
-        let entrypoint = &ctx.accounts.entrypoint;
-        let source_chain_selector = entrypoint.chain_selector;
-        let on_ramp_address = OnRampAddress::from(entrypoint.key().to_bytes());
+        let offramp = &ctx.accounts.offramp;
+        let source_chain_selector = offramp.chain_selector;
+        let on_ramp_address = OnRampAddress::from(offramp.key().to_bytes());
         let source_chain_config = SourceChainConfig {
             is_enabled: true,
             is_rmn_verification_disabled: false,
@@ -76,13 +83,13 @@ pub mod firedrill_offramp {
         min_seq_nr: u64,
         max_seq_nr: u64,
     ) -> Result<()> {
-        let entrypoint = &ctx.accounts.entrypoint;
-        let source_chain_selector = entrypoint.chain_selector;
-        let on_ramp_address = entrypoint.on_ramp.to_bytes().to_vec();
+        let offramp = &ctx.accounts.offramp;
+        let source_chain_selector = offramp.chain_selector;
+        let on_ramp_address = offramp.on_ramp.to_bytes().to_vec();
 
         // Compute hash for the merkle root
         let mut hash_input = Vec::new();
-        hash_input.extend_from_slice(&entrypoint.on_ramp.to_bytes());
+        hash_input.extend_from_slice(&offramp.on_ramp.to_bytes());
         hash_input.extend_from_slice(&min_seq_nr.to_le_bytes());
         hash_input.extend_from_slice(&max_seq_nr.to_le_bytes());
         let computed_hash = hash(&hash_input).0;
@@ -113,15 +120,29 @@ pub mod firedrill_offramp {
 #[account]
 pub struct FiredrillOffRamp {
     pub owner: Pubkey,
+    pub chain_selector: u64,
+    pub token: Pubkey,
+    pub on_ramp: Pubkey,
+}
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(init, payer = payer, space = 8 + 32 + 8 + 32 + 32)]
+    pub offramp: Account<'info, FiredrillOffRamp>,
+
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
+    #[account()]
+    pub owner: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
 pub struct EmitConfig<'info> {
     #[account(mut, has_one = owner)]
     pub offramp: Account<'info, FiredrillOffRamp>,
-
-    /// CHECK: Just reading pubkey + data
-    pub entrypoint: Account<'info, FiredrillEntrypoint>,
 
     pub owner: Signer<'info>,
 }
@@ -131,10 +152,6 @@ pub struct EmitCommitReport<'info> {
     /// The OffRamp account—for ownership verification.
     #[account(mut, has_one = owner)]
     pub offramp: Account<'info, FiredrillOffRamp>,
-    /// The control (entrypoint) account that holds chainSelector and onRamp.
-    /// Use CHECK if the account does not need further verification.
-    /// (Alternatively, if you have a full account type, you can specify it directly.)
-    pub entrypoint: Account<'info, FiredrillEntrypoint>,
     pub owner: Signer<'info>,
 }
 
