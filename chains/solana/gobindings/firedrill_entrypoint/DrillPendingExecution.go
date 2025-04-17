@@ -19,11 +19,11 @@ type DrillPendingExecution struct {
 	//
 	// [1] = [SIGNER] owner
 	//
-	// [2] = [] onramp
+	// [2] = [WRITE] onramp
 	//
-	// [3] = [] offramp
+	// [3] = [WRITE] offramp
 	//
-	// [4] = [] compound
+	// [4] = [WRITE] compound
 	//
 	// [5] = [] onrampProgram
 	//
@@ -77,7 +77,7 @@ func (inst *DrillPendingExecution) GetOwnerAccount() *ag_solanago.AccountMeta {
 
 // SetOnrampAccount sets the "onramp" account.
 func (inst *DrillPendingExecution) SetOnrampAccount(onramp ag_solanago.PublicKey) *DrillPendingExecution {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(onramp)
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(onramp).WRITE()
 	return inst
 }
 
@@ -88,7 +88,7 @@ func (inst *DrillPendingExecution) GetOnrampAccount() *ag_solanago.AccountMeta {
 
 // SetOfframpAccount sets the "offramp" account.
 func (inst *DrillPendingExecution) SetOfframpAccount(offramp ag_solanago.PublicKey) *DrillPendingExecution {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(offramp)
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(offramp).WRITE()
 	return inst
 }
 
@@ -99,7 +99,7 @@ func (inst *DrillPendingExecution) GetOfframpAccount() *ag_solanago.AccountMeta 
 
 // SetCompoundAccount sets the "compound" account.
 func (inst *DrillPendingExecution) SetCompoundAccount(compound ag_solanago.PublicKey) *DrillPendingExecution {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(compound)
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(compound).WRITE()
 	return inst
 }
 

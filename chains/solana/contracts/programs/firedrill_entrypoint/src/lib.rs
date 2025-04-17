@@ -151,12 +151,15 @@ pub struct OnlyOwner<'info> {
     pub owner: Signer<'info>,
 
     /// CHECK: CPI
+    #[account(mut)]
     pub onramp: AccountInfo<'info>,
 
     /// CHECK: CPI
+    #[account(mut)]
     pub offramp: AccountInfo<'info>,
 
     /// CHECK: CPI
+    #[account(mut)]
     pub compound: AccountInfo<'info>,
 
     pub onramp_program: Program<'info, FiredrillOnramp>,

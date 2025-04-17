@@ -17,11 +17,11 @@ type DrillPriceRegistries struct {
 	//
 	// [1] = [SIGNER] owner
 	//
-	// [2] = [] onramp
+	// [2] = [WRITE] onramp
 	//
-	// [3] = [] offramp
+	// [3] = [WRITE] offramp
 	//
-	// [4] = [] compound
+	// [4] = [WRITE] compound
 	//
 	// [5] = [] onrampProgram
 	//
@@ -63,7 +63,7 @@ func (inst *DrillPriceRegistries) GetOwnerAccount() *ag_solanago.AccountMeta {
 
 // SetOnrampAccount sets the "onramp" account.
 func (inst *DrillPriceRegistries) SetOnrampAccount(onramp ag_solanago.PublicKey) *DrillPriceRegistries {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(onramp)
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(onramp).WRITE()
 	return inst
 }
 
@@ -74,7 +74,7 @@ func (inst *DrillPriceRegistries) GetOnrampAccount() *ag_solanago.AccountMeta {
 
 // SetOfframpAccount sets the "offramp" account.
 func (inst *DrillPriceRegistries) SetOfframpAccount(offramp ag_solanago.PublicKey) *DrillPriceRegistries {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(offramp)
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(offramp).WRITE()
 	return inst
 }
 
@@ -85,7 +85,7 @@ func (inst *DrillPriceRegistries) GetOfframpAccount() *ag_solanago.AccountMeta {
 
 // SetCompoundAccount sets the "compound" account.
 func (inst *DrillPriceRegistries) SetCompoundAccount(compound ag_solanago.PublicKey) *DrillPriceRegistries {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(compound)
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(compound).WRITE()
 	return inst
 }
 
