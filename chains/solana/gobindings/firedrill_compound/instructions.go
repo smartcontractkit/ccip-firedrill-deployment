@@ -31,8 +31,6 @@ var (
 	Instruction_Initialize = ag_binary.TypeID([8]byte{175, 175, 109, 31, 13, 152, 155, 237})
 
 	Instruction_EmitCcipMessageSent = ag_binary.TypeID([8]byte{249, 210, 151, 0, 39, 144, 182, 174})
-
-	Instruction_EmitUsdPerTokenUpdated = ag_binary.TypeID([8]byte{21, 114, 11, 7, 246, 122, 253, 40})
 )
 
 // InstructionIDToName returns the name of the instruction given its ID.
@@ -42,8 +40,6 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 		return "Initialize"
 	case Instruction_EmitCcipMessageSent:
 		return "EmitCcipMessageSent"
-	case Instruction_EmitUsdPerTokenUpdated:
-		return "EmitUsdPerTokenUpdated"
 	default:
 		return ""
 	}
@@ -69,9 +65,6 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 		},
 		{
 			"emit_ccip_message_sent", (*EmitCcipMessageSent)(nil),
-		},
-		{
-			"emit_usd_per_token_updated", (*EmitUsdPerTokenUpdated)(nil),
 		},
 	},
 )
