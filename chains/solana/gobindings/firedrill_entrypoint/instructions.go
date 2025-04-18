@@ -29,14 +29,6 @@ func init() {
 
 var (
 	Instruction_Initialize = ag_binary.TypeID([8]byte{175, 175, 109, 31, 13, 152, 155, 237})
-
-	Instruction_PrepareRegister = ag_binary.TypeID([8]byte{48, 172, 164, 130, 65, 121, 92, 159})
-
-	Instruction_DrillPendingCommitQueueTxSpike = ag_binary.TypeID([8]byte{58, 104, 237, 156, 20, 108, 8, 230})
-
-	Instruction_DrillPendingExecution = ag_binary.TypeID([8]byte{191, 138, 121, 65, 53, 106, 59, 156})
-
-	Instruction_DrillPriceRegistries = ag_binary.TypeID([8]byte{177, 100, 168, 222, 100, 194, 227, 10})
 )
 
 // InstructionIDToName returns the name of the instruction given its ID.
@@ -44,14 +36,6 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 	switch id {
 	case Instruction_Initialize:
 		return "Initialize"
-	case Instruction_PrepareRegister:
-		return "PrepareRegister"
-	case Instruction_DrillPendingCommitQueueTxSpike:
-		return "DrillPendingCommitQueueTxSpike"
-	case Instruction_DrillPendingExecution:
-		return "DrillPendingExecution"
-	case Instruction_DrillPriceRegistries:
-		return "DrillPriceRegistries"
 	default:
 		return ""
 	}
@@ -74,18 +58,6 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 	[]ag_binary.VariantType{
 		{
 			"initialize", (*Initialize)(nil),
-		},
-		{
-			"prepare_register", (*PrepareRegister)(nil),
-		},
-		{
-			"drill_pending_commit_queue_tx_spike", (*DrillPendingCommitQueueTxSpike)(nil),
-		},
-		{
-			"drill_pending_execution", (*DrillPendingExecution)(nil),
-		},
-		{
-			"drill_price_registries", (*DrillPriceRegistries)(nil),
 		},
 	},
 )

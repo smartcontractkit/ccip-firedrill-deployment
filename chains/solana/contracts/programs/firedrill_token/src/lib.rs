@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use shared::seed;
 
-declare_id!("F5jMhWDPMrCbnCaw6mf91NtsRV4ccEuwGsrJUpBckQoD");
+declare_id!("Dri11zHDJhhWFj3dmPELQACmZpH3wmJp58ZnV5YrheS6");
 
 #[program]
 pub mod firedrill_token {}

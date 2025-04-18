@@ -9,8 +9,9 @@ import (
 )
 
 type FiredrillCompound struct {
-	Owner ag_solanago.PublicKey
-	Token ag_solanago.PublicKey
+	ChainSelector uint64
+	Owner         ag_solanago.PublicKey
+	Token         ag_solanago.PublicKey
 }
 
 var FiredrillCompoundDiscriminator = [8]byte{254, 217, 204, 248, 103, 242, 213, 162}
@@ -18,6 +19,11 @@ var FiredrillCompoundDiscriminator = [8]byte{254, 217, 204, 248, 103, 242, 213, 
 func (obj FiredrillCompound) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	// Write account discriminator:
 	err = encoder.WriteBytes(FiredrillCompoundDiscriminator[:], false)
+	if err != nil {
+		return err
+	}
+	// Serialize `ChainSelector` param:
+	err = encoder.Encode(obj.ChainSelector)
 	if err != nil {
 		return err
 	}
@@ -47,6 +53,11 @@ func (obj *FiredrillCompound) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (
 				"[254 217 204 248 103 242 213 162]",
 				fmt.Sprint(discriminator[:]))
 		}
+	}
+	// Deserialize `ChainSelector`:
+	err = decoder.Decode(&obj.ChainSelector)
+	if err != nil {
+		return err
 	}
 	// Deserialize `Owner`:
 	err = decoder.Decode(&obj.Owner)

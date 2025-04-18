@@ -12,18 +12,27 @@ use crate::event::*;
 mod context;
 use crate::context::*;
 
-declare_id!("F3bceNrAhvhCmpbGx2HdBDzLpt91dQdn5yR8m7QwyiQC");
+declare_id!("Dri11Lt8FrFCp1FCGcNmt6S2qubGNrxQNHBa5ETNNrjx");
 
 #[program]
 pub mod firedrill_offramp {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, chain_selector: u64, token: Pubkey, on_ramp: Pubkey) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, chain_selector: u64, token: Pubkey, compound: Pubkey) -> Result<()> {
         let offramp = &mut ctx.accounts.offramp;
         offramp.owner = ctx.accounts.authority.key();
         offramp.chain_selector = chain_selector;
         offramp.token = token;
-        offramp.on_ramp = on_ramp;
+        offramp.compound = compound;
+
+        let mut reference_addresses = ctx.accounts.reference_addresses.load_init()?;
+        *reference_addresses = ReferenceAddresses {
+            version: 1,
+            router: compound,
+            fee_quoter: compound,
+            rmn_remote: compound,
+            offramp_lookup_table: compound,
+        };
         Ok(())
     }
 
@@ -53,6 +62,21 @@ pub mod firedrill_offramp {
             Ocr3Config::new(OcrPluginType::Execution),
         ];
 
+        let source_chain = &mut ctx.accounts.source_chain;
+        source_chain.set_inner(
+            SourceChain {
+                version: 1,
+                chain_selector: svm_chain_selector,
+                state: SourceChainState{ min_seq_nr: 1 },
+                config: SourceChainConfig{
+                    is_enabled: true,
+                    is_rmn_verification_disabled: false,
+                    lane_code_version: CodeVersion::V1,
+                    on_ramp: OnRampAddress::from(Pubkey::default().to_bytes()),
+                },
+            }
+        );
+
         emit!(ConfigSet {
             svm_chain_selector,
             enable_manual_execution_after: 1,
@@ -64,7 +88,7 @@ pub mod firedrill_offramp {
     pub fn emit_source_chain_added(ctx: Context<EmitConfig>) -> Result<()> {
         let offramp = &ctx.accounts.offramp;
         let source_chain_selector = offramp.chain_selector;
-        let on_ramp_address = OnRampAddress::from(offramp.key().to_bytes());
+        let on_ramp_address = OnRampAddress::from(offramp.compound.key().to_bytes());
         let source_chain_config = SourceChainConfig {
             is_enabled: true,
             is_rmn_verification_disabled: false,
@@ -87,11 +111,11 @@ pub mod firedrill_offramp {
     ) -> Result<()> {
         let offramp = &ctx.accounts.offramp;
         let source_chain_selector = offramp.chain_selector;
-        let on_ramp_address = offramp.on_ramp.to_bytes().to_vec();
+        let compound_address = offramp.compound.to_bytes().to_vec();
 
         // Compute hash for the merkle root
         let mut hash_input = Vec::new();
-        hash_input.extend_from_slice(&offramp.on_ramp.to_bytes());
+        hash_input.extend_from_slice(&offramp.compound.to_bytes());
         hash_input.extend_from_slice(&min_seq_nr.to_le_bytes());
         hash_input.extend_from_slice(&max_seq_nr.to_le_bytes());
         let computed_hash = hash(&hash_input).0;
@@ -99,7 +123,7 @@ pub mod firedrill_offramp {
         // Construct the MerkleRoot using the CCIP router type.
         let merkle = MerkleRoot {
             source_chain_selector,
-            on_ramp_address,
+            on_ramp_address: compound_address,
             min_seq_nr,
             max_seq_nr,
             merkle_root: computed_hash,
@@ -124,11 +148,20 @@ pub struct FiredrillOffRamp {
     pub owner: Pubkey,
     pub chain_selector: u64,
     pub token: Pubkey,
-    pub on_ramp: Pubkey,
+    pub compound: Pubkey,
 }
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
+    #[account(
+        init,
+        seeds = [seed::REFERENCE_ADDRESSES],
+        bump,
+        payer = authority,
+        space = ANCHOR_DISCRIMINATOR + ReferenceAddresses::INIT_SPACE,
+    )]
+    pub reference_addresses: AccountLoader<'info, ReferenceAddresses>,
+
     #[account(init, seeds = [seed::OFFRAMP], bump, payer = authority, space = 8 + 32 + 8 + 32 + 32)]
     pub offramp: Account<'info, FiredrillOffRamp>,
 

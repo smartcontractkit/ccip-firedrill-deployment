@@ -422,7 +422,7 @@ type FiredrillOffRamp struct {
 	Owner         ag_solanago.PublicKey
 	ChainSelector uint64
 	Token         ag_solanago.PublicKey
-	OnRamp        ag_solanago.PublicKey
+	Compound      ag_solanago.PublicKey
 }
 
 var FiredrillOffRampDiscriminator = [8]byte{130, 119, 71, 128, 162, 166, 175, 201}
@@ -448,8 +448,8 @@ func (obj FiredrillOffRamp) MarshalWithEncoder(encoder *ag_binary.Encoder) (err 
 	if err != nil {
 		return err
 	}
-	// Serialize `OnRamp` param:
-	err = encoder.Encode(obj.OnRamp)
+	// Serialize `Compound` param:
+	err = encoder.Encode(obj.Compound)
 	if err != nil {
 		return err
 	}
@@ -485,8 +485,8 @@ func (obj *FiredrillOffRamp) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (e
 	if err != nil {
 		return err
 	}
-	// Deserialize `OnRamp`:
-	err = decoder.Decode(&obj.OnRamp)
+	// Deserialize `Compound`:
+	err = decoder.Decode(&obj.Compound)
 	if err != nil {
 		return err
 	}

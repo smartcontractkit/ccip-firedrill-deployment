@@ -12,7 +12,6 @@ type FiredrillEntrypoint struct {
 	Owner         ag_solanago.PublicKey
 	ChainSelector uint64
 	Token         ag_solanago.PublicKey
-	OnRamp        ag_solanago.PublicKey
 	OffRamp       ag_solanago.PublicKey
 	Compound      ag_solanago.PublicKey
 	Receiver      ag_solanago.PublicKey
@@ -39,11 +38,6 @@ func (obj FiredrillEntrypoint) MarshalWithEncoder(encoder *ag_binary.Encoder) (e
 	}
 	// Serialize `Token` param:
 	err = encoder.Encode(obj.Token)
-	if err != nil {
-		return err
-	}
-	// Serialize `OnRamp` param:
-	err = encoder.Encode(obj.OnRamp)
 	if err != nil {
 		return err
 	}
@@ -96,11 +90,6 @@ func (obj *FiredrillEntrypoint) UnmarshalWithDecoder(decoder *ag_binary.Decoder)
 	}
 	// Deserialize `Token`:
 	err = decoder.Decode(&obj.Token)
-	if err != nil {
-		return err
-	}
-	// Deserialize `OnRamp`:
-	err = decoder.Decode(&obj.OnRamp)
 	if err != nil {
 		return err
 	}

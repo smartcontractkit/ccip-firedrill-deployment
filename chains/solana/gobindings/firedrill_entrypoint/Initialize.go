@@ -14,7 +14,6 @@ import (
 type Initialize struct {
 	ChainSelector *uint64
 	Token         *ag_solanago.PublicKey
-	OnRamp        *ag_solanago.PublicKey
 	OffRamp       *ag_solanago.PublicKey
 	Compound      *ag_solanago.PublicKey
 	Receiver      *ag_solanago.PublicKey
@@ -44,12 +43,6 @@ func (inst *Initialize) SetChainSelector(chainSelector uint64) *Initialize {
 // SetToken sets the "token" parameter.
 func (inst *Initialize) SetToken(token ag_solanago.PublicKey) *Initialize {
 	inst.Token = &token
-	return inst
-}
-
-// SetOnRamp sets the "onRamp" parameter.
-func (inst *Initialize) SetOnRamp(onRamp ag_solanago.PublicKey) *Initialize {
-	inst.OnRamp = &onRamp
 	return inst
 }
 
@@ -130,9 +123,6 @@ func (inst *Initialize) Validate() error {
 		if inst.Token == nil {
 			return errors.New("Token parameter is not set")
 		}
-		if inst.OnRamp == nil {
-			return errors.New("OnRamp parameter is not set")
-		}
 		if inst.OffRamp == nil {
 			return errors.New("OffRamp parameter is not set")
 		}
@@ -168,10 +158,9 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=6]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Params[len=5]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
 						paramsBranch.Child(ag_format.Param("ChainSelector", *inst.ChainSelector))
 						paramsBranch.Child(ag_format.Param("        Token", *inst.Token))
-						paramsBranch.Child(ag_format.Param("       OnRamp", *inst.OnRamp))
 						paramsBranch.Child(ag_format.Param("      OffRamp", *inst.OffRamp))
 						paramsBranch.Child(ag_format.Param("     Compound", *inst.Compound))
 						paramsBranch.Child(ag_format.Param("     Receiver", *inst.Receiver))
@@ -195,11 +184,6 @@ func (obj Initialize) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error)
 	}
 	// Serialize `Token` param:
 	err = encoder.Encode(obj.Token)
-	if err != nil {
-		return err
-	}
-	// Serialize `OnRamp` param:
-	err = encoder.Encode(obj.OnRamp)
 	if err != nil {
 		return err
 	}
@@ -231,11 +215,6 @@ func (obj *Initialize) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err err
 	if err != nil {
 		return err
 	}
-	// Deserialize `OnRamp`:
-	err = decoder.Decode(&obj.OnRamp)
-	if err != nil {
-		return err
-	}
 	// Deserialize `OffRamp`:
 	err = decoder.Decode(&obj.OffRamp)
 	if err != nil {
@@ -259,7 +238,6 @@ func NewInitializeInstruction(
 	// Parameters:
 	chainSelector uint64,
 	token ag_solanago.PublicKey,
-	onRamp ag_solanago.PublicKey,
 	offRamp ag_solanago.PublicKey,
 	compound ag_solanago.PublicKey,
 	receiver ag_solanago.PublicKey,
@@ -270,7 +248,6 @@ func NewInitializeInstruction(
 	return NewInitializeInstructionBuilder().
 		SetChainSelector(chainSelector).
 		SetToken(token).
-		SetOnRamp(onRamp).
 		SetOffRamp(offRamp).
 		SetCompound(compound).
 		SetReceiver(receiver).

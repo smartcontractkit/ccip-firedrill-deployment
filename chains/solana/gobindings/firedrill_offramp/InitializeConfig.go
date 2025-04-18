@@ -23,22 +23,24 @@ import (
 type InitializeConfig struct {
 	SvmChainSelector *uint64
 
-	// [0] = [WRITE] config
+	// [0] = [WRITE] sourceChain
 	//
-	// [1] = [WRITE, SIGNER] authority
+	// [1] = [WRITE] config
 	//
-	// [2] = [] systemProgram
+	// [2] = [WRITE, SIGNER] authority
 	//
-	// [3] = [] program
+	// [3] = [] systemProgram
 	//
-	// [4] = [] programData
+	// [4] = [] program
+	//
+	// [5] = [] programData
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewInitializeConfigInstructionBuilder creates a new `InitializeConfig` instruction builder.
 func NewInitializeConfigInstructionBuilder() *InitializeConfig {
 	nd := &InitializeConfig{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 5),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 6),
 	}
 	return nd
 }
@@ -49,59 +51,70 @@ func (inst *InitializeConfig) SetSvmChainSelector(svmChainSelector uint64) *Init
 	return inst
 }
 
+// SetSourceChainAccount sets the "sourceChain" account.
+func (inst *InitializeConfig) SetSourceChainAccount(sourceChain ag_solanago.PublicKey) *InitializeConfig {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(sourceChain).WRITE()
+	return inst
+}
+
+// GetSourceChainAccount gets the "sourceChain" account.
+func (inst *InitializeConfig) GetSourceChainAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetConfigAccount sets the "config" account.
 func (inst *InitializeConfig) SetConfigAccount(config ag_solanago.PublicKey) *InitializeConfig {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(config).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(config).WRITE()
 	return inst
 }
 
 // GetConfigAccount gets the "config" account.
 func (inst *InitializeConfig) GetConfigAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 // SetAuthorityAccount sets the "authority" account.
 func (inst *InitializeConfig) SetAuthorityAccount(authority ag_solanago.PublicKey) *InitializeConfig {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(authority).WRITE().SIGNER()
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(authority).WRITE().SIGNER()
 	return inst
 }
 
 // GetAuthorityAccount gets the "authority" account.
 func (inst *InitializeConfig) GetAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
+	return inst.AccountMetaSlice.Get(2)
 }
 
 // SetSystemProgramAccount sets the "systemProgram" account.
 func (inst *InitializeConfig) SetSystemProgramAccount(systemProgram ag_solanago.PublicKey) *InitializeConfig {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(systemProgram)
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(systemProgram)
 	return inst
 }
 
 // GetSystemProgramAccount gets the "systemProgram" account.
 func (inst *InitializeConfig) GetSystemProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
+	return inst.AccountMetaSlice.Get(3)
 }
 
 // SetProgramAccount sets the "program" account.
 func (inst *InitializeConfig) SetProgramAccount(program ag_solanago.PublicKey) *InitializeConfig {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(program)
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(program)
 	return inst
 }
 
 // GetProgramAccount gets the "program" account.
 func (inst *InitializeConfig) GetProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(3)
+	return inst.AccountMetaSlice.Get(4)
 }
 
 // SetProgramDataAccount sets the "programData" account.
 func (inst *InitializeConfig) SetProgramDataAccount(programData ag_solanago.PublicKey) *InitializeConfig {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(programData)
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(programData)
 	return inst
 }
 
 // GetProgramDataAccount gets the "programData" account.
 func (inst *InitializeConfig) GetProgramDataAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(4)
+	return inst.AccountMetaSlice.Get(5)
 }
 
 func (inst InitializeConfig) Build() *Instruction {
@@ -132,18 +145,21 @@ func (inst *InitializeConfig) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return errors.New("accounts.Config is not set")
+			return errors.New("accounts.SourceChain is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.Authority is not set")
+			return errors.New("accounts.Config is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
-			return errors.New("accounts.SystemProgram is not set")
+			return errors.New("accounts.Authority is not set")
 		}
 		if inst.AccountMetaSlice[3] == nil {
-			return errors.New("accounts.Program is not set")
+			return errors.New("accounts.SystemProgram is not set")
 		}
 		if inst.AccountMetaSlice[4] == nil {
+			return errors.New("accounts.Program is not set")
+		}
+		if inst.AccountMetaSlice[5] == nil {
 			return errors.New("accounts.ProgramData is not set")
 		}
 	}
@@ -164,12 +180,13 @@ func (inst *InitializeConfig) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=5]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("       config", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("    authority", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("systemProgram", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(ag_format.Meta("      program", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(ag_format.Meta("  programData", inst.AccountMetaSlice.Get(4)))
+					instructionBranch.Child("Accounts[len=6]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("  sourceChain", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("       config", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("    authority", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("systemProgram", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("      program", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("  programData", inst.AccountMetaSlice.Get(5)))
 					})
 				})
 		})
@@ -197,6 +214,7 @@ func NewInitializeConfigInstruction(
 	// Parameters:
 	svmChainSelector uint64,
 	// Accounts:
+	sourceChain ag_solanago.PublicKey,
 	config ag_solanago.PublicKey,
 	authority ag_solanago.PublicKey,
 	systemProgram ag_solanago.PublicKey,
@@ -204,6 +222,7 @@ func NewInitializeConfigInstruction(
 	programData ag_solanago.PublicKey) *InitializeConfig {
 	return NewInitializeConfigInstructionBuilder().
 		SetSvmChainSelector(svmChainSelector).
+		SetSourceChainAccount(sourceChain).
 		SetConfigAccount(config).
 		SetAuthorityAccount(authority).
 		SetSystemProgramAccount(systemProgram).

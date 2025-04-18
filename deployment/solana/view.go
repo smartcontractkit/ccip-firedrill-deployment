@@ -75,7 +75,7 @@ func contractView(contract firedrill_entrypoint2.FiredrillEntrypoint, address so
 			Owner:          contract.Owner.String(),
 		},
 		Token:    contract.Token.String(),
-		OnRamp:   contract.OnRamp.String(),
+		OnRamp:   contract.Compound.String(),
 		OffRamp:  contract.OffRamp.String(),
 		Compound: contract.Compound.String(),
 		Receiver: contract.Receiver.String(),

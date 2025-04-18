@@ -9,7 +9,6 @@ skip-lint = false
 firedrill_compound = "Dri11NnBPbx85w8a47ZXBZa3Hi7E2xvHAA9Xpyk7UivQ"
 firedrill_entrypoint = "Dri11c6TXJXELaZUgQtyw3doxbn7bGXQ6z5LRZ8bMPbc"
 firedrill_offramp = "Dri11kiWR5f1oTn5NLm3wmfaDq3cYauR92wrsTxNaudt"
-firedrill_onramp = "Dri11Hs4x2gXThgDwvjYoZ7xEPgfKNa5Ys2MWUqay3Tt"
 firedrill_token = "Dri11r4S1hY8iMpxNh6UoYZ9hsGgmGUUyZ3zxUb2rpc2"
 failing_receiver = "Dri11EwVRViqqkjs7SWV3d3ejcanBGMNrcGhD6HVn756"
 

@@ -9,15 +9,15 @@ import (
 	solCommonUtil "github.com/smartcontractkit/chainlink-ccip/chains/solana/utils/common"
 	"github.com/smartcontractkit/chainlink/deployment"
 
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_compound"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_offramp"
-	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_onramp"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
 func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
 	offRampProgram := solana.MustPublicKeyFromBase58(view.OffRamp)
 	firedrill_offramp.SetProgramID(offRampProgram)
-	offRampPDA, _, _ := FindFiredrillOnrampPDA(offRampProgram)
+	offRampPDA, _, _ := FindFiredrillOfframpPDA(offRampProgram)
 	ix, err := firedrill_offramp.NewEmitSourceChainAddedInstruction(
 		offRampPDA,
 		client.DeployerKey.PublicKey(),
@@ -33,13 +33,13 @@ func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillE
 }
 
 func CallDrillPendingCommit(idx uint64, client deployment.SolChain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
-	onRampProgram := solana.MustPublicKeyFromBase58(view.OnRamp)
-	onRampPDA, _, _ := FindFiredrillOnrampPDA(onRampProgram)
-	firedrill_onramp.SetProgramID(onRampProgram)
-	ix, err := firedrill_onramp.NewEmitCcipMessageSentInstruction(
+	compoundProgram := solana.MustPublicKeyFromBase58(view.OnRamp)
+	compoundPDA, _, _ := FindFiredrillCompoundPDA(compoundProgram)
+	firedrill_compound.SetProgramID(compoundProgram)
+	ix, err := firedrill_compound.NewEmitCcipMessageSentInstruction(
 		client.DeployerKey.PublicKey(),
 		idx,
-		onRampPDA,
+		compoundPDA,
 		client.DeployerKey.PublicKey(),
 	).ValidateAndBuild()
 	if err != nil {
@@ -55,7 +55,7 @@ func CallDrillPendingCommit(idx uint64, client deployment.SolChain, view shared.
 func CallDrillPendingExec(from uint64, to uint64, client deployment.SolChain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
 	offRampProgram := solana.MustPublicKeyFromBase58(view.OffRamp)
 	firedrill_offramp.SetProgramID(offRampProgram)
-	offRampPDA, _, _ := FindFiredrillOnrampPDA(offRampProgram)
+	offRampPDA, _, _ := FindFiredrillOfframpPDA(offRampProgram)
 	ix, err := firedrill_offramp.NewEmitCommitReportAcceptedInstruction(
 		from, to,
 		offRampPDA,

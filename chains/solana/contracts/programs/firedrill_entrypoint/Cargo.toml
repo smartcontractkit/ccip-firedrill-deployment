@@ -21,7 +21,4 @@ solana-program = "1.17.25" # pin solana to 1.17
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = "0.29.0"
 shared = { path = "../../crate/shared" }
-firedrill_onramp = { path = "../firedrill_onramp", features = ["cpi"] }
-firedrill_offramp = { path = "../firedrill_offramp", features = ["cpi"] }
-firedrill_compound = { path = "../firedrill_compound", features = ["cpi"] }
 

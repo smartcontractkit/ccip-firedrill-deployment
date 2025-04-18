@@ -1,5 +1,5 @@
 use crate::program::FiredrillOfframp;
-use crate::{CcipOfframpError, Config};
+use crate::{CcipOfframpError, Config, SourceChain};
 use anchor_lang::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use shared::seed;
@@ -8,7 +8,17 @@ use shared::seed;
 pub const ANCHOR_DISCRIMINATOR: usize = 8;
 
 #[derive(Accounts)]
+#[instruction(svm_chain_selector: u64)]
 pub struct InitializeConfig<'info> {
+    #[account(
+        init,
+        seeds = [seed::SOURCE_CHAIN, svm_chain_selector.to_le_bytes().as_ref()],
+        bump,
+        payer = authority,
+        space = ANCHOR_DISCRIMINATOR + SourceChain::INIT_SPACE,
+    )]
+    pub source_chain: Account<'info, SourceChain>,
+
     #[account(
         init,
         seeds = [seed::CONFIG],
