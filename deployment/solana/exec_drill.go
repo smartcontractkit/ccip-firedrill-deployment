@@ -6,21 +6,18 @@ import (
 	"github.com/gagliardetto/solana-go"
 	"github.com/smartcontractkit/chainlink/deployment"
 
-	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_offramp"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_onramp"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
 func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillEntrypointView) error {
-	entrypointAddress := solana.MustPublicKeyFromBase58(view.Address)
-	firedrill_entrypoint.SetProgramID(entrypointAddress)
-	entrypointPDA, _, _ := FindFiredrillEntrypointPDA(entrypointAddress)
 	offRampProgram := solana.MustPublicKeyFromBase58(view.OffRamp)
+	firedrill_offramp.SetProgramID(offRampProgram)
 	offRampPDA, _, _ := FindFiredrillOnrampPDA(offRampProgram)
-	ix, err := firedrill_entrypoint.NewPrepareRegisterInstruction(
-		entrypointPDA,
+	ix, err := firedrill_offramp.NewEmitSourceChainAddedInstruction(
 		offRampPDA,
 		client.DeployerKey.PublicKey(),
-		offRampProgram,
 	).ValidateAndBuild()
 	if err != nil {
 		return fmt.Errorf("error building prepare register instruction: %w", err)
@@ -32,26 +29,15 @@ func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillE
 	return nil
 }
 
-func CallDrillPendingCommit(from uint8, to uint8, client deployment.SolChain, view shared.FiredrillEntrypointView) error {
-	entrypointAddress := solana.MustPublicKeyFromBase58(view.Address)
-	firedrill_entrypoint.SetProgramID(entrypointAddress)
-	entrypointPDA, _, _ := FindFiredrillEntrypointPDA(entrypointAddress)
+func CallDrillPendingCommit(idx uint64, client deployment.SolChain, view shared.FiredrillEntrypointView) error {
 	onRampProgram := solana.MustPublicKeyFromBase58(view.OnRamp)
 	onRampPDA, _, _ := FindFiredrillOnrampPDA(onRampProgram)
-	offRampProgram := solana.MustPublicKeyFromBase58(view.OffRamp)
-	offRampPDA, _, _ := FindFiredrillOnrampPDA(offRampProgram)
-	compoundProgram := solana.MustPublicKeyFromBase58(view.Compound)
-	compoundPDA, _, _ := FindFiredrillCompoundPDA(compoundProgram)
-	ix, err := firedrill_entrypoint.NewDrillPendingCommitQueueTxSpikeInstruction(
-		from, to,
-		entrypointPDA,
+	firedrill_onramp.SetProgramID(onRampProgram)
+	ix, err := firedrill_onramp.NewEmitCcipMessageSentInstruction(
 		client.DeployerKey.PublicKey(),
+		idx,
 		onRampPDA,
-		offRampPDA,
-		compoundPDA,
-		onRampProgram,
-		offRampProgram,
-		compoundProgram,
+		client.DeployerKey.PublicKey(),
 	).ValidateAndBuild()
 	if err != nil {
 		return fmt.Errorf("error building drill pending commit instruction: %w", err)
@@ -63,33 +49,21 @@ func CallDrillPendingCommit(from uint8, to uint8, client deployment.SolChain, vi
 	return nil
 }
 
-func CallDrillPendingExec(from uint8, to uint8, client deployment.SolChain, view shared.FiredrillEntrypointView) error {
-	entrypointAddress := solana.MustPublicKeyFromBase58(view.Address)
-	firedrill_entrypoint.SetProgramID(entrypointAddress)
-	entrypointPDA, _, _ := FindFiredrillEntrypointPDA(entrypointAddress)
-	onRampProgram := solana.MustPublicKeyFromBase58(view.OnRamp)
-	onRampPDA, _, _ := FindFiredrillOnrampPDA(onRampProgram)
+func CallDrillPendingExec(from uint64, to uint64, client deployment.SolChain, view shared.FiredrillEntrypointView) error {
 	offRampProgram := solana.MustPublicKeyFromBase58(view.OffRamp)
+	firedrill_offramp.SetProgramID(offRampProgram)
 	offRampPDA, _, _ := FindFiredrillOnrampPDA(offRampProgram)
-	compoundProgram := solana.MustPublicKeyFromBase58(view.Compound)
-	compoundPDA, _, _ := FindFiredrillCompoundPDA(compoundProgram)
-	ix, err := firedrill_entrypoint.NewDrillPendingExecutionInstruction(
+	ix, err := firedrill_offramp.NewEmitCommitReportAcceptedInstruction(
 		from, to,
-		entrypointPDA,
-		client.DeployerKey.PublicKey(),
-		onRampPDA,
 		offRampPDA,
-		compoundPDA,
-		onRampProgram,
-		offRampProgram,
-		compoundProgram,
+		client.DeployerKey.PublicKey(),
 	).ValidateAndBuild()
 	if err != nil {
-		return fmt.Errorf("error building drill pending exec instruction: %w", err)
+		return fmt.Errorf("error building prepare register instruction: %w", err)
 	}
 	err = client.Confirm([]solana.Instruction{ix})
 	if err != nil {
-		return fmt.Errorf("error confirming drill pending exec instruction: %w", err)
+		return fmt.Errorf("error confirming prepare register instruction: %w", err)
 	}
 	return nil
 }
