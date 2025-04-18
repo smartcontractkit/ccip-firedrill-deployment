@@ -141,7 +141,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	var firedrillOfframpConfigAccount firedrill_offramp.Config
 	firedrillOfframpPDA, _, _ := FindFiredrillOfframpPDA(firedrillOfframpAddress)
 	firedrillOfframpReferenceAddressesPDA, _, _ := FindFiredrillOfframpReferenceAddressesPDA(firedrillOfframpAddress)
-	firedrillOfframpSourceChainPDA, _, _ := FindFiredrillOfframpSourceChainPDA(firedrillOfframpAddress)
+	firedrillOfframpSourceChainPDA, _, _ := FindFiredrillOfframpSourceChainPDA(config.ChainSelector, firedrillOfframpAddress)
 	firedrillOfframpConfigPDA, _, _ := FindFiredrillOfframpConfigPDA(firedrillOfframpAddress)
 	err = chain.GetAccountDataBorshInto(env.GetContext(), firedrillOfframpConfigPDA, &firedrillOfframpConfigAccount)
 	if err != nil {
