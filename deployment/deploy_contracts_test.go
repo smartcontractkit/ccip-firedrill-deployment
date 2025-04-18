@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	cldf "github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	"github.com/smartcontractkit/chainlink/deployment/datastore"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -26,9 +28,14 @@ func TestDeployFiredrillContracts(t *testing.T) {
 	env := *deployment.NewEnvironment(
 		memory.Memory,
 		lggr,
-		deployment.NewMemoryAddressBook(),
+		cldf.NewMemoryAddressBook(),
+		datastore.NewMemoryDataStore[
+			datastore.DefaultMetadata,
+			datastore.DefaultMetadata,
+		]().Seal(),
 		chains,
 		map[uint64]deployment.SolChain{},
+		map[uint64]deployment.AptosChain{},
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
@@ -51,7 +58,7 @@ func TestDeployFiredrillContracts(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, chainAddr, 1)
 	typeAndVersionList := slices.Collect(maps.Values(chainAddr))
-	assert.Contains(t, typeAndVersionList, deployment.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_5_0))
+	assert.Contains(t, typeAndVersionList, cldf.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_5_0))
 }
 
 func TestRegisterFiredrill(t *testing.T) {
@@ -60,9 +67,14 @@ func TestRegisterFiredrill(t *testing.T) {
 	env := *deployment.NewEnvironment(
 		memory.Memory,
 		lggr,
-		deployment.NewMemoryAddressBook(),
+		cldf.NewMemoryAddressBook(),
+		datastore.NewMemoryDataStore[
+			datastore.DefaultMetadata,
+			datastore.DefaultMetadata,
+		]().Seal(),
 		chains,
 		map[uint64]deployment.SolChain{},
+		map[uint64]deployment.AptosChain{},
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
@@ -80,7 +92,7 @@ func TestRegisterFiredrill(t *testing.T) {
 	require.NoError(t, err)
 	err = env.ExistingAddresses.Merge(firedrillChangeset.AddressBook)
 	require.NoError(t, err)
-	firedrillEntrypointAddr, err := deployment.SearchAddressBook(firedrillChangeset.AddressBook, chainSel, FiredrillEntrypointType)
+	firedrillEntrypointAddr, err := cldf.SearchAddressBook(firedrillChangeset.AddressBook, chainSel, FiredrillEntrypointType)
 	require.NoError(t, err)
 	firedrillEntrypoint, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(common.HexToAddress(firedrillEntrypointAddr), env.Chains[chainSel].Client)
 	require.NoError(t, err)

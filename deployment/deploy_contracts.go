@@ -8,13 +8,14 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
+	cldf "github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 	"github.com/smartcontractkit/chainlink/deployment"
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
 )
 
-const FiredrillEntrypointType deployment.ContractType = "FiredrillEntrypoint"
+const FiredrillEntrypointType cldf.ContractType = "FiredrillEntrypoint"
 
 type FiredrillEntrypoint interface {
 	Owner(opts *bind.CallOpts) (common.Address, error)
@@ -74,7 +75,7 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 }
 
 func DeployFiredrillContracts(e deployment.Environment, config FiredrillConfig) (deployment.ChangesetOutput, error) {
-	ab := deployment.NewMemoryAddressBook()
+	ab := cldf.NewMemoryAddressBook()
 	switch config.Version {
 	case deployment.Version1_5_0:
 		_, err := deployment.DeployContract(e.Logger, e.Chains[config.ChainSelector], ab, deployFiredrillEntrypointV1_5)
@@ -100,7 +101,7 @@ func deployFiredrillEntrypointV1_5(chain deployment.Chain) deployment.ContractDe
 		Address:  address,
 		Contract: inst,
 		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_5_0),
+		Tv:       cldf.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_5_0),
 		Err:      err,
 	}
 }
@@ -111,13 +112,13 @@ func deployFiredrillEntrypoint(chain deployment.Chain) deployment.ContractDeploy
 		Address:  address,
 		Contract: inst,
 		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_6_0),
+		Tv:       cldf.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_6_0),
 		Err:      err,
 	}
 }
 
-func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.AddressBook, chain deployment.Chain) error {
-	firedrillEntrypointAddr, err := deployment.SearchAddressBook(addressBook, chain.Selector, FiredrillEntrypointType)
+func FiredrillRegisterContracts(lggr logger.Logger, addressBook cldf.AddressBook, chain deployment.Chain) error {
+	firedrillEntrypointAddr, err := cldf.SearchAddressBook(addressBook, chain.Selector, FiredrillEntrypointType)
 	if err != nil {
 		return err
 	}

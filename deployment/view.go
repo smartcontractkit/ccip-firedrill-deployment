@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	chain_selectors "github.com/smartcontractkit/chain-selectors"
+	cldf "github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 
 	"github.com/smartcontractkit/chainlink/deployment"
 	"github.com/smartcontractkit/chainlink/deployment/common/view/types"
@@ -68,7 +69,7 @@ func CCIPViewFiredrill(e deployment.Environment) (json.Marshaler, error) {
 		for addressStr, typeAndVersion := range addresses {
 			address := common.HexToAddress(addressStr)
 			switch typeAndVersion.String() {
-			case deployment.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_5_0).String():
+			case cldf.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_5_0).String():
 				contract, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(address, chain.Client)
 				if err != nil {
 					return nil, err
@@ -78,7 +79,7 @@ func CCIPViewFiredrill(e deployment.Environment) (json.Marshaler, error) {
 					return nil, err
 				}
 				chainView.FiredrillEntrypoint[addressStr] = view
-			case deployment.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_6_0).String():
+			case cldf.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_6_0).String():
 				contract, err := firedrill_entrypoint.NewFiredrillEntrypoint(address, chain.Client)
 				if err != nil {
 					return nil, err

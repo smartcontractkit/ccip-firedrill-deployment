@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	chainsel "github.com/smartcontractkit/chain-selectors"
+	cldf "github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 
 	firedrill "github.com/smartcontractkit/ccip-firedrill-deployment/deployment"
 
@@ -59,7 +60,7 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.Chain, version str
 		if !entrypointView.Active {
 			continue
 		}
-		entrypointVersion := deployment.MustTypeAndVersionFromString(entrypointView.TypeAndVersion)
+		entrypointVersion := cldf.MustTypeAndVersionFromString(entrypointView.TypeAndVersion)
 		if entrypointVersion.Version.String() != version {
 			continue
 		}

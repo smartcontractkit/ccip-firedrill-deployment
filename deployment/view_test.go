@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	cldf "github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	"github.com/smartcontractkit/chainlink/deployment/datastore"
 	"github.com/stretchr/testify/require"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/utils/tests"
@@ -18,9 +20,14 @@ func TestCCIPViewFiredrill(t *testing.T) {
 	env := *deployment.NewEnvironment(
 		memory.Memory,
 		lggr,
-		deployment.NewMemoryAddressBook(),
+		cldf.NewMemoryAddressBook(),
+		datastore.NewMemoryDataStore[
+			datastore.DefaultMetadata,
+			datastore.DefaultMetadata,
+		]().Seal(),
 		chains,
 		map[uint64]deployment.SolChain{},
+		map[uint64]deployment.AptosChain{},
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
