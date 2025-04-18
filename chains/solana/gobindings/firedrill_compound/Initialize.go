@@ -12,7 +12,8 @@ import (
 
 // Initialize is the `initialize` instruction.
 type Initialize struct {
-	Token *ag_solanago.PublicKey
+	Token         *ag_solanago.PublicKey
+	ChainSelector *uint64
 
 	// [0] = [WRITE] compound
 	//
@@ -33,6 +34,12 @@ func NewInitializeInstructionBuilder() *Initialize {
 // SetToken sets the "token" parameter.
 func (inst *Initialize) SetToken(token ag_solanago.PublicKey) *Initialize {
 	inst.Token = &token
+	return inst
+}
+
+// SetChainSelector sets the "chainSelector" parameter.
+func (inst *Initialize) SetChainSelector(chainSelector uint64) *Initialize {
+	inst.ChainSelector = &chainSelector
 	return inst
 }
 
@@ -92,6 +99,9 @@ func (inst *Initialize) Validate() error {
 		if inst.Token == nil {
 			return errors.New("Token parameter is not set")
 		}
+		if inst.ChainSelector == nil {
+			return errors.New("ChainSelector parameter is not set")
+		}
 	}
 
 	// Check whether all (required) accounts are set:
@@ -118,8 +128,9 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=1]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Token", *inst.Token))
+					instructionBranch.Child("Params[len=2]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param("        Token", *inst.Token))
+						paramsBranch.Child(ag_format.Param("ChainSelector", *inst.ChainSelector))
 					})
 
 					// Accounts of the instruction:
@@ -138,11 +149,21 @@ func (obj Initialize) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error)
 	if err != nil {
 		return err
 	}
+	// Serialize `ChainSelector` param:
+	err = encoder.Encode(obj.ChainSelector)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func (obj *Initialize) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 	// Deserialize `Token`:
 	err = decoder.Decode(&obj.Token)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ChainSelector`:
+	err = decoder.Decode(&obj.ChainSelector)
 	if err != nil {
 		return err
 	}
@@ -153,12 +174,14 @@ func (obj *Initialize) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err err
 func NewInitializeInstruction(
 	// Parameters:
 	token ag_solanago.PublicKey,
+	chainSelector uint64,
 	// Accounts:
 	compound ag_solanago.PublicKey,
 	authority ag_solanago.PublicKey,
 	systemProgram ag_solanago.PublicKey) *Initialize {
 	return NewInitializeInstructionBuilder().
 		SetToken(token).
+		SetChainSelector(chainSelector).
 		SetCompoundAccount(compound).
 		SetAuthorityAccount(authority).
 		SetSystemProgramAccount(systemProgram)

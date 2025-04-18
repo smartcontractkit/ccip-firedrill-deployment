@@ -6,15 +6,16 @@ use crate::messages::*;
 
 use ethnum::U256;
 
-declare_id!("Dri11ePx1XJ5Eu3DRDFjgCf4ZqB98qzNrHzEwqx2jpqk");
+declare_id!("9foztXMAs3Zdgx7ZkxDksb2S6piKE6R5G9iM5oAuVwFP");
 
 // FiredrillCompound is Router, OnRamp, RMNRemote, FeeQuoter and TokenAdminRegistry
 #[program]
 pub mod firedrill_compound {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, token: Pubkey) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, token: Pubkey, chain_selector: u64) -> Result<()> {
         let compound = &mut ctx.accounts.compound;
+        compound.chain_selector = chain_selector;
         compound.owner = ctx.accounts.authority.key();
         compound.token = token;
         Ok(())

@@ -100,6 +100,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	if err != nil {
 		initTx, err2 := firedrill_compound.NewInitializeInstruction(
 			firedrillTokenAddress,
+			config.ChainSelector,
 			firedrillCompoundPDA,
 			chain.DeployerKey.PublicKey(),
 			solana.SystemProgramID,
