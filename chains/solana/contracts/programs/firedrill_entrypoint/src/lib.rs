@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use shared::seed;
 
-declare_id!("Dri11jJrhAN5DEr3b47WqFh6jvskcq4TT8ZWBJuvCphX");
+declare_id!("351TRJhiMuGnf9YJjhyVA1HHGDAUbwq1U7ppQQZNhsqj");
 
 #[program]
 pub mod firedrill_entrypoint {
@@ -12,6 +12,7 @@ pub mod firedrill_entrypoint {
         chain_selector: u64,
         token: Pubkey,
         off_ramp: Pubkey,
+        fee_quoter: Pubkey,
         compound: Pubkey,
         receiver: Pubkey,
     ) -> Result<()> {
@@ -20,6 +21,7 @@ pub mod firedrill_entrypoint {
         state.chain_selector = chain_selector;
         state.token = token;
         state.off_ramp = off_ramp;
+        state.fee_quoter = fee_quoter;
         state.compound = compound;
         state.receiver = receiver;
         state.send_last = 0;
@@ -34,6 +36,7 @@ pub struct FiredrillEntrypoint {
     pub chain_selector: u64,
     pub token: Pubkey,
     pub off_ramp: Pubkey,
+    pub fee_quoter: Pubkey,
     pub compound: Pubkey,
     pub receiver: Pubkey,
     pub send_last: u8,

@@ -21,9 +21,10 @@ type ContractMetaData struct {
 
 type FiredrillEntrypointView struct {
 	ContractMetaData
-	Token    string `json:"token"`
-	OnRamp   string `json:"onRamp"`
-	OffRamp  string `json:"offRamp"`
-	Compound string `json:"compound"`
-	Receiver string `json:"receiver"`
+	Token     string `json:"token"`
+	OnRamp    string `json:"onRamp"`
+	OffRamp   string `json:"offRamp"`
+	FeeQuoter string `json:"feeQuoter"`
+	Compound  string `json:"compound"`
+	Receiver  string `json:"receiver"`
 }

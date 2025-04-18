@@ -270,3 +270,130 @@ func (obj *CrossChainAmount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (e
 	}
 	return nil
 }
+
+type DestChainState struct {
+	SequenceNumber          uint64
+	SequenceNumberToRestore uint64
+	RestoreOnAction         RestoreOnAction
+}
+
+func (obj DestChainState) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `SequenceNumber` param:
+	err = encoder.Encode(obj.SequenceNumber)
+	if err != nil {
+		return err
+	}
+	// Serialize `SequenceNumberToRestore` param:
+	err = encoder.Encode(obj.SequenceNumberToRestore)
+	if err != nil {
+		return err
+	}
+	// Serialize `RestoreOnAction` param:
+	err = encoder.Encode(obj.RestoreOnAction)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *DestChainState) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `SequenceNumber`:
+	err = decoder.Decode(&obj.SequenceNumber)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SequenceNumberToRestore`:
+	err = decoder.Decode(&obj.SequenceNumberToRestore)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RestoreOnAction`:
+	err = decoder.Decode(&obj.RestoreOnAction)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type DestChainConfig struct {
+	LaneCodeVersion  CodeVersion
+	AllowedSenders   []ag_solanago.PublicKey
+	AllowListEnabled bool
+}
+
+func (obj DestChainConfig) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `LaneCodeVersion` param:
+	err = encoder.Encode(obj.LaneCodeVersion)
+	if err != nil {
+		return err
+	}
+	// Serialize `AllowedSenders` param:
+	err = encoder.Encode(obj.AllowedSenders)
+	if err != nil {
+		return err
+	}
+	// Serialize `AllowListEnabled` param:
+	err = encoder.Encode(obj.AllowListEnabled)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *DestChainConfig) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `LaneCodeVersion`:
+	err = decoder.Decode(&obj.LaneCodeVersion)
+	if err != nil {
+		return err
+	}
+	// Deserialize `AllowedSenders`:
+	err = decoder.Decode(&obj.AllowedSenders)
+	if err != nil {
+		return err
+	}
+	// Deserialize `AllowListEnabled`:
+	err = decoder.Decode(&obj.AllowListEnabled)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type CodeVersion ag_binary.BorshEnum
+
+const (
+	CodeVersionDefault CodeVersion = iota
+	CodeVersionV1
+)
+
+func (value CodeVersion) String() string {
+	switch value {
+	case CodeVersionDefault:
+		return "Default"
+	case CodeVersionV1:
+		return "V1"
+	default:
+		return ""
+	}
+}
+
+type RestoreOnAction ag_binary.BorshEnum
+
+const (
+	RestoreOnActionNone RestoreOnAction = iota
+	RestoreOnActionUpgrade
+	RestoreOnActionRollback
+)
+
+func (value RestoreOnAction) String() string {
+	switch value {
+	case RestoreOnActionNone:
+		return "None"
+	case RestoreOnActionUpgrade:
+		return "Upgrade"
+	case RestoreOnActionRollback:
+		return "Rollback"
+	default:
+		return ""
+	}
+}

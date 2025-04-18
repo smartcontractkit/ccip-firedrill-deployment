@@ -943,6 +943,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "firedrill_feequoter"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "shared",
+ "solana-program",
+]
+
+[[package]]
 name = "firedrill_offramp"
 version = "0.1.0"
 dependencies = [

@@ -12,24 +12,40 @@ use crate::event::*;
 mod context;
 use crate::context::*;
 
-declare_id!("Dri11Lt8FrFCp1FCGcNmt6S2qubGNrxQNHBa5ETNNrjx");
+declare_id!("5UqQWaHG68xxSy2Mf2ywLhUwzNBd4fmEXsDDLng1v9ry");
 
 #[program]
 pub mod firedrill_offramp {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, chain_selector: u64, token: Pubkey, compound: Pubkey) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, chain_selector: u64, token: Pubkey, fee_quoter: Pubkey, compound: Pubkey) -> Result<()> {
         let offramp = &mut ctx.accounts.offramp;
         offramp.owner = ctx.accounts.authority.key();
         offramp.chain_selector = chain_selector;
         offramp.token = token;
+        offramp.fee_quoter = fee_quoter;
         offramp.compound = compound;
+
+        let source_chain = &mut ctx.accounts.source_chain;
+        source_chain.set_inner(
+            SourceChain {
+                version: 1,
+                chain_selector,
+                state: SourceChainState{ min_seq_nr: 1 },
+                config: SourceChainConfig{
+                    is_enabled: true,
+                    is_rmn_verification_disabled: false,
+                    lane_code_version: CodeVersion::V1,
+                    on_ramp: OnRampAddress::from(compound.to_bytes()),
+                },
+            }
+        );
 
         let mut reference_addresses = ctx.accounts.reference_addresses.load_init()?;
         *reference_addresses = ReferenceAddresses {
             version: 1,
             router: compound,
-            fee_quoter: compound,
+            fee_quoter,
             rmn_remote: compound,
             offramp_lookup_table: compound,
         };
@@ -61,21 +77,6 @@ pub mod firedrill_offramp {
             Ocr3Config::new(OcrPluginType::Commit),
             Ocr3Config::new(OcrPluginType::Execution),
         ];
-
-        let source_chain = &mut ctx.accounts.source_chain;
-        source_chain.set_inner(
-            SourceChain {
-                version: 1,
-                chain_selector: svm_chain_selector,
-                state: SourceChainState{ min_seq_nr: 1 },
-                config: SourceChainConfig{
-                    is_enabled: true,
-                    is_rmn_verification_disabled: false,
-                    lane_code_version: CodeVersion::V1,
-                    on_ramp: OnRampAddress::from(Pubkey::default().to_bytes()),
-                },
-            }
-        );
 
         emit!(ConfigSet {
             svm_chain_selector,
@@ -148,11 +149,22 @@ pub struct FiredrillOffRamp {
     pub owner: Pubkey,
     pub chain_selector: u64,
     pub token: Pubkey,
+    pub fee_quoter: Pubkey,
     pub compound: Pubkey,
 }
 
 #[derive(Accounts)]
+#[instruction(svm_chain_selector: u64)]
 pub struct Initialize<'info> {
+    #[account(
+        init,
+        seeds = [seed::SOURCE_CHAIN, svm_chain_selector.to_le_bytes().as_ref()],
+        bump,
+        payer = authority,
+        space = ANCHOR_DISCRIMINATOR + SourceChain::INIT_SPACE,
+    )]
+    pub source_chain: Account<'info, SourceChain>,
+
     #[account(
         init,
         seeds = [seed::REFERENCE_ADDRESSES],
@@ -162,7 +174,7 @@ pub struct Initialize<'info> {
     )]
     pub reference_addresses: AccountLoader<'info, ReferenceAddresses>,
 
-    #[account(init, seeds = [seed::OFFRAMP], bump, payer = authority, space = 8 + 32 + 8 + 32 + 32)]
+    #[account(init, seeds = [seed::OFFRAMP], bump, payer = authority, space = 8 + 32 + 8 + 32 + 32 + 32)]
     pub offramp: Account<'info, FiredrillOffRamp>,
 
     #[account(mut)]

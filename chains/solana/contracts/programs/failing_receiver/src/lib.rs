@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("Dri11e51CFemqdySVVhmJbRzKeyVBJjch49RF2zH6Nt6");
+declare_id!("GG8nuxEhBqkxoQU9AF4jg39GYufEyzMabJbbDoLkeYwL");
 
 #[program]
 pub mod failing_receiver {
