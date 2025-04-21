@@ -10,6 +10,9 @@ import (
 	"github.com/smartcontractkit/chainlink/deployment"
 	"github.com/smartcontractkit/chainlink/deployment/environment/memory"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
+
+	evm_deployment "github.com/smartcontractkit/ccip-firedrill-deployment/deployment/evm"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
 func TestCCIPViewFiredrill(t *testing.T) {
@@ -19,8 +22,10 @@ func TestCCIPViewFiredrill(t *testing.T) {
 		memory.Memory,
 		lggr,
 		deployment.NewMemoryAddressBook(),
+		nil,
 		chains,
 		map[uint64]deployment.SolChain{},
+		map[uint64]deployment.AptosChain{},
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
@@ -30,7 +35,7 @@ func TestCCIPViewFiredrill(t *testing.T) {
 	require.Len(t, chainSels, 3)
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
-	changeset, err := DeployFiredrillContracts(env, FiredrillConfig{
+	changeset, err := evm_deployment.DeployFiredrillContracts(env, shared.FiredrillConfig{
 		Version:             deployment.Version1_5_0,
 		ChainSelector:       chainSel,
 		SourceChainSelector: sourceChainSel,

@@ -1,4 +1,4 @@
-package deployment
+package evm
 
 import (
 	"context"
@@ -18,6 +18,7 @@ import (
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_off_ramp"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
 func TestDeployFiredrillContracts(t *testing.T) {
@@ -27,8 +28,10 @@ func TestDeployFiredrillContracts(t *testing.T) {
 		memory.Memory,
 		lggr,
 		deployment.NewMemoryAddressBook(),
+		nil,
 		chains,
 		map[uint64]deployment.SolChain{},
+		map[uint64]deployment.AptosChain{},
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
@@ -38,7 +41,7 @@ func TestDeployFiredrillContracts(t *testing.T) {
 	require.Len(t, chainSels, 2)
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
-	firedrillChangeset, err := DeployFiredrillContracts(env, FiredrillConfig{
+	firedrillChangeset, err := DeployFiredrillContracts(env, shared.FiredrillConfig{
 		Version:             deployment.Version1_5_0,
 		ChainSelector:       chainSel,
 		SourceChainSelector: sourceChainSel,
@@ -51,7 +54,7 @@ func TestDeployFiredrillContracts(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, chainAddr, 1)
 	typeAndVersionList := slices.Collect(maps.Values(chainAddr))
-	assert.Contains(t, typeAndVersionList, deployment.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_5_0))
+	assert.Contains(t, typeAndVersionList, deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_5_0))
 }
 
 func TestRegisterFiredrill(t *testing.T) {
@@ -61,8 +64,10 @@ func TestRegisterFiredrill(t *testing.T) {
 		memory.Memory,
 		lggr,
 		deployment.NewMemoryAddressBook(),
+		nil,
 		chains,
 		map[uint64]deployment.SolChain{},
+		map[uint64]deployment.AptosChain{},
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
@@ -72,7 +77,7 @@ func TestRegisterFiredrill(t *testing.T) {
 	require.Len(t, chainSels, 2)
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
-	firedrillChangeset, err := DeployFiredrillContracts(env, FiredrillConfig{
+	firedrillChangeset, err := DeployFiredrillContracts(env, shared.FiredrillConfig{
 		Version:             deployment.Version1_5_0,
 		ChainSelector:       chainSel,
 		SourceChainSelector: sourceChainSel,
@@ -80,7 +85,7 @@ func TestRegisterFiredrill(t *testing.T) {
 	require.NoError(t, err)
 	err = env.ExistingAddresses.Merge(firedrillChangeset.AddressBook)
 	require.NoError(t, err)
-	firedrillEntrypointAddr, err := deployment.SearchAddressBook(firedrillChangeset.AddressBook, chainSel, FiredrillEntrypointType)
+	firedrillEntrypointAddr, err := deployment.SearchAddressBook(firedrillChangeset.AddressBook, chainSel, shared.FiredrillEntrypointType)
 	require.NoError(t, err)
 	firedrillEntrypoint, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(common.HexToAddress(firedrillEntrypointAddr), env.Chains[chainSel].Client)
 	require.NoError(t, err)

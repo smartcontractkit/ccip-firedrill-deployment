@@ -1,4 +1,4 @@
-package deployment
+package evm
 
 import (
 	"errors"
@@ -12,9 +12,8 @@ import (
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
-
-const FiredrillEntrypointType deployment.ContractType = "FiredrillEntrypoint"
 
 type FiredrillEntrypoint interface {
 	Owner(opts *bind.CallOpts) (common.Address, error)
@@ -26,17 +25,11 @@ type FiredrillEntrypoint interface {
 	Compound(opts *bind.CallOpts) (common.Address, error)
 }
 
-var _ deployment.ChangeSetV2[FiredrillConfig] = FiredrillDeployRegisterChangeSet{}
-
-type FiredrillConfig struct {
-	Version             semver.Version
-	ChainSelector       uint64
-	SourceChainSelector uint64
-}
+var _ deployment.ChangeSetV2[shared.FiredrillConfig] = FiredrillDeployRegisterChangeSet{}
 
 type FiredrillDeployRegisterChangeSet struct{}
 
-func (c FiredrillDeployRegisterChangeSet) Apply(e deployment.Environment, config FiredrillConfig) (deployment.ChangesetOutput, error) {
+func (c FiredrillDeployRegisterChangeSet) Apply(e deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
 	changesetOutput, err := DeployFiredrillContracts(e, config)
 	if err != nil {
 		return deployment.ChangesetOutput{}, err
@@ -52,7 +45,7 @@ func (c FiredrillDeployRegisterChangeSet) Apply(e deployment.Environment, config
 	return changesetOutput, nil
 }
 
-func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Environment, config FiredrillConfig) error {
+func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Environment, config shared.FiredrillConfig) error {
 	if (config.Version == semver.Version{}) {
 		return errors.New("missing Version")
 	}
@@ -73,7 +66,7 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 	return nil
 }
 
-func DeployFiredrillContracts(e deployment.Environment, config FiredrillConfig) (deployment.ChangesetOutput, error) {
+func DeployFiredrillContracts(e deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
 	ab := deployment.NewMemoryAddressBook()
 	switch config.Version {
 	case deployment.Version1_5_0:
@@ -100,7 +93,7 @@ func deployFiredrillEntrypointV1_5(chain deployment.Chain) deployment.ContractDe
 		Address:  address,
 		Contract: inst,
 		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_5_0),
+		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_5_0),
 		Err:      err,
 	}
 }
@@ -111,13 +104,13 @@ func deployFiredrillEntrypoint(chain deployment.Chain) deployment.ContractDeploy
 		Address:  address,
 		Contract: inst,
 		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(FiredrillEntrypointType, deployment.Version1_6_0),
+		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_6_0),
 		Err:      err,
 	}
 }
 
 func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.AddressBook, chain deployment.Chain) error {
-	firedrillEntrypointAddr, err := deployment.SearchAddressBook(addressBook, chain.Selector, FiredrillEntrypointType)
+	firedrillEntrypointAddr, err := deployment.SearchAddressBook(addressBook, chain.Selector, shared.FiredrillEntrypointType)
 	if err != nil {
 		return err
 	}
