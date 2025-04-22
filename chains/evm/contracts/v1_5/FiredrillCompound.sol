@@ -151,6 +151,6 @@ contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
     }
 
     function typeAndVersion() external pure returns (string memory) {
-        return "Router 1.2.0";
+        return "Router PriceRegistry 1.2.0";
     }
 }
