@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.24;
 
-import {HasStatus} from "../common/HasStatus.sol";
 import {FiredrillToken} from "../v1_0/FiredrillToken.sol";
-import {FiredrillEntrypoint} from "./FiredrillEntrypoint.sol";
+import {FiredrillCompound} from "./FiredrillCompound.sol";
 import {Ownable2Step} from "@openzeppelin/access/Ownable2Step.sol";
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {EnumerableSet} from "@openzeppelin/utils/structs/EnumerableSet.sol";
 
-contract FiredrillOnRamp is Ownable2Step, HasStatus {
+contract FiredrillOnRamp is Ownable2Step {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     event CCIPMessageSent(uint64 indexed destChainSelector, uint64 indexed sequenceNumber, EVM2AnyRampMessage message);
@@ -79,42 +78,38 @@ contract FiredrillOnRamp is Ownable2Step, HasStatus {
         EVM2AnyTokenTransfer[] tokenAmounts; // array of tokens and amounts to transfer.
     }
 
-    FiredrillEntrypoint private immutable i_ctrl;
+    FiredrillCompound private immutable i_ctrl;
 
-    constructor(FiredrillEntrypoint ctrl) Ownable(msg.sender) {
+    constructor(FiredrillCompound ctrl) Ownable(msg.sender) {
         i_ctrl = ctrl;
-    }
-
-    function isActive() public view returns (bool) {
-        return i_ctrl.isActive();
     }
 
     function getStaticConfig() external view returns (StaticConfig memory) {
         return StaticConfig({
             chainSelector: i_ctrl.chainSelector(),
-            rmnRemote: address(i_ctrl.compound()),
-            nonceManager: address(i_ctrl.compound()),
-            tokenAdminRegistry: address(i_ctrl.compound())
+            rmnRemote: address(i_ctrl),
+            nonceManager: address(i_ctrl),
+            tokenAdminRegistry: address(i_ctrl)
         });
     }
 
     function getDynamicConfig() external view returns (DynamicConfig memory) {
         return DynamicConfig({
-            feeQuoter: address(i_ctrl.compound()),
+            feeQuoter: address(i_ctrl),
             reentrancyGuardEntered: false,
             messageInterceptor: address(0),
-            feeAggregator: address(i_ctrl.compound()),
+            feeAggregator: address(i_ctrl),
             allowlistAdmin: address(0)
         });
     }
 
-    function getDestChainConfig(uint64 destChainSelector) external view returns (uint64 sequenceNumber, bool allowlistEnabled, address router) {
-        return (0, false, address(i_ctrl.compound()));
+    function getDestChainConfig(uint64) external view returns (uint64 sequenceNumber, bool allowlistEnabled, address router) {
+        return (0, false, address(i_ctrl));
     }
 
     function emitCCIPMessageSent(address sender, uint64 index) external {
         require(msg.sender == address(i_ctrl), "only control");
-        EVM2AnyRampMessage memory msg = EVM2AnyRampMessage({
+        EVM2AnyRampMessage memory message = EVM2AnyRampMessage({
             header: RampMessageHeader({
                 messageId: keccak256(abi.encodePacked(sender, index)),
                 sourceChainSelector: i_ctrl.chainSelector(),
@@ -131,7 +126,7 @@ contract FiredrillOnRamp is Ownable2Step, HasStatus {
             feeValueJuels: 0,
             tokenAmounts: new EVM2AnyTokenTransfer[](0)
         });
-        emit CCIPMessageSent(i_ctrl.chainSelector(), index, msg);
+        emit CCIPMessageSent(i_ctrl.chainSelector(), index, message);
     }
 
     function typeAndVersion() external pure returns (string memory) {

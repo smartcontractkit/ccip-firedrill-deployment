@@ -14,7 +14,6 @@ type FiredrillEntrypoint struct {
 	Token         ag_solanago.PublicKey
 	OffRamp       ag_solanago.PublicKey
 	FeeQuoter     ag_solanago.PublicKey
-	Compound      ag_solanago.PublicKey
 	Receiver      ag_solanago.PublicKey
 	SendLast      uint8
 }
@@ -49,11 +48,6 @@ func (obj FiredrillEntrypoint) MarshalWithEncoder(encoder *ag_binary.Encoder) (e
 	}
 	// Serialize `FeeQuoter` param:
 	err = encoder.Encode(obj.FeeQuoter)
-	if err != nil {
-		return err
-	}
-	// Serialize `Compound` param:
-	err = encoder.Encode(obj.Compound)
 	if err != nil {
 		return err
 	}
@@ -109,11 +103,6 @@ func (obj *FiredrillEntrypoint) UnmarshalWithDecoder(decoder *ag_binary.Decoder)
 	if err != nil {
 		return err
 	}
-	// Deserialize `Compound`:
-	err = decoder.Decode(&obj.Compound)
-	if err != nil {
-		return err
-	}
 	// Deserialize `Receiver`:
 	err = decoder.Decode(&obj.Receiver)
 	if err != nil {
@@ -121,6 +110,211 @@ func (obj *FiredrillEntrypoint) UnmarshalWithDecoder(decoder *ag_binary.Decoder)
 	}
 	// Deserialize `SendLast`:
 	err = decoder.Decode(&obj.SendLast)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type DestChain struct {
+	Version       uint8
+	ChainSelector uint64
+	State         DestChainState
+	Config        DestChainConfig
+}
+
+var DestChainDiscriminator = [8]byte{77, 18, 241, 132, 212, 54, 218, 16}
+
+func (obj DestChain) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Write account discriminator:
+	err = encoder.WriteBytes(DestChainDiscriminator[:], false)
+	if err != nil {
+		return err
+	}
+	// Serialize `Version` param:
+	err = encoder.Encode(obj.Version)
+	if err != nil {
+		return err
+	}
+	// Serialize `ChainSelector` param:
+	err = encoder.Encode(obj.ChainSelector)
+	if err != nil {
+		return err
+	}
+	// Serialize `State` param:
+	err = encoder.Encode(obj.State)
+	if err != nil {
+		return err
+	}
+	// Serialize `Config` param:
+	err = encoder.Encode(obj.Config)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *DestChain) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Read and check account discriminator:
+	{
+		discriminator, err := decoder.ReadTypeID()
+		if err != nil {
+			return err
+		}
+		if !discriminator.Equal(DestChainDiscriminator[:]) {
+			return fmt.Errorf(
+				"wrong discriminator: wanted %s, got %s",
+				"[77 18 241 132 212 54 218 16]",
+				fmt.Sprint(discriminator[:]))
+		}
+	}
+	// Deserialize `Version`:
+	err = decoder.Decode(&obj.Version)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ChainSelector`:
+	err = decoder.Decode(&obj.ChainSelector)
+	if err != nil {
+		return err
+	}
+	// Deserialize `State`:
+	err = decoder.Decode(&obj.State)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Config`:
+	err = decoder.Decode(&obj.Config)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type Config struct {
+	Version            uint8
+	DefaultCodeVersion CodeVersion
+	SvmChainSelector   uint64
+	Owner              ag_solanago.PublicKey
+	ProposedOwner      ag_solanago.PublicKey
+	FeeQuoter          ag_solanago.PublicKey
+	RmnRemote          ag_solanago.PublicKey
+	LinkTokenMint      ag_solanago.PublicKey
+	FeeAggregator      ag_solanago.PublicKey
+}
+
+var ConfigDiscriminator = [8]byte{155, 12, 170, 224, 30, 250, 204, 130}
+
+func (obj Config) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Write account discriminator:
+	err = encoder.WriteBytes(ConfigDiscriminator[:], false)
+	if err != nil {
+		return err
+	}
+	// Serialize `Version` param:
+	err = encoder.Encode(obj.Version)
+	if err != nil {
+		return err
+	}
+	// Serialize `DefaultCodeVersion` param:
+	err = encoder.Encode(obj.DefaultCodeVersion)
+	if err != nil {
+		return err
+	}
+	// Serialize `SvmChainSelector` param:
+	err = encoder.Encode(obj.SvmChainSelector)
+	if err != nil {
+		return err
+	}
+	// Serialize `Owner` param:
+	err = encoder.Encode(obj.Owner)
+	if err != nil {
+		return err
+	}
+	// Serialize `ProposedOwner` param:
+	err = encoder.Encode(obj.ProposedOwner)
+	if err != nil {
+		return err
+	}
+	// Serialize `FeeQuoter` param:
+	err = encoder.Encode(obj.FeeQuoter)
+	if err != nil {
+		return err
+	}
+	// Serialize `RmnRemote` param:
+	err = encoder.Encode(obj.RmnRemote)
+	if err != nil {
+		return err
+	}
+	// Serialize `LinkTokenMint` param:
+	err = encoder.Encode(obj.LinkTokenMint)
+	if err != nil {
+		return err
+	}
+	// Serialize `FeeAggregator` param:
+	err = encoder.Encode(obj.FeeAggregator)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *Config) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Read and check account discriminator:
+	{
+		discriminator, err := decoder.ReadTypeID()
+		if err != nil {
+			return err
+		}
+		if !discriminator.Equal(ConfigDiscriminator[:]) {
+			return fmt.Errorf(
+				"wrong discriminator: wanted %s, got %s",
+				"[155 12 170 224 30 250 204 130]",
+				fmt.Sprint(discriminator[:]))
+		}
+	}
+	// Deserialize `Version`:
+	err = decoder.Decode(&obj.Version)
+	if err != nil {
+		return err
+	}
+	// Deserialize `DefaultCodeVersion`:
+	err = decoder.Decode(&obj.DefaultCodeVersion)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SvmChainSelector`:
+	err = decoder.Decode(&obj.SvmChainSelector)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Owner`:
+	err = decoder.Decode(&obj.Owner)
+	if err != nil {
+		return err
+	}
+	// Deserialize `ProposedOwner`:
+	err = decoder.Decode(&obj.ProposedOwner)
+	if err != nil {
+		return err
+	}
+	// Deserialize `FeeQuoter`:
+	err = decoder.Decode(&obj.FeeQuoter)
+	if err != nil {
+		return err
+	}
+	// Deserialize `RmnRemote`:
+	err = decoder.Decode(&obj.RmnRemote)
+	if err != nil {
+		return err
+	}
+	// Deserialize `LinkTokenMint`:
+	err = decoder.Decode(&obj.LinkTokenMint)
+	if err != nil {
+		return err
+	}
+	// Deserialize `FeeAggregator`:
+	err = decoder.Decode(&obj.FeeAggregator)
 	if err != nil {
 		return err
 	}

@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.24;
 
-import {HasStatus} from "../common/HasStatus.sol";
+import {Ownable} from "@openzeppelin/access/Ownable.sol";
+import {Ownable2Step} from "@openzeppelin/access/Ownable2Step.sol";
+import {ITypeAndVersion} from "@chainlink/shared/interfaces/ITypeAndVersion.sol";
 import {FiredrillToken} from "../v1_0/FiredrillToken.sol";
 import {FiredrillRevertMessageReceiver} from "../v1_0/FiredrillRevertMessageReceiver.sol";
 import {FiredrillOnRamp} from "./FiredrillOnRamp.sol";
 import {FiredrillOffRamp} from "./FiredrillOffRamp.sol";
-import {FiredrillEntrypoint} from "./FiredrillEntrypoint.sol";
-import {Ownable2Step} from "@openzeppelin/access/Ownable2Step.sol";
-import {Ownable} from "@openzeppelin/access/Ownable.sol";
-import {ITypeAndVersion} from "@chainlink/shared/interfaces/ITypeAndVersion.sol";
 
-contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
+abstract contract FiredrillCompound is Ownable2Step, ITypeAndVersion {
     event UsdPerTokenUpdated(address indexed token, uint256 value, uint256 timestamp);
 
     struct OffRamp {
@@ -26,19 +24,23 @@ contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
         uint32 tokenPriceStalenessThreshold;
     }
 
-    FiredrillEntrypoint private immutable i_ctrl;
+    uint64 internal immutable i_chainSelector;
+    FiredrillToken internal immutable i_token;
+    FiredrillOnRamp internal immutable i_onRamp;
+    FiredrillOffRamp internal immutable i_offRamp;
+    FiredrillRevertMessageReceiver internal immutable i_receiver;
 
-    constructor(FiredrillEntrypoint ctrl) Ownable(msg.sender) {
-        i_ctrl = ctrl;
-    }
-
-    function isActive() public view returns (bool) {
-        return i_ctrl.isActive();
+    constructor(uint64 chainSelector_) Ownable(msg.sender) {
+        i_chainSelector = chainSelector_;
+        i_token = new FiredrillToken();
+        i_onRamp = new FiredrillOnRamp(this);
+        i_offRamp = new FiredrillOffRamp(this);
+        i_receiver = new FiredrillRevertMessageReceiver();
     }
 
     function emitUsdPerTokenUpdated() public {
         emit UsdPerTokenUpdated({
-            token: i_ctrl.token(),
+            token: address(i_token),
             value: 1,
             timestamp: block.timestamp
         });
@@ -46,14 +48,14 @@ contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
 
     // ========== Router ==========
     function getOnRamp(uint64) external view returns (address) {
-        return address(i_ctrl.onRamp());
+        return address(i_onRamp);
     }
 
     function getOffRamps() external view returns (OffRamp[] memory) {
         OffRamp[] memory offRamps = new OffRamp[](1);
         offRamps[0] = OffRamp({
-            sourceChainSelector: i_ctrl.chainSelector(),
-            offRamp: address(i_ctrl.offRamp())
+            sourceChainSelector: i_chainSelector,
+            offRamp: address(i_offRamp)
         });
         return offRamps;
     }
@@ -63,7 +65,7 @@ contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
     function getStaticConfig() external view returns (StaticConfig memory) {
         return StaticConfig({
             maxFeeJuelsPerMsg: 1,
-            linkToken: i_ctrl.token(),
+            linkToken: address(i_token),
             tokenPriceStalenessThreshold: 0
         });
     }
@@ -71,11 +73,27 @@ contract FiredrillCompound is Ownable2Step, HasStatus, ITypeAndVersion {
 
     // ========== ARMProxy ==========
     function getARM() public view returns (address) {
-        return i_ctrl.compound();
+        return address(this);
     }
     // ==================================
 
-    function typeAndVersion() external pure returns (string memory) {
-        return "Router 1.2.0 FeeQuoter 1.6.0";
+    function chainSelector() public view returns (uint64) {
+        return i_chainSelector;
+    }
+
+    function token() public view returns (address) {
+        return address(i_token);
+    }
+
+    function onRamp() public view returns (address) {
+        return address(i_onRamp);
+    }
+
+    function offRamp() public view returns (address) {
+        return address(i_offRamp);
+    }
+
+    function receiver() public view returns (address) {
+        return address(i_receiver);
     }
 }

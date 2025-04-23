@@ -7,7 +7,6 @@ skip-lint = false
 
 [programs.devnet]
 failing_receiver = "Dri11EwVRViqqkjs7SWV3d3ejcanBGMNrcGhD6HVn756"
-firedrill_compound = "Dri11NnBPbx85w8a47ZXBZa3Hi7E2xvHAA9Xpyk7UivQ"
 firedrill_entrypoint = "Dri11c6TXJXELaZUgQtyw3doxbn7bGXQ6z5LRZ8bMPbc"
 firedrill_feequoter = "3d1KhA6K2L6pbzpuhYGHTcsj1B4f3r86wJRE81brYTQW"
 firedrill_offramp = "Dri11kiWR5f1oTn5NLm3wmfaDq3cYauR92wrsTxNaudt"
