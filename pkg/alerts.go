@@ -8,6 +8,7 @@ import (
 	chainsel "github.com/smartcontractkit/chain-selectors"
 
 	firedrill "github.com/smartcontractkit/ccip-firedrill-deployment/deployment"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	"github.com/smartcontractkit/chainlink/deployment"
@@ -56,12 +57,16 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.ChainDetails, vers
 			ChainName:     chainsel.ETHEREUM_MAINNET.Name,
 		}
 	}
-	firedrillChainView, ok := ccipFiredrillView.Chains[destChain.ChainName]
-	if !ok {
+	var entrypoints map[string]shared.FiredrillEntrypointView
+	if firedrillChainView, ok := ccipFiredrillView.Chains[destChain.ChainName]; ok {
+		entrypoints = firedrillChainView.FiredrillEntrypoint
+	} else if firedrillChainView, ok := ccipFiredrillView.SolChains[destChain.ChainName]; ok {
+		entrypoints = firedrillChainView.FiredrillEntrypoint
+	} else {
 		return GlobalInput{}, fmt.Errorf("no firedrills known for chain %s", destChain.ChainName)
 	}
 	var network GlobalInputNetwork
-	for _, entrypointView := range firedrillChainView.FiredrillEntrypoint {
+	for _, entrypointView := range entrypoints {
 		entrypointVersion := deployment.MustTypeAndVersionFromString(entrypointView.TypeAndVersion)
 		if entrypointVersion.Version.String() != version {
 			continue
@@ -146,20 +151,38 @@ func lookupCCIPv1_5(ccipView view.CCIPView, srcChain chainsel.ChainDetails, dest
 
 func lookupCCIPv1_6(ccipView view.CCIPView, srcChain chainsel.ChainDetails, destChain chainsel.ChainDetails) GlobalInputContracts {
 	contracts := GlobalInputContracts{}
-	destChainView := ccipView.Chains[destChain.ChainName]
-	for _, offRampView := range destChainView.OffRamp {
-		sourceChainConfig, ok := offRampView.SourceChainConfigs[srcChain.ChainSelector]
-		if !ok || sourceChainConfig.Router == (common.Address{}) {
-			continue
+	if chainView, ok := ccipView.Chains[destChain.ChainName]; ok {
+		for _, offRampView := range chainView.OffRamp {
+			sourceChainConfig, ok := offRampView.SourceChainConfigs[srcChain.ChainSelector]
+			if !ok || sourceChainConfig.Router == (common.Address{}) {
+				continue
+			}
+			contracts.OffRamps = append(
+				contracts.OffRamps,
+				GlobalInputContract{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.ChainName},
+			)
+			// There shouldn't be several matching offramps
+			return GlobalInputContracts{
+				Routers:  []GlobalInputContract{{Address: strings.ToLower(sourceChainConfig.Router.Hex()), Network: destChain.ChainName}},
+				OffRamps: []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.ChainName}},
+			}
 		}
-		contracts.OffRamps = append(
-			contracts.OffRamps,
-			GlobalInputContract{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.ChainName},
-		)
-		// There shouldn't be several matching offramps
-		return GlobalInputContracts{
-			Routers:  []GlobalInputContract{{Address: strings.ToLower(sourceChainConfig.Router.Hex()), Network: destChain.ChainName}},
-			OffRamps: []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.ChainName}},
+	}
+	if chainView, ok := ccipView.SolChains[destChain.ChainName]; ok {
+		for offRampAddress, offRampView := range chainView.OffRamp {
+			sourceChainConfig, ok := offRampView.SourceChains[srcChain.ChainSelector]
+			if !ok || !sourceChainConfig.IsEnabled {
+				continue
+			}
+			contracts.OffRamps = append(
+				contracts.OffRamps,
+				GlobalInputContract{Address: offRampAddress, Network: destChain.ChainName},
+			)
+			// There shouldn't be several matching offramps
+			return GlobalInputContracts{
+				Routers:  []GlobalInputContract{{Address: sourceChainConfig.OnRamp, Network: destChain.ChainName}},
+				OffRamps: []GlobalInputContract{{Address: offRampAddress, Network: destChain.ChainName}},
+			}
 		}
 	}
 	return GlobalInputContracts{}
