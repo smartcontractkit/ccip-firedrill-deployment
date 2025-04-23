@@ -5,19 +5,6 @@ import (
 	"github.com/smartcontractkit/chainlink-ccip/chains/solana/utils/common"
 )
 
-func FindFiredrillCompoundPDA(firedrillCompoundProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
-	return solana.FindProgramAddress([][]byte{[]byte("compound")}, firedrillCompoundProgram)
-}
-
-func FindFiredrillCompoundConfigPDA(firedrillCompoundProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
-	return solana.FindProgramAddress([][]byte{[]byte("config")}, firedrillCompoundProgram)
-}
-
-func FindFiredrillCompoundDestChainPDA(firedrillCompoundProgram solana.PublicKey, chainSelector uint64) (solana.PublicKey, uint8, error) {
-	chainSelectorLE := common.Uint64ToLE(chainSelector)
-	return solana.FindProgramAddress([][]byte{[]byte("dest_chain_state"), chainSelectorLE}, firedrillCompoundProgram)
-}
-
 func FindFiredrillOfframpPDA(firedrillOfframpProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
 	return solana.FindProgramAddress([][]byte{[]byte("offramp")}, firedrillOfframpProgram)
 }
@@ -50,6 +37,15 @@ func FindFiredrillFeeQuoterDestChainPDA(firedrillFeeQuoterProgram solana.PublicK
 
 func FindFiredrillEntrypointPDA(firedrillEntrypointProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
 	return solana.FindProgramAddress([][]byte{[]byte("entrypoint")}, firedrillEntrypointProgram)
+}
+
+func FindFiredrillEntrypointConfigPDA(firedrillEntrypointProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
+	return solana.FindProgramAddress([][]byte{[]byte("config")}, firedrillEntrypointProgram)
+}
+
+func FindFiredrillEntrypointDestChainPDA(firedrillEntrypointProgram solana.PublicKey, chainSelector uint64) (solana.PublicKey, uint8, error) {
+	chainSelectorLE := common.Uint64ToLE(chainSelector)
+	return solana.FindProgramAddress([][]byte{[]byte("dest_chain_state"), chainSelectorLE}, firedrillEntrypointProgram)
 }
 
 func FindFiredrillTokenPDA(firedrillTokenProgram solana.PublicKey) (solana.PublicKey, uint8, error) {

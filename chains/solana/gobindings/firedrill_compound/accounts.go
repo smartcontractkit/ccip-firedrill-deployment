@@ -13,6 +13,9 @@ type FiredrillCompound struct {
 	Owner         ag_solanago.PublicKey
 	FeeQuoter     ag_solanago.PublicKey
 	Token         ag_solanago.PublicKey
+	OffRamp       ag_solanago.PublicKey
+	Receiver      ag_solanago.PublicKey
+	SendLast      uint8
 }
 
 var FiredrillCompoundDiscriminator = [8]byte{254, 217, 204, 248, 103, 242, 213, 162}
@@ -40,6 +43,21 @@ func (obj FiredrillCompound) MarshalWithEncoder(encoder *ag_binary.Encoder) (err
 	}
 	// Serialize `Token` param:
 	err = encoder.Encode(obj.Token)
+	if err != nil {
+		return err
+	}
+	// Serialize `OffRamp` param:
+	err = encoder.Encode(obj.OffRamp)
+	if err != nil {
+		return err
+	}
+	// Serialize `Receiver` param:
+	err = encoder.Encode(obj.Receiver)
+	if err != nil {
+		return err
+	}
+	// Serialize `SendLast` param:
+	err = encoder.Encode(obj.SendLast)
 	if err != nil {
 		return err
 	}
@@ -77,6 +95,21 @@ func (obj *FiredrillCompound) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (
 	}
 	// Deserialize `Token`:
 	err = decoder.Decode(&obj.Token)
+	if err != nil {
+		return err
+	}
+	// Deserialize `OffRamp`:
+	err = decoder.Decode(&obj.OffRamp)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Receiver`:
+	err = decoder.Decode(&obj.Receiver)
+	if err != nil {
+		return err
+	}
+	// Deserialize `SendLast`:
+	err = decoder.Decode(&obj.SendLast)
 	if err != nil {
 		return err
 	}

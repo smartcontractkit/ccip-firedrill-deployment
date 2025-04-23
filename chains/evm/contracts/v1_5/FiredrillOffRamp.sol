@@ -2,13 +2,12 @@
 pragma solidity ^0.8.24;
 
 import {Internal} from "../common/Internal.sol";
-import {HasStatus} from "../common/HasStatus.sol";
-import {FiredrillEntrypoint} from "./FiredrillEntrypoint.sol";
+import {FiredrillCompound} from "./FiredrillCompound.sol";
 import {ITypeAndVersion} from "@chainlink/shared/interfaces/ITypeAndVersion.sol";
 import {Ownable2Step} from "@openzeppelin/access/Ownable2Step.sol";
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 
-contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
+contract FiredrillOffRamp is Ownable2Step, ITypeAndVersion {
     event TokensConsumed(uint256 tokens);
     event ConfigSet(StaticConfig staticConfig, DynamicConfig dynamicConfig);
     event ReportAccepted(CommitReport report);
@@ -59,14 +58,10 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
         bytes32 merkleRoot;
     }
 
-    FiredrillEntrypoint private immutable i_ctrl;
+    FiredrillCompound private immutable i_ctrl;
 
-    constructor(FiredrillEntrypoint ctrl) Ownable(msg.sender) {
+    constructor(FiredrillCompound ctrl) Ownable(msg.sender) {
         i_ctrl = ctrl;
-    }
-
-    function isActive() public view returns (bool) {
-        return i_ctrl.isActive();
     }
 
     function emitConfigSet() public {
@@ -78,15 +73,15 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
                 sourceChainSelector: i_ctrl.chainSelector(),
                 onRamp: i_ctrl.onRamp(),
                 prevOffRamp: address(0),
-                rmnProxy: address(i_ctrl.compound()),
-                tokenAdminRegistry: address(i_ctrl.compound())
+                rmnProxy: address(i_ctrl),
+                tokenAdminRegistry: address(i_ctrl)
             }),
             DynamicConfig({
                 permissionLessExecutionThresholdSeconds: 10,
                 maxDataBytes: 10,
                 maxNumberOfTokensPerMsg: 10,
-                router: address(i_ctrl.compound()),
-                priceRegistry: address(i_ctrl.compound())
+                router: address(i_ctrl),
+                priceRegistry: address(i_ctrl)
             })
         );
     }
@@ -128,8 +123,8 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
             sourceChainSelector: i_ctrl.chainSelector(),
             onRamp: i_ctrl.onRamp(),
             prevOffRamp: address(0),
-            rmnProxy: address(i_ctrl.compound()),
-            tokenAdminRegistry: address(i_ctrl.compound())
+            rmnProxy: address(i_ctrl),
+            tokenAdminRegistry: address(i_ctrl)
         });
     }
 
@@ -138,8 +133,8 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
             permissionLessExecutionThresholdSeconds: 10,
             maxDataBytes: 10,
             maxNumberOfTokensPerMsg: 10,
-            router: address(i_ctrl.compound()),
-            priceRegistry: address(i_ctrl.compound())
+            router: address(i_ctrl),
+            priceRegistry: address(i_ctrl)
         });
     }
 

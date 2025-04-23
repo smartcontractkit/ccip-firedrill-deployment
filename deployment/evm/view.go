@@ -92,10 +92,6 @@ func contractView(contract FiredrillEntrypoint, address common.Address, typeAndV
 	if err != nil {
 		return shared.FiredrillEntrypointView{}, err
 	}
-	compound, err := contract.Compound(nil)
-	if err != nil {
-		return shared.FiredrillEntrypointView{}, err
-	}
 	receiver, err := contract.Receiver(nil)
 	if err != nil {
 		return shared.FiredrillEntrypointView{}, err
@@ -109,7 +105,6 @@ func contractView(contract FiredrillEntrypoint, address common.Address, typeAndV
 		Token:    strings.ToLower(token.String()),
 		OnRamp:   strings.ToLower(onramp.String()),
 		OffRamp:  strings.ToLower(offramp.String()),
-		Compound: strings.ToLower(compound.String()),
 		Receiver: strings.ToLower(receiver.String()),
 	}, nil
 }

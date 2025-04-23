@@ -7,7 +7,7 @@ import (
 	chain_selectors "github.com/smartcontractkit/chain-selectors"
 	"github.com/smartcontractkit/chainlink/deployment"
 
-	firedrill_entrypoint2 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
+	firedrill_entrypoint "github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
@@ -47,7 +47,7 @@ func SolViewFiredrill(e deployment.Environment) (map[string]*SolChainView, error
 				}
 				firedrillEntrypointAddress := solana.MustPublicKeyFromBase58(programID)
 				firedrillEntrypointPDA, _, _ := FindFiredrillEntrypointPDA(firedrillEntrypointAddress)
-				var firedrillEntrypointAccount firedrill_entrypoint2.FiredrillEntrypoint
+				var firedrillEntrypointAccount firedrill_entrypoint.FiredrillEntrypoint
 				err := chain.GetAccountDataBorshInto(e.GetContext(), firedrillEntrypointPDA, &firedrillEntrypointAccount)
 				if err != nil {
 					return nil, fmt.Errorf("firedrillEntrypoint %s not found in existing state chain=%s, not initialized", programID, chain.Name())
@@ -67,7 +67,7 @@ func SolViewFiredrill(e deployment.Environment) (map[string]*SolChainView, error
 	return solChains, nil
 }
 
-func contractView(contract firedrill_entrypoint2.FiredrillEntrypoint, address solana.PublicKey, typeAndVersion string) (shared.FiredrillEntrypointView, error) {
+func contractView(contract firedrill_entrypoint.FiredrillEntrypoint, address solana.PublicKey, typeAndVersion string) (shared.FiredrillEntrypointView, error) {
 	return shared.FiredrillEntrypointView{
 		ContractMetaData: shared.ContractMetaData{
 			TypeAndVersion: typeAndVersion,
@@ -75,10 +75,9 @@ func contractView(contract firedrill_entrypoint2.FiredrillEntrypoint, address so
 			Owner:          contract.Owner.String(),
 		},
 		Token:     contract.Token.String(),
-		OnRamp:    contract.Compound.String(),
+		OnRamp:    address.String(),
 		OffRamp:   contract.OffRamp.String(),
 		FeeQuoter: contract.FeeQuoter.String(),
-		Compound:  contract.Compound.String(),
 		Receiver:  contract.Receiver.String(),
 	}, nil
 }

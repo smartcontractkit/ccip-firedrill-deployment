@@ -15,6 +15,8 @@ type Initialize struct {
 	ChainSelector *uint64
 	FeeQuoter     *ag_solanago.PublicKey
 	Token         *ag_solanago.PublicKey
+	OffRamp       *ag_solanago.PublicKey
+	Receiver      *ag_solanago.PublicKey
 
 	// [0] = [WRITE] compound
 	//
@@ -51,6 +53,18 @@ func (inst *Initialize) SetFeeQuoter(feeQuoter ag_solanago.PublicKey) *Initializ
 // SetToken sets the "token" parameter.
 func (inst *Initialize) SetToken(token ag_solanago.PublicKey) *Initialize {
 	inst.Token = &token
+	return inst
+}
+
+// SetOffRamp sets the "offRamp" parameter.
+func (inst *Initialize) SetOffRamp(offRamp ag_solanago.PublicKey) *Initialize {
+	inst.OffRamp = &offRamp
+	return inst
+}
+
+// SetReceiver sets the "receiver" parameter.
+func (inst *Initialize) SetReceiver(receiver ag_solanago.PublicKey) *Initialize {
+	inst.Receiver = &receiver
 	return inst
 }
 
@@ -138,6 +152,12 @@ func (inst *Initialize) Validate() error {
 		if inst.Token == nil {
 			return errors.New("Token parameter is not set")
 		}
+		if inst.OffRamp == nil {
+			return errors.New("OffRamp parameter is not set")
+		}
+		if inst.Receiver == nil {
+			return errors.New("Receiver parameter is not set")
+		}
 	}
 
 	// Check whether all (required) accounts are set:
@@ -170,10 +190,12 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=3]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Params[len=5]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
 						paramsBranch.Child(ag_format.Param("ChainSelector", *inst.ChainSelector))
 						paramsBranch.Child(ag_format.Param("    FeeQuoter", *inst.FeeQuoter))
 						paramsBranch.Child(ag_format.Param("        Token", *inst.Token))
+						paramsBranch.Child(ag_format.Param("      OffRamp", *inst.OffRamp))
+						paramsBranch.Child(ag_format.Param("     Receiver", *inst.Receiver))
 					})
 
 					// Accounts of the instruction:
@@ -204,6 +226,16 @@ func (obj Initialize) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error)
 	if err != nil {
 		return err
 	}
+	// Serialize `OffRamp` param:
+	err = encoder.Encode(obj.OffRamp)
+	if err != nil {
+		return err
+	}
+	// Serialize `Receiver` param:
+	err = encoder.Encode(obj.Receiver)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func (obj *Initialize) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
@@ -222,6 +254,16 @@ func (obj *Initialize) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err err
 	if err != nil {
 		return err
 	}
+	// Deserialize `OffRamp`:
+	err = decoder.Decode(&obj.OffRamp)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Receiver`:
+	err = decoder.Decode(&obj.Receiver)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -231,6 +273,8 @@ func NewInitializeInstruction(
 	chainSelector uint64,
 	feeQuoter ag_solanago.PublicKey,
 	token ag_solanago.PublicKey,
+	offRamp ag_solanago.PublicKey,
+	receiver ag_solanago.PublicKey,
 	// Accounts:
 	compound ag_solanago.PublicKey,
 	config ag_solanago.PublicKey,
@@ -241,6 +285,8 @@ func NewInitializeInstruction(
 		SetChainSelector(chainSelector).
 		SetFeeQuoter(feeQuoter).
 		SetToken(token).
+		SetOffRamp(offRamp).
+		SetReceiver(receiver).
 		SetCompoundAccount(compound).
 		SetConfigAccount(config).
 		SetDestChainAccount(destChain).
