@@ -4,40 +4,21 @@ import (
 	"fmt"
 
 	solana "github.com/gagliardetto/solana-go"
-	chain_selectors "github.com/smartcontractkit/chain-selectors"
 	"github.com/smartcontractkit/chainlink/deployment"
 
 	firedrill_entrypoint2 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
-type SolChainView struct {
-	ChainSelector       uint64                                    `json:"svmChainSelector,omitempty"`
-	ChainID             string                                    `json:"chainID,omitempty"`
-	FiredrillEntrypoint map[string]shared.FiredrillEntrypointView `json:"firedrillEntrypoint,omitempty"`
-}
-
-func NewSolChainView(chain deployment.SolChain) (*SolChainView, error) {
-	chainID, err := chain_selectors.GetChainIDFromSelector(chain.Selector)
-	if err != nil {
-		return nil, err
-	}
-	return &SolChainView{
-		ChainSelector:       chain.Selector,
-		ChainID:             chainID,
-		FiredrillEntrypoint: make(map[string]shared.FiredrillEntrypointView),
-	}, nil
-}
-
-func SolViewFiredrill(e deployment.Environment) (map[string]*SolChainView, error) {
+func SolViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, error) {
 	ab, err := e.ExistingAddresses.Addresses()
 	if err != nil {
 		return nil, err
 	}
-	solChains := make(map[string]*SolChainView)
+	solChains := make(map[string]*shared.ChainView)
 	for chainSel, addresses := range ab {
 		if chain, ok := e.SolChains[chainSel]; ok {
-			chainView, err := NewSolChainView(chain)
+			chainView, err := shared.NewChainView(chain.Selector)
 			if err != nil {
 				return nil, err
 			}
