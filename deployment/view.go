@@ -6,14 +6,15 @@ import (
 	"github.com/smartcontractkit/chainlink/deployment"
 
 	evm_deployment "github.com/smartcontractkit/ccip-firedrill-deployment/deployment/evm"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 	sol_deployment "github.com/smartcontractkit/ccip-firedrill-deployment/deployment/solana"
 )
 
 var _ deployment.ViewState = CCIPViewFiredrill
 
 type CCIPFiredrillView struct {
-	Chains    map[string]*evm_deployment.ChainView    `json:"chains,omitempty"`
-	SolChains map[string]*sol_deployment.SolChainView `json:"solChains,omitempty"`
+	Chains    map[string]*shared.ChainView `json:"chains,omitempty"`
+	SolChains map[string]*shared.ChainView `json:"solChains,omitempty"`
 }
 
 func (v CCIPFiredrillView) MarshalJSON() ([]byte, error) {

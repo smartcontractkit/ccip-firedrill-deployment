@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
-	chain_selectors "github.com/smartcontractkit/chain-selectors"
 	"github.com/smartcontractkit/chainlink/deployment"
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
@@ -12,33 +11,15 @@ import (
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
-type ChainView struct {
-	ChainSelector       uint64                                    `json:"chainSelector,omitempty"`
-	ChainID             string                                    `json:"chainID,omitempty"`
-	FiredrillEntrypoint map[string]shared.FiredrillEntrypointView `json:"firedrillEntrypoint,omitempty"`
-}
-
-func NewChainView(chain deployment.Chain) (*ChainView, error) {
-	chainID, err := chain_selectors.GetChainIDFromSelector(chain.Selector)
-	if err != nil {
-		return nil, err
-	}
-	return &ChainView{
-		ChainSelector:       chain.Selector,
-		ChainID:             chainID,
-		FiredrillEntrypoint: make(map[string]shared.FiredrillEntrypointView),
-	}, nil
-}
-
-func EVMViewFiredrill(e deployment.Environment) (map[string]*ChainView, error) {
+func EVMViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, error) {
 	ab, err := e.ExistingAddresses.Addresses()
 	if err != nil {
 		return nil, err
 	}
-	chains := make(map[string]*ChainView)
+	chains := make(map[string]*shared.ChainView)
 	for chainSel, addresses := range ab {
 		if chain, ok := e.Chains[chainSel]; ok {
-			chainView, err := NewChainView(chain)
+			chainView, err := shared.NewChainView(chain.Selector)
 			if err != nil {
 				return nil, err
 			}

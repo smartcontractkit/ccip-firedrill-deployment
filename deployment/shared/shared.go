@@ -2,6 +2,7 @@ package shared
 
 import (
 	"github.com/Masterminds/semver/v3"
+	chain_selectors "github.com/smartcontractkit/chain-selectors"
 	"github.com/smartcontractkit/chainlink/deployment"
 )
 
@@ -11,6 +12,24 @@ type FiredrillConfig struct {
 	Version             semver.Version
 	ChainSelector       uint64
 	SourceChainSelector uint64
+}
+
+type ChainView struct {
+	ChainSelector       uint64                             `json:"chainSelector,omitempty"`
+	ChainID             string                             `json:"chainID,omitempty"`
+	FiredrillEntrypoint map[string]FiredrillEntrypointView `json:"firedrillEntrypoint,omitempty"`
+}
+
+func NewChainView(chainSelector uint64) (*ChainView, error) {
+	chainID, err := chain_selectors.GetChainIDFromSelector(chainSelector)
+	if err != nil {
+		return nil, err
+	}
+	return &ChainView{
+		ChainSelector:       chainSelector,
+		ChainID:             chainID,
+		FiredrillEntrypoint: make(map[string]FiredrillEntrypointView),
+	}, nil
 }
 
 type ContractMetaData struct {
