@@ -111,14 +111,14 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.ChainDetails, vers
 	case deployment.Version1_6_0.String():
 		contractsSrc := lookupCCIPv1_6(ccipView, srcChain, destChain)
 		if len(contractsSrc.OffRamps) == 0 {
-			return GlobalInput{}, fmt.Errorf("no off ramps found for %s", srcChain.ChainName)
+			return GlobalInput{}, fmt.Errorf("no off ramps found for %s -> %s", srcChain.ChainName, destChain.ChainName)
 		}
 		network.Contracts.Routers = append(network.Contracts.Routers, contractsSrc.Routers...)
 		network.Contracts.OffRamps = append(network.Contracts.OffRamps, contractsSrc.OffRamps...)
 
 		contractsDest := lookupCCIPv1_6(ccipView, destChain, srcChain)
 		if len(contractsDest.OffRamps) == 0 {
-			return GlobalInput{}, fmt.Errorf("no off ramps found for %s", destChain.ChainName)
+			return GlobalInput{}, fmt.Errorf("no off ramps found for %s <- %s", srcChain.ChainName, destChain.ChainName)
 		}
 		network.Contracts.Routers = append(network.Contracts.Routers, contractsDest.Routers...)
 		network.Contracts.OffRamps = append(network.Contracts.OffRamps, contractsDest.OffRamps...)
@@ -180,7 +180,7 @@ func lookupCCIPv1_6(ccipView view.CCIPView, srcChain chainsel.ChainDetails, dest
 			)
 			// There shouldn't be several matching offramps
 			return GlobalInputContracts{
-				Routers:  []GlobalInputContract{{Address: sourceChainConfig.OnRamp, Network: destChain.ChainName}},
+				Routers:  []GlobalInputContract{{Address: offRampView.ReferenceAddresses.Router, Network: destChain.ChainName}},
 				OffRamps: []GlobalInputContract{{Address: offRampAddress, Network: destChain.ChainName}},
 			}
 		}
