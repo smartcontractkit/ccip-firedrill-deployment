@@ -222,7 +222,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 		env.Logger.Infow("FiredrillOfframp already initialized, skipping initialization", "chain", chain.String())
 	}
 	updateIx, err := firedrill_offramp.NewUpdateOnRampInstruction(
-		firedrillOfframpConfigPDA,
+		firedrillOfframpPDA,
 		firedrillOfframpSourceChainPDA,
 		chain.DeployerKey.PublicKey(),
 	).ValidateAndBuild()

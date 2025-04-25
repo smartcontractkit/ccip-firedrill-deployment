@@ -191,11 +191,22 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct UpdateConfig<'info> {
-  #[account(mut, has_one = owner)]
-  pub offramp: Account<'info, FiredrillOffRamp>,
-  #[account(mut)]
-  pub source_chain: Account<'info, SourceChain>,
-  pub owner: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [seed::OFFRAMP],
+        bump,
+        has_one = owner
+    )]
+    pub offramp: Account<'info, FiredrillOffRamp>,
+
+    #[account(
+        mut,
+        seeds = [seed::SOURCE_CHAIN, offramp.chain_selector.to_le_bytes().as_ref()],
+        bump
+    )]
+    pub source_chain: Account<'info, SourceChain>,
+
+    pub owner: Signer<'info>,
 }
 
 #[derive(Accounts)]
