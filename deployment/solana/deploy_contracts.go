@@ -221,6 +221,17 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	} else {
 		env.Logger.Infow("FiredrillOfframp already initialized, skipping initialization", "chain", chain.String())
 	}
+	updateIx, err := firedrill_offramp.NewUpdateOnRampInstruction(
+		firedrillOfframpConfigPDA,
+		firedrillOfframpSourceChainPDA,
+		chain.DeployerKey.PublicKey(),
+	).ValidateAndBuild()
+	if err != nil {
+		return deployment.ChangesetOutput{}, fmt.Errorf("failed to build update offramp: %w", err)
+	}
+	if err2 := chain.Confirm([]solana.Instruction{updateIx}); err2 != nil {
+		return deployment.ChangesetOutput{}, fmt.Errorf("failed to confirm update offramp: %w", err2)
+	}
 
 	var firedrillFeeQuoterConfigAccount firedrill_feequoter.Config
 	firedrillFeeQuoterPDA, _, _ := FindFiredrillFeeQuoterPDA(firedrillFeeQuoterAddress)

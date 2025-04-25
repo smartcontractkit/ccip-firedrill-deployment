@@ -30,6 +30,8 @@ func init() {
 var (
 	Instruction_Initialize = ag_binary.TypeID([8]byte{175, 175, 109, 31, 13, 152, 155, 237})
 
+	Instruction_UpdateOnRamp = ag_binary.TypeID([8]byte{120, 135, 9, 123, 23, 211, 149, 33})
+
 	// Initializes the CCIP Offramp Config account.
 	//
 	// The initialization of the Offramp is responsibility of Admin, nothing more than calling these
@@ -52,6 +54,8 @@ func InstructionIDToName(id ag_binary.TypeID) string {
 	switch id {
 	case Instruction_Initialize:
 		return "Initialize"
+	case Instruction_UpdateOnRamp:
+		return "UpdateOnRamp"
 	case Instruction_InitializeConfig:
 		return "InitializeConfig"
 	case Instruction_EmitSourceChainAdded:
@@ -80,6 +84,9 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 	[]ag_binary.VariantType{
 		{
 			"initialize", (*Initialize)(nil),
+		},
+		{
+			"update_on_ramp", (*UpdateOnRamp)(nil),
 		},
 		{
 			"initialize_config", (*InitializeConfig)(nil),

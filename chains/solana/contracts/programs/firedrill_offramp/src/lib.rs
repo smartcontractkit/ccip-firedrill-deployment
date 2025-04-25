@@ -36,7 +36,7 @@ pub mod firedrill_offramp {
                     is_enabled: true,
                     is_rmn_verification_disabled: false,
                     lane_code_version: CodeVersion::V1,
-                    on_ramp: OnRampAddress::from(compound.to_bytes()),
+                    on_ramp: OnRampAddress::from(compound.key().to_bytes()),
                 },
             }
         );
@@ -50,6 +50,12 @@ pub mod firedrill_offramp {
             offramp_lookup_table: compound,
         };
         Ok(())
+    }
+
+    pub fn update_on_ramp(ctx: Context<UpdateConfig>) -> Result<()> {
+      let new_on_ramp = OnRampAddress::from(ctx.accounts.offramp.compound.key().to_bytes());
+      ctx.accounts.source_chain.config.on_ramp = new_on_ramp;
+      Ok(())
     }
 
     /// Initializes the CCIP Offramp Config account.
@@ -181,6 +187,15 @@ pub struct Initialize<'info> {
     pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateConfig<'info> {
+  #[account(mut, has_one = owner)]
+  pub offramp: Account<'info, FiredrillOffRamp>,
+  #[account(mut)]
+  pub source_chain: Account<'info, SourceChain>,
+  pub owner: Signer<'info>,
 }
 
 #[derive(Accounts)]
