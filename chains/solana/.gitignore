@@ -1,2 +1,5 @@
 contracts/target
+!contracts/target/deploy/*.so
+!contracts/target/idl
+
 contracts/docker-target
