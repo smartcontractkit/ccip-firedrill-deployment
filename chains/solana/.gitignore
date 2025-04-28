@@ -1,5 +1,6 @@
-contracts/target
-!contracts/target/deploy/*.so
-!contracts/target/idl
-
+contracts/target/debug
+contracts/target/release
+contracts/target/sbf-*
+contracts/target/.rustc_info.json
+contracts/target/deploy/*.json
 contracts/docker-target
