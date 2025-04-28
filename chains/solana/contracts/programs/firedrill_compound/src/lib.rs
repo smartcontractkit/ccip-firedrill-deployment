@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use solana_program::keccak::hash;
 use shared::seed;
 
 pub mod messages;
@@ -58,10 +59,15 @@ pub mod firedrill_compound {
         sender: Pubkey,
         index: u64,
     ) -> Result<()> {
+        let mut preimage = Vec::with_capacity(32 + 8);
+        preimage.extend_from_slice(&sender.to_bytes());      // 32-byte Pubkey
+        preimage.extend_from_slice(&index.to_be_bytes());    // 8-byte big-endian
+        let message_id = hash(&preimage).0;
+
         let compound = &ctx.accounts.compound;
         let message = SVM2AnyRampMessage {
             header: RampMessageHeader {
-                message_id: [0u8; 32],
+                message_id,
                 source_chain_selector: compound.chain_selector,
                 dest_chain_selector: compound.chain_selector,
                 sequence_number: index,
