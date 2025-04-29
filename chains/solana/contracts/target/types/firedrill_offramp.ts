@@ -110,6 +110,11 @@ export type FiredrillOfframp = {
           "name": "owner",
           "isMut": false,
           "isSigner": true
+        },
+        {
+          "name": "sourceChain",
+          "isMut": true,
+          "isSigner": false
         }
       ],
       "args": []
@@ -887,6 +892,11 @@ export const IDL: FiredrillOfframp = {
           "name": "owner",
           "isMut": false,
           "isSigner": true
+        },
+        {
+          "name": "sourceChain",
+          "isMut": true,
+          "isSigner": false
         }
       ],
       "args": []

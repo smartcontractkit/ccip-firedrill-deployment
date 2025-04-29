@@ -134,7 +134,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 		initTx, err2 := firedrill_compound.NewInitializeInstruction(
 			config.ChainSelector,
 			firedrillFeeQuoterAddress,
-			firedrillTokenAddress,
+			firedrillTokenPDA,
 			firedrillCompoundPDA,
 			firedrillCompoundConfigPDA,
 			firedrillCompoundDestChainPDA,
@@ -191,7 +191,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 		}
 		initTx, err2 := firedrill_offramp.NewInitializeInstruction(
 			chain.Selector,
-			firedrillTokenAddress,
+			firedrillTokenPDA,
 			firedrillFeeQuoterAddress,
 			firedrillCompoundAddress,
 			firedrillOfframpSourceChainPDA,

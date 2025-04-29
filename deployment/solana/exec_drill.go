@@ -18,9 +18,11 @@ func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillE
 	offRampProgram := solana.MustPublicKeyFromBase58(view.OffRamp)
 	firedrill_offramp.SetProgramID(offRampProgram)
 	offRampPDA, _, _ := FindFiredrillOfframpPDA(offRampProgram)
+	offRampSourceChainPDA, _, _ := FindFiredrillOfframpSourceChainPDA(offRampProgram, client.Selector)
 	ix, err := firedrill_offramp.NewEmitSourceChainAddedInstruction(
 		offRampPDA,
 		client.DeployerKey.PublicKey(),
+		offRampSourceChainPDA,
 	).ValidateAndBuild()
 	if err != nil {
 		return nil, fmt.Errorf("error building prepare-register instruction: %w", err)

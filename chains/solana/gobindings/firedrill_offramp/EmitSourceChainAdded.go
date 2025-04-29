@@ -16,13 +16,15 @@ type EmitSourceChainAdded struct {
 	// [0] = [WRITE] offramp
 	//
 	// [1] = [SIGNER] owner
+	//
+	// [2] = [WRITE] sourceChain
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewEmitSourceChainAddedInstructionBuilder creates a new `EmitSourceChainAdded` instruction builder.
 func NewEmitSourceChainAddedInstructionBuilder() *EmitSourceChainAdded {
 	nd := &EmitSourceChainAdded{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
 	return nd
 }
@@ -47,6 +49,17 @@ func (inst *EmitSourceChainAdded) SetOwnerAccount(owner ag_solanago.PublicKey) *
 // GetOwnerAccount gets the "owner" account.
 func (inst *EmitSourceChainAdded) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(1)
+}
+
+// SetSourceChainAccount sets the "sourceChain" account.
+func (inst *EmitSourceChainAdded) SetSourceChainAccount(sourceChain ag_solanago.PublicKey) *EmitSourceChainAdded {
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(sourceChain).WRITE()
+	return inst
+}
+
+// GetSourceChainAccount gets the "sourceChain" account.
+func (inst *EmitSourceChainAdded) GetSourceChainAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(2)
 }
 
 func (inst EmitSourceChainAdded) Build() *Instruction {
@@ -75,6 +88,9 @@ func (inst *EmitSourceChainAdded) Validate() error {
 		if inst.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
+		if inst.AccountMetaSlice[2] == nil {
+			return errors.New("accounts.SourceChain is not set")
+		}
 	}
 	return nil
 }
@@ -91,9 +107,10 @@ func (inst *EmitSourceChainAdded) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("offramp", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("  owner", inst.AccountMetaSlice.Get(1)))
+					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("    offramp", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("      owner", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("sourceChain", inst.AccountMetaSlice.Get(2)))
 					})
 				})
 		})
@@ -110,8 +127,10 @@ func (obj *EmitSourceChainAdded) UnmarshalWithDecoder(decoder *ag_binary.Decoder
 func NewEmitSourceChainAddedInstruction(
 	// Accounts:
 	offramp ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey) *EmitSourceChainAdded {
+	owner ag_solanago.PublicKey,
+	sourceChain ag_solanago.PublicKey) *EmitSourceChainAdded {
 	return NewEmitSourceChainAddedInstructionBuilder().
 		SetOfframpAccount(offramp).
-		SetOwnerAccount(owner)
+		SetOwnerAccount(owner).
+		SetSourceChainAccount(sourceChain)
 }

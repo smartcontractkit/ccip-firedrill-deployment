@@ -34,7 +34,7 @@ pub mod firedrill_offramp {
                 state: SourceChainState{ min_seq_nr: 1 },
                 config: SourceChainConfig{
                     is_enabled: true,
-                    is_rmn_verification_disabled: false,
+                    is_rmn_verification_disabled: true,
                     lane_code_version: CodeVersion::V1,
                     on_ramp: OnRampAddress::from(compound.to_bytes()),
                 },
@@ -88,17 +88,28 @@ pub mod firedrill_offramp {
 
     pub fn emit_source_chain_added(ctx: Context<EmitConfig>) -> Result<()> {
         let offramp = &ctx.accounts.offramp;
-        let source_chain_selector = offramp.chain_selector;
+        let chain_selector = offramp.chain_selector;
         let on_ramp_address = OnRampAddress::from(offramp.compound.key().to_bytes());
+
         let source_chain_config = SourceChainConfig {
             is_enabled: true,
-            is_rmn_verification_disabled: false,
+            is_rmn_verification_disabled: true,
             lane_code_version: CodeVersion::V1,
             on_ramp: on_ramp_address,
         };
 
+        let source_chain = &mut ctx.accounts.source_chain;
+        source_chain.set_inner(
+            SourceChain {
+                version: 1,
+                chain_selector,
+                state: SourceChainState{ min_seq_nr: 1 },
+                config: source_chain_config.clone(),
+            }
+        );
+
         emit!(SourceChainAdded {
-            source_chain_selector,
+            source_chain_selector: chain_selector,
             source_chain_config,
         });
 
@@ -189,6 +200,13 @@ pub struct EmitConfig<'info> {
     pub offramp: Account<'info, FiredrillOffRamp>,
 
     pub owner: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [seed::SOURCE_CHAIN, offramp.chain_selector.to_le_bytes().as_ref()],
+        bump,
+    )]
+    pub source_chain: Account<'info, SourceChain>,
 }
 
 #[derive(Accounts)]
