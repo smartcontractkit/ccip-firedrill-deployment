@@ -3,8 +3,9 @@ package solana
 import (
 	"fmt"
 
-	solana "github.com/gagliardetto/solana-go"
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/gagliardetto/solana-go"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	deploy "github.com/smartcontractkit/chainlink/deployment"
 
 	firedrill_entrypoint2 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
@@ -23,7 +24,7 @@ func SolViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, e
 				return nil, err
 			}
 			for programID, typeAndVersion := range addresses {
-				if typeAndVersion.Type != shared.FiredrillEntrypointType || typeAndVersion.Version != deployment.Version1_6_0 {
+				if typeAndVersion.Type != shared.FiredrillEntrypointType || typeAndVersion.Version != deploy.Version1_6_0 {
 					return nil, fmt.Errorf("only FiredrillEntrypoint 1.6.0 is supported, but was: %s", typeAndVersion.String())
 				}
 				firedrillEntrypointAddress := solana.MustPublicKeyFromBase58(programID)

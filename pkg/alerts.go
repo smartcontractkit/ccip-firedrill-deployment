@@ -6,13 +6,13 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	chainsel "github.com/smartcontractkit/chain-selectors"
+	"github.com/smartcontractkit/chainlink-common/pkg/logger"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	deploy "github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/chainlink/deployment/ccip/view"
 
 	firedrill "github.com/smartcontractkit/ccip-firedrill-deployment/deployment"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
-
-	"github.com/smartcontractkit/chainlink-common/pkg/logger"
-	"github.com/smartcontractkit/chainlink/deployment"
-	"github.com/smartcontractkit/chainlink/deployment/ccip/view"
 )
 
 type GlobalInput struct {
@@ -93,7 +93,7 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.ChainDetails, vers
 		return GlobalInput{}, fmt.Errorf("no active firedrills %s known for chain %s", version, destChain.ChainName)
 	}
 	switch version {
-	case deployment.Version1_5_0.String():
+	case deploy.Version1_5_0.String():
 		contractsSrcDest := lookupCCIPv1_5(ccipView, srcChain, destChain)
 		if len(contractsSrcDest.OffRamps) == 0 {
 			return GlobalInput{}, fmt.Errorf("no off ramps found for %s -> %s", srcChain.ChainName, destChain.ChainName)
@@ -108,7 +108,7 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.ChainDetails, vers
 		network.Contracts.Routers = append(network.Contracts.Routers, contractsDestSrc.Routers...)
 		network.Contracts.CommitStores = append(network.Contracts.CommitStores, contractsDestSrc.CommitStores...)
 		network.Contracts.OffRamps = append(network.Contracts.OffRamps, contractsDestSrc.OffRamps...)
-	case deployment.Version1_6_0.String():
+	case deploy.Version1_6_0.String():
 		contractsSrc := lookupCCIPv1_6(ccipView, srcChain, destChain)
 		if len(contractsSrc.OffRamps) == 0 {
 			return GlobalInput{}, fmt.Errorf("no off ramps found for %s -> %s", srcChain.ChainName, destChain.ChainName)

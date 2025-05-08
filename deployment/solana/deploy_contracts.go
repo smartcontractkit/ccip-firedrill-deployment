@@ -9,7 +9,8 @@ import (
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	solRpc "github.com/gagliardetto/solana-go/rpc"
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	deploy "github.com/smartcontractkit/chainlink/deployment"
 
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/failing_receiver"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_compound"
@@ -40,7 +41,7 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 	if (config.Version == semver.Version{}) {
 		return errors.New("missing Version")
 	}
-	if config.Version != deployment.Version1_6_0 {
+	if config.Version != deploy.Version1_6_0 {
 		return fmt.Errorf("invalid Version %s. Only 1.6.0 is allowed", config.Version)
 	}
 	if config.ChainSelector == 0 {
@@ -249,7 +250,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 		env.Logger.Infow("FiredrillFeeQuoter already initialized, skipping initialization", "chain", chain.String())
 	}
 
-	err = ab.Save(chain.Selector, firedrillEntrypointProgramID, deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_6_0))
+	err = ab.Save(chain.Selector, firedrillEntrypointProgramID, deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_6_0))
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to save program to address book: %w", err)
 	}
