@@ -8,7 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	deploy "github.com/smartcontractkit/chainlink/deployment"
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
@@ -49,7 +50,7 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 	if (config.Version == semver.Version{}) {
 		return errors.New("missing Version")
 	}
-	if config.Version != deployment.Version1_5_0 && config.Version != deployment.Version1_6_0 {
+	if config.Version != deploy.Version1_5_0 && config.Version != deploy.Version1_6_0 {
 		return fmt.Errorf("invalid Firedrill version %s. Only 1.5.0 and 1.6.0 is allowed", config.Version)
 	}
 	if config.ChainSelector == 0 {
@@ -69,12 +70,12 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 func DeployFiredrillContracts(e deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
 	ab := deployment.NewMemoryAddressBook()
 	switch config.Version {
-	case deployment.Version1_5_0:
+	case deploy.Version1_5_0:
 		_, err := deployment.DeployContract(e.Logger, e.Chains[config.ChainSelector], ab, deployFiredrillEntrypointV1_5)
 		if err != nil {
 			return deployment.ChangesetOutput{}, err
 		}
-	case deployment.Version1_6_0:
+	case deploy.Version1_6_0:
 		_, err := deployment.DeployContract(e.Logger, e.Chains[config.ChainSelector], ab, deployFiredrillEntrypoint)
 		if err != nil {
 			return deployment.ChangesetOutput{}, err
@@ -93,7 +94,7 @@ func deployFiredrillEntrypointV1_5(chain deployment.Chain) deployment.ContractDe
 		Address:  address,
 		Contract: inst,
 		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_5_0),
+		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_5_0),
 		Err:      err,
 	}
 }
@@ -104,7 +105,7 @@ func deployFiredrillEntrypoint(chain deployment.Chain) deployment.ContractDeploy
 		Address:  address,
 		Contract: inst,
 		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_6_0),
+		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_6_0),
 		Err:      err,
 	}
 }

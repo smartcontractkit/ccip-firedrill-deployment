@@ -3,7 +3,7 @@ package shared
 import (
 	"github.com/Masterminds/semver/v3"
 	chain_selectors "github.com/smartcontractkit/chain-selectors"
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 )
 
 const FiredrillEntrypointType deployment.ContractType = "FiredrillEntrypoint"

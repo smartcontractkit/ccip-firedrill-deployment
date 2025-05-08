@@ -4,7 +4,8 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	deploy "github.com/smartcontractkit/chainlink/deployment"
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
@@ -26,7 +27,7 @@ func EVMViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, e
 			for addressStr, typeAndVersion := range addresses {
 				address := common.HexToAddress(addressStr)
 				switch typeAndVersion.String() {
-				case deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_5_0).String():
+				case deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_5_0).String():
 					contract, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(address, chain.Client)
 					if err != nil {
 						return nil, err
@@ -36,7 +37,7 @@ func EVMViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, e
 						return nil, err
 					}
 					chainView.FiredrillEntrypoint[addressStr] = view
-				case deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_6_0).String():
+				case deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_6_0).String():
 					contract, err := firedrill_entrypoint.NewFiredrillEntrypoint(address, chain.Client)
 					if err != nil {
 						return nil, err

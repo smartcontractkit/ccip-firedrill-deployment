@@ -3,7 +3,7 @@ package deployment
 import (
 	"encoding/json"
 
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 
 	evm_deployment "github.com/smartcontractkit/ccip-firedrill-deployment/deployment/evm"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"

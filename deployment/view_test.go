@@ -7,7 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/utils/tests"
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	deploy "github.com/smartcontractkit/chainlink/deployment"
 	"github.com/smartcontractkit/chainlink/deployment/environment/memory"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
 
@@ -36,7 +37,7 @@ func TestCCIPViewFiredrill(t *testing.T) {
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
 	changeset, err := evm_deployment.DeployFiredrillContracts(env, shared.FiredrillConfig{
-		Version:             deployment.Version1_5_0,
+		Version:             deploy.Version1_5_0,
 		ChainSelector:       chainSel,
 		SourceChainSelector: sourceChainSel,
 	})

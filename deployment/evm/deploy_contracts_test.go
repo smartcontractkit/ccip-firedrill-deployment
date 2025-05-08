@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/smartcontractkit/chainlink-common/pkg/utils/tests"
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	deploy "github.com/smartcontractkit/chainlink/deployment"
 	"github.com/smartcontractkit/chainlink/deployment/environment/memory"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_off_ramp"
@@ -42,7 +42,7 @@ func TestDeployFiredrillContracts(t *testing.T) {
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
 	firedrillChangeset, err := DeployFiredrillContracts(env, shared.FiredrillConfig{
-		Version:             deployment.Version1_5_0,
+		Version:             deploy.Version1_5_0,
 		ChainSelector:       chainSel,
 		SourceChainSelector: sourceChainSel,
 	})
@@ -54,7 +54,7 @@ func TestDeployFiredrillContracts(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, chainAddr, 1)
 	typeAndVersionList := slices.Collect(maps.Values(chainAddr))
-	assert.Contains(t, typeAndVersionList, deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deployment.Version1_5_0))
+	assert.Contains(t, typeAndVersionList, deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_5_0))
 }
 
 func TestRegisterFiredrill(t *testing.T) {
@@ -78,7 +78,7 @@ func TestRegisterFiredrill(t *testing.T) {
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
 	firedrillChangeset, err := DeployFiredrillContracts(env, shared.FiredrillConfig{
-		Version:             deployment.Version1_5_0,
+		Version:             deploy.Version1_5_0,
 		ChainSelector:       chainSel,
 		SourceChainSelector: sourceChainSel,
 	})
