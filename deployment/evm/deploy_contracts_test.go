@@ -93,8 +93,6 @@ func TestRegisterFiredrill(t *testing.T) {
 	require.NoError(t, err)
 	firedrillOffRampAddr, err := firedrillEntrypoint.OffRamp(nil)
 	require.NoError(t, err)
-	firedrillCompoundAddr, err := firedrillEntrypoint.Compound(nil)
-	require.NoError(t, err)
 	firedrillOffRamp, err := firedrill_off_ramp.NewFiredrillOffRamp(firedrillOffRampAddr, env.Chains[chainSel].Client)
 	require.NoError(t, err)
 	offRampSetSink := make(chan *firedrill_off_ramp.FiredrillOffRampConfigSet)
@@ -111,10 +109,10 @@ func TestRegisterFiredrill(t *testing.T) {
 			assert.Equal(t, ev.StaticConfig.SourceChainSelector, chainSel)
 			assert.Equal(t, ev.StaticConfig.OnRamp, firedrillOnRampAddr)
 			assert.Equal(t, ev.StaticConfig.CommitStore, firedrillOffRampAddr)
-			assert.Equal(t, ev.StaticConfig.RmnProxy, firedrillCompoundAddr)
-			assert.Equal(t, ev.StaticConfig.TokenAdminRegistry, firedrillCompoundAddr)
-			assert.Equal(t, ev.DynamicConfig.Router, firedrillCompoundAddr)
-			assert.Equal(t, ev.DynamicConfig.PriceRegistry, firedrillCompoundAddr)
+			assert.Equal(t, ev.StaticConfig.RmnProxy, firedrillEntrypointAddr)
+			assert.Equal(t, ev.StaticConfig.TokenAdminRegistry, firedrillEntrypointAddr)
+			assert.Equal(t, ev.DynamicConfig.Router, firedrillEntrypointAddr)
+			assert.Equal(t, ev.DynamicConfig.PriceRegistry, firedrillEntrypointAddr)
 			return
 		case <-timer.C:
 			require.Fail(t, "haven't received all events")

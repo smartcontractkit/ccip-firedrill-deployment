@@ -2,24 +2,23 @@
 pragma solidity ^0.8.24;
 
 import {Internal} from "../common/Internal.sol";
-import {HasStatus} from "../common/HasStatus.sol";
-import {FiredrillEntrypoint} from "./FiredrillEntrypoint.sol";
+import {FiredrillCompound} from "./FiredrillCompound.sol";
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {Ownable2Step} from "@openzeppelin/access/Ownable2Step.sol";
 
-contract FiredrillOffRamp is Ownable2Step, HasStatus {
+contract FiredrillOffRamp is Ownable2Step {
     event SourceChainConfigSet(uint64 indexed sourceChainSelector, SourceChainConfig sourceConfig);
     event CommitReportAccepted(
         MerkleRoot[] blessedMerkleRoots,
         MerkleRoot[] unblessedMerkleRoots,
         Internal.PriceUpdates priceUpdates
     );
-    
+
     enum MessageExecutionState {
-      UNTOUCHED,
-      IN_PROGRESS,
-      SUCCESS,
-      FAILURE
+        UNTOUCHED,
+        IN_PROGRESS,
+        SUCCESS,
+        FAILURE
     }
 
     struct StaticConfig {
@@ -52,14 +51,10 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus {
         bytes32 merkleRoot; //         Merkle root covering the interval & source chain messages
     }
 
-    FiredrillEntrypoint private immutable i_ctrl;
+    FiredrillCompound private immutable i_ctrl;
 
-    constructor(FiredrillEntrypoint ctrl) Ownable(msg.sender) {
+    constructor(FiredrillCompound ctrl) Ownable(msg.sender) {
         i_ctrl = ctrl;
-    }
-
-    function isActive() public view returns (bool) {
-        return i_ctrl.isActive();
     }
 
     function emitSourceChainConfigSet() public {
@@ -67,36 +62,36 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus {
         emit SourceChainConfigSet({
             sourceChainSelector: i_ctrl.chainSelector(),
             sourceConfig: SourceChainConfig({
-                router: address(i_ctrl.compound()),
-                isEnabled: true,
-                minSeqNr: 0,
-                isRMNVerificationDisabled: false,
-                onRamp: abi.encodePacked(i_ctrl.onRamp())
-            })
+            router: address(i_ctrl),
+            isEnabled: true,
+            minSeqNr: 0,
+            isRMNVerificationDisabled: false,
+            onRamp: abi.encodePacked(i_ctrl.onRamp())
+        })
         });
-    }    
-    
+    }
+
     function getStaticConfig() external view returns (StaticConfig memory) {
         return StaticConfig({
             chainSelector: i_ctrl.chainSelector(),
             gasForCallExactCheck: 0,
-            rmnRemote: address(i_ctrl.compound()),
-            tokenAdminRegistry: address(i_ctrl.compound()),
-            nonceManager: address(i_ctrl.compound())
+            rmnRemote: address(i_ctrl),
+            tokenAdminRegistry: address(i_ctrl),
+            nonceManager: address(i_ctrl)
         });
     }
 
     function getDynamicConfig() external view returns (DynamicConfig memory) {
         return DynamicConfig({
-            feeQuoter: address(i_ctrl.compound()),
+            feeQuoter: address(i_ctrl),
             permissionLessExecutionThresholdSeconds: 10,
             messageInterceptor: address(0)
         });
     }
 
-    function getSourceChainConfig(uint64 sourceChainSelector) external view returns (SourceChainConfig memory) {
+    function getSourceChainConfig(uint64) external view returns (SourceChainConfig memory) {
         return SourceChainConfig({
-            router: address(i_ctrl.compound()),
+            router: address(i_ctrl),
             isEnabled: true,
             minSeqNr: 0,
             isRMNVerificationDisabled: false,

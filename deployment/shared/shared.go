@@ -44,6 +44,5 @@ type FiredrillEntrypointView struct {
 	OnRamp    string `json:"onRamp"`
 	OffRamp   string `json:"offRamp"`
 	FeeQuoter string `json:"feeQuoter"`
-	Compound  string `json:"compound"`
 	Receiver  string `json:"receiver"`
 }

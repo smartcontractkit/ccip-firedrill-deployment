@@ -2,24 +2,23 @@
 pragma solidity ^0.8.24;
 
 import {Internal} from "../common/Internal.sol";
-import {HasStatus} from "../common/HasStatus.sol";
-import {FiredrillEntrypoint} from "./FiredrillEntrypoint.sol";
+import {FiredrillCompound} from "./FiredrillCompound.sol";
 import {ITypeAndVersion} from "@chainlink/shared/interfaces/ITypeAndVersion.sol";
 import {Ownable2Step} from "@openzeppelin/access/Ownable2Step.sol";
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 
-contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
+contract FiredrillOffRamp is Ownable2Step, ITypeAndVersion {
     event TokensConsumed(uint256 tokens);
     event ConfigSet(StaticConfig staticConfig, DynamicConfig dynamicConfig);
     event ReportAccepted(CommitReport report);
     event ExecutionStateChanged(uint64 indexed sequenceNumber, bytes32 indexed messageId, MessageExecutionState state, bytes returnData);
-    
+
     enum MessageExecutionState {
-      UNTOUCHED,
-      IN_PROGRESS,
-      SUCCESS,
-      FAILURE
-    }    
+        UNTOUCHED,
+        IN_PROGRESS,
+        SUCCESS,
+        FAILURE
+    }
 
     struct TokenBucket {
         uint128 tokens; // ──────╮ Current number of tokens that are in the bucket.
@@ -30,23 +29,23 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
     }
 
     struct StaticConfig {
-      address commitStore; // ────────╮  CommitStore address on the destination chain
-      uint64 chainSelector; // ───────╯  Destination chainSelector
-      uint64 sourceChainSelector; // ─╮  Source chainSelector
-      address onRamp; // ─────────────╯  OnRamp address on the source chain
-      address prevOffRamp; //            Address of previous-version OffRamp
-      address rmnProxy; //               RMN proxy address
-      address tokenAdminRegistry; //     Token admin registry address
+        address commitStore; // ────────╮  CommitStore address on the destination chain
+        uint64 chainSelector; // ───────╯  Destination chainSelector
+        uint64 sourceChainSelector; // ─╮  Source chainSelector
+        address onRamp; // ─────────────╯  OnRamp address on the source chain
+        address prevOffRamp; //            Address of previous-version OffRamp
+        address rmnProxy; //               RMN proxy address
+        address tokenAdminRegistry; //     Token admin registry address
     }
 
     /// @notice Dynamic offRamp config
     /// @dev since OffRampConfig is part of OffRampConfigChanged event, if changing it, we should update the ABI on Atlas
     struct DynamicConfig {
-      uint32 permissionLessExecutionThresholdSeconds; // ─╮ Waiting time before manual execution is enabled
-      uint32 maxDataBytes; //                             │ Maximum payload data size in bytes
-      uint16 maxNumberOfTokensPerMsg; //                  │ Maximum number of ERC20 token transfers that can be included per message
-      address router; // ─────────────────────────────────╯ Router address
-      address priceRegistry; //                             Price registry address
+        uint32 permissionLessExecutionThresholdSeconds; // ─╮ Waiting time before manual execution is enabled
+        uint32 maxDataBytes; //                             │ Maximum payload data size in bytes
+        uint16 maxNumberOfTokensPerMsg; //                  │ Maximum number of ERC20 token transfers that can be included per message
+        address router; // ─────────────────────────────────╯ Router address
+        address priceRegistry; //                             Price registry address
     }
 
     struct Interval {
@@ -59,14 +58,10 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
         bytes32 merkleRoot;
     }
 
-    FiredrillEntrypoint private immutable i_ctrl;
+    FiredrillCompound private immutable i_ctrl;
 
-    constructor(FiredrillEntrypoint ctrl) Ownable(msg.sender) {
+    constructor(FiredrillCompound ctrl) Ownable(msg.sender) {
         i_ctrl = ctrl;
-    }
-
-    function isActive() public view returns (bool) {
-        return i_ctrl.isActive();
     }
 
     function emitConfigSet() public {
@@ -78,15 +73,15 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
                 sourceChainSelector: i_ctrl.chainSelector(),
                 onRamp: i_ctrl.onRamp(),
                 prevOffRamp: address(0),
-                rmnProxy: address(i_ctrl.compound()),
-                tokenAdminRegistry: address(i_ctrl.compound())
+                rmnProxy: address(i_ctrl),
+                tokenAdminRegistry: address(i_ctrl)
             }),
             DynamicConfig({
                 permissionLessExecutionThresholdSeconds: 10,
                 maxDataBytes: 10,
                 maxNumberOfTokensPerMsg: 10,
-                router: address(i_ctrl.compound()),
-                priceRegistry: address(i_ctrl.compound())
+                router: address(i_ctrl),
+                priceRegistry: address(i_ctrl)
             })
         );
     }
@@ -105,7 +100,7 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
             })
         );
     }
-    
+
     function emitExecutionStateChanged(address sender, uint64 index) public {
         require(msg.sender == address(i_ctrl), "only control");
         emit ExecutionStateChanged({
@@ -128,8 +123,8 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
             sourceChainSelector: i_ctrl.chainSelector(),
             onRamp: i_ctrl.onRamp(),
             prevOffRamp: address(0),
-            rmnProxy: address(i_ctrl.compound()),
-            tokenAdminRegistry: address(i_ctrl.compound())
+            rmnProxy: address(i_ctrl),
+            tokenAdminRegistry: address(i_ctrl)
         });
     }
 
@@ -138,8 +133,8 @@ contract FiredrillOffRamp is Ownable2Step, HasStatus, ITypeAndVersion {
             permissionLessExecutionThresholdSeconds: 10,
             maxDataBytes: 10,
             maxNumberOfTokensPerMsg: 10,
-            router: address(i_ctrl.compound()),
-            priceRegistry: address(i_ctrl.compound())
+            router: address(i_ctrl),
+            priceRegistry: address(i_ctrl)
         });
     }
 

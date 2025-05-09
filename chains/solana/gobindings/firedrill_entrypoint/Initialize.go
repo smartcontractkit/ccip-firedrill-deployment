@@ -16,21 +16,24 @@ type Initialize struct {
 	Token         *ag_solanago.PublicKey
 	OffRamp       *ag_solanago.PublicKey
 	FeeQuoter     *ag_solanago.PublicKey
-	Compound      *ag_solanago.PublicKey
 	Receiver      *ag_solanago.PublicKey
 
 	// [0] = [WRITE] entrypoint
 	//
-	// [1] = [WRITE, SIGNER] authority
+	// [1] = [WRITE] config
 	//
-	// [2] = [] systemProgram
+	// [2] = [WRITE] destChain
+	//
+	// [3] = [WRITE, SIGNER] authority
+	//
+	// [4] = [] systemProgram
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewInitializeInstructionBuilder creates a new `Initialize` instruction builder.
 func NewInitializeInstructionBuilder() *Initialize {
 	nd := &Initialize{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 5),
 	}
 	return nd
 }
@@ -59,12 +62,6 @@ func (inst *Initialize) SetFeeQuoter(feeQuoter ag_solanago.PublicKey) *Initializ
 	return inst
 }
 
-// SetCompound sets the "compound" parameter.
-func (inst *Initialize) SetCompound(compound ag_solanago.PublicKey) *Initialize {
-	inst.Compound = &compound
-	return inst
-}
-
 // SetReceiver sets the "receiver" parameter.
 func (inst *Initialize) SetReceiver(receiver ag_solanago.PublicKey) *Initialize {
 	inst.Receiver = &receiver
@@ -82,26 +79,48 @@ func (inst *Initialize) GetEntrypointAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(0)
 }
 
+// SetConfigAccount sets the "config" account.
+func (inst *Initialize) SetConfigAccount(config ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(config).WRITE()
+	return inst
+}
+
+// GetConfigAccount gets the "config" account.
+func (inst *Initialize) GetConfigAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
+}
+
+// SetDestChainAccount sets the "destChain" account.
+func (inst *Initialize) SetDestChainAccount(destChain ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(destChain).WRITE()
+	return inst
+}
+
+// GetDestChainAccount gets the "destChain" account.
+func (inst *Initialize) GetDestChainAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(2)
+}
+
 // SetAuthorityAccount sets the "authority" account.
 func (inst *Initialize) SetAuthorityAccount(authority ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(authority).WRITE().SIGNER()
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(authority).WRITE().SIGNER()
 	return inst
 }
 
 // GetAuthorityAccount gets the "authority" account.
 func (inst *Initialize) GetAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
+	return inst.AccountMetaSlice.Get(3)
 }
 
 // SetSystemProgramAccount sets the "systemProgram" account.
 func (inst *Initialize) SetSystemProgramAccount(systemProgram ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(systemProgram)
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(systemProgram)
 	return inst
 }
 
 // GetSystemProgramAccount gets the "systemProgram" account.
 func (inst *Initialize) GetSystemProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
+	return inst.AccountMetaSlice.Get(4)
 }
 
 func (inst Initialize) Build() *Instruction {
@@ -136,9 +155,6 @@ func (inst *Initialize) Validate() error {
 		if inst.FeeQuoter == nil {
 			return errors.New("FeeQuoter parameter is not set")
 		}
-		if inst.Compound == nil {
-			return errors.New("Compound parameter is not set")
-		}
 		if inst.Receiver == nil {
 			return errors.New("Receiver parameter is not set")
 		}
@@ -150,9 +166,15 @@ func (inst *Initialize) Validate() error {
 			return errors.New("accounts.Entrypoint is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.Authority is not set")
+			return errors.New("accounts.Config is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
+			return errors.New("accounts.DestChain is not set")
+		}
+		if inst.AccountMetaSlice[3] == nil {
+			return errors.New("accounts.Authority is not set")
+		}
+		if inst.AccountMetaSlice[4] == nil {
 			return errors.New("accounts.SystemProgram is not set")
 		}
 	}
@@ -168,20 +190,21 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=6]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Params[len=5]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
 						paramsBranch.Child(ag_format.Param("ChainSelector", *inst.ChainSelector))
 						paramsBranch.Child(ag_format.Param("        Token", *inst.Token))
 						paramsBranch.Child(ag_format.Param("      OffRamp", *inst.OffRamp))
 						paramsBranch.Child(ag_format.Param("    FeeQuoter", *inst.FeeQuoter))
-						paramsBranch.Child(ag_format.Param("     Compound", *inst.Compound))
 						paramsBranch.Child(ag_format.Param("     Receiver", *inst.Receiver))
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Accounts[len=5]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("   entrypoint", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("    authority", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("systemProgram", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("       config", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("    destChain", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("    authority", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("systemProgram", inst.AccountMetaSlice.Get(4)))
 					})
 				})
 		})
@@ -205,11 +228,6 @@ func (obj Initialize) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error)
 	}
 	// Serialize `FeeQuoter` param:
 	err = encoder.Encode(obj.FeeQuoter)
-	if err != nil {
-		return err
-	}
-	// Serialize `Compound` param:
-	err = encoder.Encode(obj.Compound)
 	if err != nil {
 		return err
 	}
@@ -241,11 +259,6 @@ func (obj *Initialize) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err err
 	if err != nil {
 		return err
 	}
-	// Deserialize `Compound`:
-	err = decoder.Decode(&obj.Compound)
-	if err != nil {
-		return err
-	}
 	// Deserialize `Receiver`:
 	err = decoder.Decode(&obj.Receiver)
 	if err != nil {
@@ -261,10 +274,11 @@ func NewInitializeInstruction(
 	token ag_solanago.PublicKey,
 	offRamp ag_solanago.PublicKey,
 	feeQuoter ag_solanago.PublicKey,
-	compound ag_solanago.PublicKey,
 	receiver ag_solanago.PublicKey,
 	// Accounts:
 	entrypoint ag_solanago.PublicKey,
+	config ag_solanago.PublicKey,
+	destChain ag_solanago.PublicKey,
 	authority ag_solanago.PublicKey,
 	systemProgram ag_solanago.PublicKey) *Initialize {
 	return NewInitializeInstructionBuilder().
@@ -272,9 +286,10 @@ func NewInitializeInstruction(
 		SetToken(token).
 		SetOffRamp(offRamp).
 		SetFeeQuoter(feeQuoter).
-		SetCompound(compound).
 		SetReceiver(receiver).
 		SetEntrypointAccount(entrypoint).
+		SetConfigAccount(config).
+		SetDestChainAccount(destChain).
 		SetAuthorityAccount(authority).
 		SetSystemProgramAccount(systemProgram)
 }

@@ -44,34 +44,12 @@ type FiredrillCompoundStaticConfig struct {
 
 // FiredrillCompoundMetaData contains all meta data concerning the FiredrillCompound contract.
 var FiredrillCompoundMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"ctrl\",\"type\":\"address\",\"internalType\":\"contractFiredrillEntrypoint\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"acceptOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"emitUsdPerTokenUpdated\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"getARM\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOffRamps\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"tuple[]\",\"internalType\":\"structFiredrillCompound.OffRamp[]\",\"components\":[{\"name\":\"sourceChainSelector\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"offRamp\",\"type\":\"address\",\"internalType\":\"address\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOnRamp\",\"inputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getStaticConfig\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structFiredrillCompound.StaticConfig\",\"components\":[{\"name\":\"maxFeeJuelsPerMsg\",\"type\":\"uint96\",\"internalType\":\"uint96\"},{\"name\":\"linkToken\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"tokenPriceStalenessThreshold\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"isActive\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pendingOwner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"typeAndVersion\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"pure\"},{\"type\":\"event\",\"name\":\"OwnershipTransferStarted\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"UsdPerTokenUpdated\",\"inputs\":[{\"name\":\"token\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"timestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]}]",
-	Bin: "0x60a060405234801561000f575f80fd5b50604051610afc380380610afc83398101604081905261002e916100d9565b338061005357604051631e4fbdf760e01b81525f600482015260240160405180910390fd5b61005c8161006e565b506001600160a01b0316608052610106565b600180546001600160a01b03191690556100878161008a565b50565b5f80546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b5f602082840312156100e9575f80fd5b81516001600160a01b03811681146100ff575f80fd5b9392505050565b6080516109b46101485f395f818161022c015281816102c3015281816103920152818161041801528181610541015281816105d0015261067f01526109b45ff3fe608060405234801561000f575f80fd5b50600436106100b1575f3560e01c806379ba50971161006e57806379ba50971461018a5780638da5cb5b14610192578063a40e69c7146101a2578063a8d87a3b146101b7578063e30c3978146101ca578063f2fde38b146101db575f80fd5b806306285c69146100b5578063181f5a771461010157806320f938b61461014057806322f3e2d41461014a5780632e90aa2114610162578063715018a614610182575b5f80fd5b6100bd6101ee565b6040805182516bffffffffffffffffffffffff1681526020808401516001600160a01b0316908201529181015163ffffffff16908201526060015b60405180910390f35b604080518082018252601c81527f526f7574657220312e322e302046656551756f74657220312e362e3000000000602082015290516100f89190610802565b6101486102c1565b005b61015261038f565b60405190151581526020016100f8565b61016a610415565b6040516001600160a01b0390911681526020016100f8565b610148610496565b6101486104a9565b5f546001600160a01b031661016a565b6101aa6104f2565b6040516100f8919061084e565b61016a6101c53660046108c4565b61067c565b6001546001600160a01b031661016a565b6101486101e93660046108fa565b610703565b604080516060810182525f8082526020820181905291810191909152604051806060016040528060016bffffffffffffffffffffffff1681526020017f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663fc0c546a6040518163ffffffff1660e01b8152600401602060405180830381865afa158015610286573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906102aa9190610915565b6001600160a01b031681525f602090910152919050565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663fc0c546a6040518163ffffffff1660e01b8152600401602060405180830381865afa15801561031d573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906103419190610915565b6001600160a01b03167f52f50aa6d1a95a4595361ecf953d095f125d442e4673716dede699e049de148a600142604051610385929190918252602082015260400190565b60405180910390a2565b5f7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03166322f3e2d46040518163ffffffff1660e01b8152600401602060405180830381865afa1580156103ec573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906104109190610930565b905090565b5f7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663f69e20466040518163ffffffff1660e01b8152600401602060405180830381865afa158015610472573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906104109190610915565b61049e610773565b6104a75f61079f565b565b60015433906001600160a01b031681146104e65760405163118cdaa760e01b81526001600160a01b03821660048201526024015b60405180910390fd5b6104ef8161079f565b50565b6040805160018082528183019092526060915f9190816020015b604080518082019091525f808252602082015281526020019060019003908161050c57905050905060405180604001604052807f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316634e4bc8476040518163ffffffff1660e01b8152600401602060405180830381865afa15801561059b573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906105bf919061094f565b67ffffffffffffffff1681526020017f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03166344671a5d6040518163ffffffff1660e01b8152600401602060405180830381865afa15801561062a573d5f803e3d5ffd5b505050506040513d601f19601f8201168201806040525081019061064e9190610915565b6001600160a01b0316815250815f8151811061066c5761066c61096a565b6020908102919091010152919050565b5f7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663c021e73c6040518163ffffffff1660e01b8152600401602060405180830381865afa1580156106d9573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906106fd9190610915565b92915050565b61070b610773565b600180546001600160a01b0383166001600160a01b0319909116811790915561073b5f546001600160a01b031690565b6001600160a01b03167f38d16b8cac22d99fc7c124b9cd0de2d3fa1faef420bfe791d8c362d765e2270060405160405180910390a350565b5f546001600160a01b031633146104a75760405163118cdaa760e01b81523360048201526024016104dd565b600180546001600160a01b03191690556104ef815f80546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b5f602080835283518060208501525f5b8181101561082e57858101830151858201604001528201610812565b505f604082860101526040601f19601f8301168501019250505092915050565b602080825282518282018190525f919060409081850190868401855b828110156108a2578151805167ffffffffffffffff1685528601516001600160a01b031686850152928401929085019060010161086a565b5091979650505050505050565b67ffffffffffffffff811681146104ef575f80fd5b5f602082840312156108d4575f80fd5b81356108df816108af565b9392505050565b6001600160a01b03811681146104ef575f80fd5b5f6020828403121561090a575f80fd5b81356108df816108e6565b5f60208284031215610925575f80fd5b81516108df816108e6565b5f60208284031215610940575f80fd5b815180151581146108df575f80fd5b5f6020828403121561095f575f80fd5b81516108df816108af565b634e487b7160e01b5f52603260045260245ffdfea2646970667358221220a6c53a2320b6013762fdd5c4eb84dd96692fadcfddc7f5c19d244683db5c682b64736f6c63430008180033",
+	ABI: "[{\"type\":\"function\",\"name\":\"acceptOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"chainSelector\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"emitUsdPerTokenUpdated\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"getARM\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOffRamps\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"tuple[]\",\"internalType\":\"structFiredrillCompound.OffRamp[]\",\"components\":[{\"name\":\"sourceChainSelector\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"offRamp\",\"type\":\"address\",\"internalType\":\"address\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOnRamp\",\"inputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getStaticConfig\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structFiredrillCompound.StaticConfig\",\"components\":[{\"name\":\"maxFeeJuelsPerMsg\",\"type\":\"uint96\",\"internalType\":\"uint96\"},{\"name\":\"linkToken\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"tokenPriceStalenessThreshold\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"offRamp\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"onRamp\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pendingOwner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"receiver\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"token\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"typeAndVersion\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"pure\"},{\"type\":\"event\",\"name\":\"OwnershipTransferStarted\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"UsdPerTokenUpdated\",\"inputs\":[{\"name\":\"token\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"timestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"OwnableInvalidOwner\",\"inputs\":[{\"name\":\"owner\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"OwnableUnauthorizedAccount\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"}]}]",
 }
 
 // FiredrillCompoundABI is the input ABI used to generate the binding from.
 // Deprecated: Use FiredrillCompoundMetaData.ABI instead.
 var FiredrillCompoundABI = FiredrillCompoundMetaData.ABI
-
-// FiredrillCompoundBin is the compiled bytecode used for deploying new contracts.
-// Deprecated: Use FiredrillCompoundMetaData.Bin instead.
-var FiredrillCompoundBin = FiredrillCompoundMetaData.Bin
-
-// DeployFiredrillCompound deploys a new Ethereum contract, binding an instance of FiredrillCompound to it.
-func DeployFiredrillCompound(auth *bind.TransactOpts, backend bind.ContractBackend, ctrl common.Address) (common.Address, *types.Transaction, *FiredrillCompound, error) {
-	parsed, err := FiredrillCompoundMetaData.GetAbi()
-	if err != nil {
-		return common.Address{}, nil, nil, err
-	}
-	if parsed == nil {
-		return common.Address{}, nil, nil, errors.New("GetABI returned nil")
-	}
-
-	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(FiredrillCompoundBin), backend, ctrl)
-	if err != nil {
-		return common.Address{}, nil, nil, err
-	}
-	return address, tx, &FiredrillCompound{FiredrillCompoundCaller: FiredrillCompoundCaller{contract: contract}, FiredrillCompoundTransactor: FiredrillCompoundTransactor{contract: contract}, FiredrillCompoundFilterer: FiredrillCompoundFilterer{contract: contract}}, nil
-}
 
 // FiredrillCompound is an auto generated Go binding around an Ethereum contract.
 type FiredrillCompound struct {
@@ -215,6 +193,37 @@ func (_FiredrillCompound *FiredrillCompoundTransactorRaw) Transact(opts *bind.Tr
 	return _FiredrillCompound.Contract.contract.Transact(opts, method, params...)
 }
 
+// ChainSelector is a free data retrieval call binding the contract method 0x4e4bc847.
+//
+// Solidity: function chainSelector() view returns(uint64)
+func (_FiredrillCompound *FiredrillCompoundCaller) ChainSelector(opts *bind.CallOpts) (uint64, error) {
+	var out []interface{}
+	err := _FiredrillCompound.contract.Call(opts, &out, "chainSelector")
+
+	if err != nil {
+		return *new(uint64), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint64)).(*uint64)
+
+	return out0, err
+
+}
+
+// ChainSelector is a free data retrieval call binding the contract method 0x4e4bc847.
+//
+// Solidity: function chainSelector() view returns(uint64)
+func (_FiredrillCompound *FiredrillCompoundSession) ChainSelector() (uint64, error) {
+	return _FiredrillCompound.Contract.ChainSelector(&_FiredrillCompound.CallOpts)
+}
+
+// ChainSelector is a free data retrieval call binding the contract method 0x4e4bc847.
+//
+// Solidity: function chainSelector() view returns(uint64)
+func (_FiredrillCompound *FiredrillCompoundCallerSession) ChainSelector() (uint64, error) {
+	return _FiredrillCompound.Contract.ChainSelector(&_FiredrillCompound.CallOpts)
+}
+
 // GetARM is a free data retrieval call binding the contract method 0x2e90aa21.
 //
 // Solidity: function getARM() view returns(address)
@@ -339,35 +348,66 @@ func (_FiredrillCompound *FiredrillCompoundCallerSession) GetStaticConfig() (Fir
 	return _FiredrillCompound.Contract.GetStaticConfig(&_FiredrillCompound.CallOpts)
 }
 
-// IsActive is a free data retrieval call binding the contract method 0x22f3e2d4.
+// OffRamp is a free data retrieval call binding the contract method 0x44671a5d.
 //
-// Solidity: function isActive() view returns(bool)
-func (_FiredrillCompound *FiredrillCompoundCaller) IsActive(opts *bind.CallOpts) (bool, error) {
+// Solidity: function offRamp() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundCaller) OffRamp(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _FiredrillCompound.contract.Call(opts, &out, "isActive")
+	err := _FiredrillCompound.contract.Call(opts, &out, "offRamp")
 
 	if err != nil {
-		return *new(bool), err
+		return *new(common.Address), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
 
 	return out0, err
 
 }
 
-// IsActive is a free data retrieval call binding the contract method 0x22f3e2d4.
+// OffRamp is a free data retrieval call binding the contract method 0x44671a5d.
 //
-// Solidity: function isActive() view returns(bool)
-func (_FiredrillCompound *FiredrillCompoundSession) IsActive() (bool, error) {
-	return _FiredrillCompound.Contract.IsActive(&_FiredrillCompound.CallOpts)
+// Solidity: function offRamp() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundSession) OffRamp() (common.Address, error) {
+	return _FiredrillCompound.Contract.OffRamp(&_FiredrillCompound.CallOpts)
 }
 
-// IsActive is a free data retrieval call binding the contract method 0x22f3e2d4.
+// OffRamp is a free data retrieval call binding the contract method 0x44671a5d.
 //
-// Solidity: function isActive() view returns(bool)
-func (_FiredrillCompound *FiredrillCompoundCallerSession) IsActive() (bool, error) {
-	return _FiredrillCompound.Contract.IsActive(&_FiredrillCompound.CallOpts)
+// Solidity: function offRamp() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundCallerSession) OffRamp() (common.Address, error) {
+	return _FiredrillCompound.Contract.OffRamp(&_FiredrillCompound.CallOpts)
+}
+
+// OnRamp is a free data retrieval call binding the contract method 0xc021e73c.
+//
+// Solidity: function onRamp() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundCaller) OnRamp(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _FiredrillCompound.contract.Call(opts, &out, "onRamp")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// OnRamp is a free data retrieval call binding the contract method 0xc021e73c.
+//
+// Solidity: function onRamp() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundSession) OnRamp() (common.Address, error) {
+	return _FiredrillCompound.Contract.OnRamp(&_FiredrillCompound.CallOpts)
+}
+
+// OnRamp is a free data retrieval call binding the contract method 0xc021e73c.
+//
+// Solidity: function onRamp() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundCallerSession) OnRamp() (common.Address, error) {
+	return _FiredrillCompound.Contract.OnRamp(&_FiredrillCompound.CallOpts)
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -430,6 +470,68 @@ func (_FiredrillCompound *FiredrillCompoundSession) PendingOwner() (common.Addre
 // Solidity: function pendingOwner() view returns(address)
 func (_FiredrillCompound *FiredrillCompoundCallerSession) PendingOwner() (common.Address, error) {
 	return _FiredrillCompound.Contract.PendingOwner(&_FiredrillCompound.CallOpts)
+}
+
+// Receiver is a free data retrieval call binding the contract method 0xf7260d3e.
+//
+// Solidity: function receiver() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundCaller) Receiver(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _FiredrillCompound.contract.Call(opts, &out, "receiver")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Receiver is a free data retrieval call binding the contract method 0xf7260d3e.
+//
+// Solidity: function receiver() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundSession) Receiver() (common.Address, error) {
+	return _FiredrillCompound.Contract.Receiver(&_FiredrillCompound.CallOpts)
+}
+
+// Receiver is a free data retrieval call binding the contract method 0xf7260d3e.
+//
+// Solidity: function receiver() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundCallerSession) Receiver() (common.Address, error) {
+	return _FiredrillCompound.Contract.Receiver(&_FiredrillCompound.CallOpts)
+}
+
+// Token is a free data retrieval call binding the contract method 0xfc0c546a.
+//
+// Solidity: function token() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundCaller) Token(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _FiredrillCompound.contract.Call(opts, &out, "token")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Token is a free data retrieval call binding the contract method 0xfc0c546a.
+//
+// Solidity: function token() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundSession) Token() (common.Address, error) {
+	return _FiredrillCompound.Contract.Token(&_FiredrillCompound.CallOpts)
+}
+
+// Token is a free data retrieval call binding the contract method 0xfc0c546a.
+//
+// Solidity: function token() view returns(address)
+func (_FiredrillCompound *FiredrillCompoundCallerSession) Token() (common.Address, error) {
+	return _FiredrillCompound.Contract.Token(&_FiredrillCompound.CallOpts)
 }
 
 // TypeAndVersion is a free data retrieval call binding the contract method 0x181f5a77.
