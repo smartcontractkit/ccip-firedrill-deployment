@@ -62,42 +62,42 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	ab := deployment.NewMemoryAddressBook()
 	chain := env.SolChains[config.ChainSelector]
 
-	firedrillCompoundProgramID, err := chain.DeployProgram(env.Logger, "firedrill_compound", false)
+	firedrillCompoundProgramID, err := chain.DeployProgram(env.Logger, "firedrill_compound", false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillCompoundAddress := solana.MustPublicKeyFromBase58(firedrillCompoundProgramID)
 	firedrill_compound.SetProgramID(firedrillCompoundAddress)
 
-	firedrillEntrypointProgramID, err := chain.DeployProgram(env.Logger, "firedrill_entrypoint", false)
+	firedrillEntrypointProgramID, err := chain.DeployProgram(env.Logger, "firedrill_entrypoint", false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillEntrypointAddress := solana.MustPublicKeyFromBase58(firedrillEntrypointProgramID)
 	firedrill_entrypoint.SetProgramID(firedrillEntrypointAddress)
 
-	firedrillOfframpProgramID, err := chain.DeployProgram(env.Logger, "firedrill_offramp", false)
+	firedrillOfframpProgramID, err := chain.DeployProgram(env.Logger, "firedrill_offramp", false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillOfframpAddress := solana.MustPublicKeyFromBase58(firedrillOfframpProgramID)
 	firedrill_offramp.SetProgramID(firedrillOfframpAddress)
 
-	firedrillFeeQuoterProgramID, err := chain.DeployProgram(env.Logger, "firedrill_feequoter", false)
+	firedrillFeeQuoterProgramID, err := chain.DeployProgram(env.Logger, "firedrill_feequoter", false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillFeeQuoterAddress := solana.MustPublicKeyFromBase58(firedrillFeeQuoterProgramID)
 	firedrill_feequoter.SetProgramID(firedrillFeeQuoterAddress)
 
-	firedrillTokenProgramID, err := chain.DeployProgram(env.Logger, "firedrill_token", false)
+	firedrillTokenProgramID, err := chain.DeployProgram(env.Logger, "firedrill_token", false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillTokenAddress := solana.MustPublicKeyFromBase58(firedrillTokenProgramID)
 	firedrill_token.SetProgramID(firedrillTokenAddress)
 
-	firedrillReceiverProgramID, err := chain.DeployProgram(env.Logger, "failing_receiver", false)
+	firedrillReceiverProgramID, err := chain.DeployProgram(env.Logger, "failing_receiver", false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}

@@ -21,10 +21,10 @@ require (
 	github.com/gagliardetto/treeout v0.1.4
 	github.com/smartcontractkit/chain-selectors v1.0.55
 	github.com/smartcontractkit/chainlink-ccip/chains/solana v0.0.0-20250506195202-6a3f20db41c6
-	github.com/smartcontractkit/chainlink-common v0.7.1-0.20250506185033-ea88ef405511
-	github.com/smartcontractkit/chainlink-deployments-framework v0.0.13
-	github.com/smartcontractkit/chainlink/deployment v0.0.0-20250508022647-04802cd56a30
-	github.com/smartcontractkit/chainlink/v2 v2.22.1-por-beta.5.0.20250508022647-04802cd56a30
+	github.com/smartcontractkit/chainlink-common v0.7.1-0.20250507190601-db395570d649
+	github.com/smartcontractkit/chainlink-deployments-framework v0.0.15-0.20250508081139-ee24199564bd
+	github.com/smartcontractkit/chainlink/deployment v0.0.0-20250509063500-e3e681caac42
+	github.com/smartcontractkit/chainlink/v2 v2.22.1-por-beta.5.0.20250509063500-e3e681caac42
 	github.com/stretchr/testify v1.10.0
 )
 
