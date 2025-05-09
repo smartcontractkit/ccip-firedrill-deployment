@@ -12,7 +12,7 @@ use crate::event::*;
 mod context;
 use crate::context::*;
 
-declare_id!("5UqQWaHG68xxSy2Mf2ywLhUwzNBd4fmEXsDDLng1v9ry");
+declare_id!("APXXVut5KxNW6bMPwVQtvYTqxY2ZyHMxyUXWnTiQqGvb");
 
 #[program]
 pub mod firedrill_offramp {

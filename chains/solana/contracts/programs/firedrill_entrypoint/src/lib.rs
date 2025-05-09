@@ -9,7 +9,7 @@ use crate::messages::*;
 pub mod state;
 use crate::state::*;
 
-declare_id!("351TRJhiMuGnf9YJjhyVA1HHGDAUbwq1U7ppQQZNhsqj");
+declare_id!("2kJTe1XWyb5EUoWFYEp3UwujceJkJ2SNGPjbD5dWEY7n");
 
 #[program]
 pub mod firedrill_entrypoint {
