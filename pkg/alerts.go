@@ -29,13 +29,13 @@ type GlobalInputNetwork struct {
 }
 
 type GlobalInputContracts struct {
-	Routers            []GlobalInputContract `yaml:"router_addresses"`
-	CommitStores       []GlobalInputContract `yaml:"commit_store_addresses,omitempty"`
-	OffRamps           []GlobalInputContract `yaml:"off_ramp_addresses"`
-	FiredrillTokens    []GlobalInputContract `yaml:"firedrill_token_addresses"`
-	FiredrillOnRamps   []GlobalInputContract `yaml:"firedrill_on_ramp_addresses"`
-	FiredrillOffRamps  []GlobalInputContract `yaml:"firedrill_off_ramp_addresses"`
-	FiredrillCompounds []GlobalInputContract `yaml:"firedrill_compound_addresses"`
+	Routers              []GlobalInputContract `yaml:"router_addresses"`
+	CommitStores         []GlobalInputContract `yaml:"commit_store_addresses,omitempty"`
+	OffRamps             []GlobalInputContract `yaml:"off_ramp_addresses"`
+	FiredrillTokens      []GlobalInputContract `yaml:"firedrill_token_addresses"`
+	FiredrillOnRamps     []GlobalInputContract `yaml:"firedrill_on_ramp_addresses"`
+	FiredrillOffRamps    []GlobalInputContract `yaml:"firedrill_off_ramp_addresses"`
+	FiredrillEntrypoints []GlobalInputContract `yaml:"firedrill_entrypoint_addresses"`
 }
 
 type GlobalInputContract struct {
@@ -84,12 +84,12 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.ChainDetails, vers
 			network.Contracts.FiredrillOffRamps,
 			GlobalInputContract{Address: entrypointView.OffRamp, Network: destChain.ChainName},
 		)
-		network.Contracts.FiredrillCompounds = append(
-			network.Contracts.FiredrillCompounds,
-			GlobalInputContract{Address: entrypointView.Compound, Network: destChain.ChainName},
+		network.Contracts.FiredrillEntrypoints = append(
+			network.Contracts.FiredrillEntrypoints,
+			GlobalInputContract{Address: entrypointView.Address, Network: destChain.ChainName},
 		)
 	}
-	if len(network.Contracts.FiredrillCompounds) == 0 {
+	if len(network.Contracts.FiredrillEntrypoints) == 0 {
 		return GlobalInput{}, fmt.Errorf("no active firedrills %s known for chain %s", version, destChain.ChainName)
 	}
 	switch version {

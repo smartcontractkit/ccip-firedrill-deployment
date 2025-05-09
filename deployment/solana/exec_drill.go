@@ -9,7 +9,7 @@ import (
 	solCommonUtil "github.com/smartcontractkit/chainlink-ccip/chains/solana/utils/common"
 	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 
-	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_compound"
+	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_offramp"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
@@ -35,13 +35,13 @@ func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillE
 }
 
 func CallDrillPendingCommit(idx uint64, client deployment.SolChain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
-	compoundProgram := solana.MustPublicKeyFromBase58(view.OnRamp)
-	compoundPDA, _, _ := FindFiredrillCompoundPDA(compoundProgram)
-	firedrill_compound.SetProgramID(compoundProgram)
-	ix, err := firedrill_compound.NewEmitCcipMessageSentInstruction(
+	entrypointProgram := solana.MustPublicKeyFromBase58(view.Address)
+	entrypointPDA, _, _ := FindFiredrillEntrypointPDA(entrypointProgram)
+	firedrill_entrypoint.SetProgramID(entrypointProgram)
+	ix, err := firedrill_entrypoint.NewEmitCcipMessageSentInstruction(
 		client.DeployerKey.PublicKey(),
 		idx,
-		compoundPDA,
+		entrypointPDA,
 		client.DeployerKey.PublicKey(),
 	).ValidateAndBuild()
 	if err != nil {

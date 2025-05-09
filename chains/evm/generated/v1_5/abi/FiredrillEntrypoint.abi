@@ -32,23 +32,43 @@
   },
   {
     "type": "function",
-    "name": "compound",
+    "name": "currentRateLimiterState",
     "inputs": [],
     "outputs": [
       {
         "name": "",
-        "type": "address",
-        "internalType": "address"
+        "type": "tuple",
+        "internalType": "struct FiredrillCompound.TokenBucket",
+        "components": [
+          {
+            "name": "tokens",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "lastUpdated",
+            "type": "uint32",
+            "internalType": "uint32"
+          },
+          {
+            "name": "isEnabled",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "capacity",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "rate",
+            "type": "uint128",
+            "internalType": "uint128"
+          }
+        ]
       }
     ],
     "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "deactivate",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -166,13 +186,221 @@
   },
   {
     "type": "function",
-    "name": "isActive",
+    "name": "emitCursed",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "emitReleased",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "emitTagRootBlessed",
+    "inputs": [
+      {
+        "name": "minSeqNr",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "maxSeqNr",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "emitUsdPerTokenUpdated",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "emitVotedToCurse",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getARM",
     "inputs": [],
     "outputs": [
       {
         "name": "",
-        "type": "bool",
-        "internalType": "bool"
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getCurrentInboundRateLimiterState",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct FiredrillCompound.TokenBucket",
+        "components": [
+          {
+            "name": "tokens",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "lastUpdated",
+            "type": "uint32",
+            "internalType": "uint32"
+          },
+          {
+            "name": "isEnabled",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "capacity",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "rate",
+            "type": "uint128",
+            "internalType": "uint128"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getCurrentOutboundRateLimiterState",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct FiredrillCompound.TokenBucket",
+        "components": [
+          {
+            "name": "tokens",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "lastUpdated",
+            "type": "uint32",
+            "internalType": "uint32"
+          },
+          {
+            "name": "isEnabled",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "capacity",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "rate",
+            "type": "uint128",
+            "internalType": "uint128"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getOffRamps",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple[]",
+        "internalType": "struct FiredrillCompound.OffRamp[]",
+        "components": [
+          {
+            "name": "sourceChainSelector",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "offRamp",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getOnRamp",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getStalenessThreshold",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint128",
+        "internalType": "uint128"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "getToken",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "stateMutability": "view"
@@ -297,6 +525,31 @@
   },
   {
     "type": "event",
+    "name": "Cursed",
+    "inputs": [
+      {
+        "name": "configVersion",
+        "type": "uint32",
+        "indexed": true,
+        "internalType": "uint32"
+      },
+      {
+        "name": "subject",
+        "type": "bytes16",
+        "indexed": false,
+        "internalType": "bytes16"
+      },
+      {
+        "name": "blockTimestamp",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "OwnershipTransferStarted",
     "inputs": [
       {
@@ -329,6 +582,148 @@
         "type": "address",
         "indexed": true,
         "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Released",
+    "inputs": [
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "recipient",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TaggedRootBlessed",
+    "inputs": [
+      {
+        "name": "configVersion",
+        "type": "uint32",
+        "indexed": true,
+        "internalType": "uint32"
+      },
+      {
+        "name": "taggedRoot",
+        "type": "tuple",
+        "indexed": false,
+        "internalType": "struct FiredrillCompound.TaggedRoot",
+        "components": [
+          {
+            "name": "commitStore",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "root",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
+      },
+      {
+        "name": "accumulatedWeight",
+        "type": "uint16",
+        "indexed": false,
+        "internalType": "uint16"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "UsdPerTokenUpdated",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "value",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "VotedToCurse",
+    "inputs": [
+      {
+        "name": "configVersion",
+        "type": "uint32",
+        "indexed": true,
+        "internalType": "uint32"
+      },
+      {
+        "name": "voter",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "subject",
+        "type": "bytes16",
+        "indexed": false,
+        "internalType": "bytes16"
+      },
+      {
+        "name": "curseId",
+        "type": "bytes16",
+        "indexed": false,
+        "internalType": "bytes16"
+      },
+      {
+        "name": "weight",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "uint8"
+      },
+      {
+        "name": "blockTimestamp",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "cursesHash",
+        "type": "bytes28",
+        "indexed": false,
+        "internalType": "bytes28"
+      },
+      {
+        "name": "accumulatedWeight",
+        "type": "uint16",
+        "indexed": false,
+        "internalType": "uint16"
       }
     ],
     "anonymous": false

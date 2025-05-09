@@ -18,12 +18,10 @@ import (
 
 type FiredrillEntrypoint interface {
 	Owner(opts *bind.CallOpts) (common.Address, error)
-	IsActive(opts *bind.CallOpts) (bool, error)
 	Token(opts *bind.CallOpts) (common.Address, error)
 	OnRamp(opts *bind.CallOpts) (common.Address, error)
 	OffRamp(opts *bind.CallOpts) (common.Address, error)
 	Receiver(opts *bind.CallOpts) (common.Address, error)
-	Compound(opts *bind.CallOpts) (common.Address, error)
 }
 
 var _ deployment.ChangeSetV2[shared.FiredrillConfig] = FiredrillDeployRegisterChangeSet{}
@@ -122,9 +120,8 @@ func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.Addre
 	entrypointTokenAddr, err1 := firedrillEntrypoint.Token(nil)
 	entrypointOnRampAddr, err2 := firedrillEntrypoint.OnRamp(nil)
 	entrypointOffRampAddr, err3 := firedrillEntrypoint.OffRamp(nil)
-	entrypointCompoundAddr, err4 := firedrillEntrypoint.Compound(nil)
-	entrypointReceiverAddr, err5 := firedrillEntrypoint.Receiver(nil)
-	if err := errors.Join(err1, err2, err3, err4, err5); err != nil {
+	entrypointReceiverAddr, err4 := firedrillEntrypoint.Receiver(nil)
+	if err := errors.Join(err1, err2, err3, err4); err != nil {
 		return err
 	}
 	if (entrypointTokenAddr == common.Address{}) {
@@ -135,9 +132,6 @@ func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.Addre
 	}
 	if (entrypointOffRampAddr == common.Address{}) {
 		err = errors.Join(err, errors.New("firedrill offramp on entrypoint can't be 0-address"))
-	}
-	if (entrypointCompoundAddr == common.Address{}) {
-		err = errors.Join(err, errors.New("firedrill compound on entrypoint can't be 0-address"))
 	}
 	if (entrypointReceiverAddr == common.Address{}) {
 		err = errors.Join(err, errors.New("firedrill receiver on entrypoint can't be 0-address"))

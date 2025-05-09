@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.24;
 
-import {HasStatus} from "../common/HasStatus.sol";
 import {FiredrillToken} from "../v1_0/FiredrillToken.sol";
-import {FiredrillEntrypoint} from "./FiredrillEntrypoint.sol";
+import {FiredrillCompound} from "./FiredrillCompound.sol";
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {Ownable2Step} from "@openzeppelin/access/Ownable2Step.sol";
 import {ITypeAndVersion} from "@chainlink/shared/interfaces/ITypeAndVersion.sol";
 
-contract FiredrillOnRamp is Ownable2Step, HasStatus, ITypeAndVersion {
+contract FiredrillOnRamp is Ownable2Step, ITypeAndVersion {
     event CCIPSendRequested(EVM2EVMMessage message);
 
     struct EVM2EVMMessage {
@@ -63,14 +62,10 @@ contract FiredrillOnRamp is Ownable2Step, HasStatus, ITypeAndVersion {
         bool enforceOutOfOrder; // ──────────────────╯ Whether to enforce the allowOutOfOrderExecution extraArg value to be true.
     }
 
-    FiredrillEntrypoint private immutable i_ctrl;
+    FiredrillCompound private immutable i_ctrl;
 
-    constructor(FiredrillEntrypoint ctrl) Ownable(msg.sender) {
+    constructor(FiredrillCompound ctrl) Ownable(msg.sender) {
         i_ctrl = ctrl;
-    }
-
-    function isActive() public view returns (bool) {
-        return i_ctrl.isActive();
     }
 
     function getStaticConfig() external view returns (StaticConfig memory) {
@@ -81,21 +76,21 @@ contract FiredrillOnRamp is Ownable2Step, HasStatus, ITypeAndVersion {
             defaultTxGasLimit: 0,
             maxNopFeesJuels: 0,
             prevOnRamp: address(0),
-            rmnProxy: address(i_ctrl.compound()),
-            tokenAdminRegistry: address(i_ctrl.compound())
+            rmnProxy: address(i_ctrl),
+            tokenAdminRegistry: address(i_ctrl)
         });
     }
 
     function getDynamicConfig() external view returns (DynamicConfig memory dynamicConfig) {
         return DynamicConfig({
-            router: address(i_ctrl.compound()),
+            router: address(i_ctrl),
             maxNumberOfTokensPerMsg: 0,
             destGasOverhead: 0,
             destGasPerPayloadByte: 0,
             destDataAvailabilityOverheadGas: 0,
             destGasPerDataAvailabilityByte: 0,
             destDataAvailabilityMultiplierBps: 0,
-            priceRegistry: address(i_ctrl.compound()),
+            priceRegistry: address(i_ctrl),
             maxDataBytes: 0,
             maxPerMsgGasLimit: 0,
             defaultTokenFeeUSDCents: 0,
