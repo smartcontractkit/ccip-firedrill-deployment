@@ -21,6 +21,30 @@ export type FiredrillEntrypoint = {
           "isSigner": false
         },
         {
+          "name": "token",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The PDA where we want a single “firedrill token” mint for this entrypoint"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL Token program"
+          ]
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Rent sysvar for SPL init"
+          ]
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -35,10 +59,6 @@ export type FiredrillEntrypoint = {
         {
           "name": "chainSelector",
           "type": "u64"
-        },
-        {
-          "name": "token",
-          "type": "publicKey"
         },
         {
           "name": "offRamp",
@@ -454,6 +474,30 @@ export const IDL: FiredrillEntrypoint = {
           "isSigner": false
         },
         {
+          "name": "token",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The PDA where we want a single “firedrill token” mint for this entrypoint"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL Token program"
+          ]
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Rent sysvar for SPL init"
+          ]
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -468,10 +512,6 @@ export const IDL: FiredrillEntrypoint = {
         {
           "name": "chainSelector",
           "type": "u64"
-        },
-        {
-          "name": "token",
-          "type": "publicKey"
         },
         {
           "name": "offRamp",

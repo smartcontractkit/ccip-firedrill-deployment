@@ -13,7 +13,6 @@ import (
 // Initialize is the `initialize` instruction.
 type Initialize struct {
 	ChainSelector *uint64
-	Token         *ag_solanago.PublicKey
 	OffRamp       *ag_solanago.PublicKey
 	FeeQuoter     *ag_solanago.PublicKey
 	Receiver      *ag_solanago.PublicKey
@@ -24,16 +23,25 @@ type Initialize struct {
 	//
 	// [2] = [WRITE] destChain
 	//
-	// [3] = [WRITE, SIGNER] authority
+	// [3] = [WRITE] token
+	// ··········· The PDA where we want a single “firedrill token” mint for this entrypoint
 	//
-	// [4] = [] systemProgram
+	// [4] = [] tokenProgram
+	// ··········· SPL Token program
+	//
+	// [5] = [] rent
+	// ··········· Rent sysvar for SPL init
+	//
+	// [6] = [WRITE, SIGNER] authority
+	//
+	// [7] = [] systemProgram
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewInitializeInstructionBuilder creates a new `Initialize` instruction builder.
 func NewInitializeInstructionBuilder() *Initialize {
 	nd := &Initialize{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 5),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 8),
 	}
 	return nd
 }
@@ -41,12 +49,6 @@ func NewInitializeInstructionBuilder() *Initialize {
 // SetChainSelector sets the "chainSelector" parameter.
 func (inst *Initialize) SetChainSelector(chainSelector uint64) *Initialize {
 	inst.ChainSelector = &chainSelector
-	return inst
-}
-
-// SetToken sets the "token" parameter.
-func (inst *Initialize) SetToken(token ag_solanago.PublicKey) *Initialize {
-	inst.Token = &token
 	return inst
 }
 
@@ -101,26 +103,65 @@ func (inst *Initialize) GetDestChainAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(2)
 }
 
+// SetTokenAccount sets the "token" account.
+// The PDA where we want a single “firedrill token” mint for this entrypoint
+func (inst *Initialize) SetTokenAccount(token ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(token).WRITE()
+	return inst
+}
+
+// GetTokenAccount gets the "token" account.
+// The PDA where we want a single “firedrill token” mint for this entrypoint
+func (inst *Initialize) GetTokenAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(3)
+}
+
+// SetTokenProgramAccount sets the "tokenProgram" account.
+// SPL Token program
+func (inst *Initialize) SetTokenProgramAccount(tokenProgram ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(tokenProgram)
+	return inst
+}
+
+// GetTokenProgramAccount gets the "tokenProgram" account.
+// SPL Token program
+func (inst *Initialize) GetTokenProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(4)
+}
+
+// SetRentAccount sets the "rent" account.
+// Rent sysvar for SPL init
+func (inst *Initialize) SetRentAccount(rent ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(rent)
+	return inst
+}
+
+// GetRentAccount gets the "rent" account.
+// Rent sysvar for SPL init
+func (inst *Initialize) GetRentAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(5)
+}
+
 // SetAuthorityAccount sets the "authority" account.
 func (inst *Initialize) SetAuthorityAccount(authority ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(authority).WRITE().SIGNER()
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(authority).WRITE().SIGNER()
 	return inst
 }
 
 // GetAuthorityAccount gets the "authority" account.
 func (inst *Initialize) GetAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(3)
+	return inst.AccountMetaSlice.Get(6)
 }
 
 // SetSystemProgramAccount sets the "systemProgram" account.
 func (inst *Initialize) SetSystemProgramAccount(systemProgram ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(systemProgram)
+	inst.AccountMetaSlice[7] = ag_solanago.Meta(systemProgram)
 	return inst
 }
 
 // GetSystemProgramAccount gets the "systemProgram" account.
 func (inst *Initialize) GetSystemProgramAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(4)
+	return inst.AccountMetaSlice.Get(7)
 }
 
 func (inst Initialize) Build() *Instruction {
@@ -146,9 +187,6 @@ func (inst *Initialize) Validate() error {
 		if inst.ChainSelector == nil {
 			return errors.New("ChainSelector parameter is not set")
 		}
-		if inst.Token == nil {
-			return errors.New("Token parameter is not set")
-		}
 		if inst.OffRamp == nil {
 			return errors.New("OffRamp parameter is not set")
 		}
@@ -172,9 +210,18 @@ func (inst *Initialize) Validate() error {
 			return errors.New("accounts.DestChain is not set")
 		}
 		if inst.AccountMetaSlice[3] == nil {
-			return errors.New("accounts.Authority is not set")
+			return errors.New("accounts.Token is not set")
 		}
 		if inst.AccountMetaSlice[4] == nil {
+			return errors.New("accounts.TokenProgram is not set")
+		}
+		if inst.AccountMetaSlice[5] == nil {
+			return errors.New("accounts.Rent is not set")
+		}
+		if inst.AccountMetaSlice[6] == nil {
+			return errors.New("accounts.Authority is not set")
+		}
+		if inst.AccountMetaSlice[7] == nil {
 			return errors.New("accounts.SystemProgram is not set")
 		}
 	}
@@ -190,21 +237,23 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=5]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Params[len=4]").ParentFunc(func(paramsBranch ag_treeout.Branches) {
 						paramsBranch.Child(ag_format.Param("ChainSelector", *inst.ChainSelector))
-						paramsBranch.Child(ag_format.Param("        Token", *inst.Token))
 						paramsBranch.Child(ag_format.Param("      OffRamp", *inst.OffRamp))
 						paramsBranch.Child(ag_format.Param("    FeeQuoter", *inst.FeeQuoter))
 						paramsBranch.Child(ag_format.Param("     Receiver", *inst.Receiver))
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=5]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+					instructionBranch.Child("Accounts[len=8]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("   entrypoint", inst.AccountMetaSlice.Get(0)))
 						accountsBranch.Child(ag_format.Meta("       config", inst.AccountMetaSlice.Get(1)))
 						accountsBranch.Child(ag_format.Meta("    destChain", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(ag_format.Meta("    authority", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(ag_format.Meta("systemProgram", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("        token", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta(" tokenProgram", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("         rent", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(ag_format.Meta("    authority", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(ag_format.Meta("systemProgram", inst.AccountMetaSlice.Get(7)))
 					})
 				})
 		})
@@ -213,11 +262,6 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 func (obj Initialize) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	// Serialize `ChainSelector` param:
 	err = encoder.Encode(obj.ChainSelector)
-	if err != nil {
-		return err
-	}
-	// Serialize `Token` param:
-	err = encoder.Encode(obj.Token)
 	if err != nil {
 		return err
 	}
@@ -244,11 +288,6 @@ func (obj *Initialize) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err err
 	if err != nil {
 		return err
 	}
-	// Deserialize `Token`:
-	err = decoder.Decode(&obj.Token)
-	if err != nil {
-		return err
-	}
 	// Deserialize `OffRamp`:
 	err = decoder.Decode(&obj.OffRamp)
 	if err != nil {
@@ -271,7 +310,6 @@ func (obj *Initialize) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err err
 func NewInitializeInstruction(
 	// Parameters:
 	chainSelector uint64,
-	token ag_solanago.PublicKey,
 	offRamp ag_solanago.PublicKey,
 	feeQuoter ag_solanago.PublicKey,
 	receiver ag_solanago.PublicKey,
@@ -279,17 +317,22 @@ func NewInitializeInstruction(
 	entrypoint ag_solanago.PublicKey,
 	config ag_solanago.PublicKey,
 	destChain ag_solanago.PublicKey,
+	token ag_solanago.PublicKey,
+	tokenProgram ag_solanago.PublicKey,
+	rent ag_solanago.PublicKey,
 	authority ag_solanago.PublicKey,
 	systemProgram ag_solanago.PublicKey) *Initialize {
 	return NewInitializeInstructionBuilder().
 		SetChainSelector(chainSelector).
-		SetToken(token).
 		SetOffRamp(offRamp).
 		SetFeeQuoter(feeQuoter).
 		SetReceiver(receiver).
 		SetEntrypointAccount(entrypoint).
 		SetConfigAccount(config).
 		SetDestChainAccount(destChain).
+		SetTokenAccount(token).
+		SetTokenProgramAccount(tokenProgram).
+		SetRentAccount(rent).
 		SetAuthorityAccount(authority).
 		SetSystemProgramAccount(systemProgram)
 }

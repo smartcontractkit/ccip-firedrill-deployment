@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Mint};
 use ethnum::U256;
 
 use shared::seed;
@@ -9,7 +10,7 @@ use crate::messages::*;
 pub mod state;
 use crate::state::*;
 
-declare_id!("2kJTe1XWyb5EUoWFYEp3UwujceJkJ2SNGPjbD5dWEY7n");
+declare_id!("7QHnC8L6vFK55jj4g6DNDcyfZQboGGMXi7rk8NEPEDs9");
 
 #[program]
 pub mod firedrill_entrypoint {
@@ -18,7 +19,6 @@ pub mod firedrill_entrypoint {
     pub fn initialize(
         ctx: Context<Initialize>,
         chain_selector: u64,
-        token: Pubkey,
         off_ramp: Pubkey,
         fee_quoter: Pubkey,
         receiver: Pubkey,
@@ -27,7 +27,7 @@ pub mod firedrill_entrypoint {
         let state = &mut ctx.accounts.entrypoint;
         state.owner = ctx.accounts.authority.key();
         state.chain_selector = chain_selector;
-        state.token = token;
+        state.token = ctx.accounts.token.key();
         state.off_ramp = off_ramp;
         state.fee_quoter = fee_quoter;
         state.receiver = receiver;
@@ -42,7 +42,7 @@ pub mod firedrill_entrypoint {
             svm_chain_selector: chain_selector,
             fee_quoter,
             rmn_remote: ID,
-            link_token_mint: token,
+            link_token_mint: ctx.accounts.token.key(),
             fee_aggregator: ID,
         });
 
@@ -158,6 +158,24 @@ pub struct Initialize<'info> {
         space = 8 + DestChain::INIT_SPACE + 4, // 4 = empty Vec<Pubkey> len prefix
     )]
     pub dest_chain: Account<'info, DestChain>,
+
+    /// The PDA where we want a single “firedrill token” mint for this entrypoint
+    #[account(
+      init,
+      seeds = [seed::TOKEN],
+      bump,
+      payer = authority,
+      // SPL Token init flags:
+      mint::decimals = 6,
+      mint::authority = entrypoint.key(),
+      mint::freeze_authority = entrypoint.key(),
+    )]
+    pub token: Account<'info, Mint>,
+
+    /// SPL Token program
+    pub token_program: Program<'info, token::Token>,
+    /// Rent sysvar for SPL init
+    pub rent: Sysvar<'info, Rent>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

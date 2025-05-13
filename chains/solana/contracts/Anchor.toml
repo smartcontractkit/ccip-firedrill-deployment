@@ -6,16 +6,16 @@ seeds = false
 skip-lint = false
 
 [programs.devnet]
-failing_receiver = "2qK8FXM4ri8Fzv1sesxo1PrCS6NqX5AM1qF8Yhh5E3TR"
-firedrill_entrypoint = "2kJTe1XWyb5EUoWFYEp3UwujceJkJ2SNGPjbD5dWEY7n"
-firedrill_feequoter = "6GyN8oxTLKib8qHrNvSby2TT5uAexqWHJ7NoAPZVBwxk"
-firedrill_offramp = "APXXVut5KxNW6bMPwVQtvYTqxY2ZyHMxyUXWnTiQqGvb"
+failing_receiver = "26qpAicnGsqYijAKtKkiD2mRwo3JTaUdDxVwLxT7nujm"
+firedrill_entrypoint = "7QHnC8L6vFK55jj4g6DNDcyfZQboGGMXi7rk8NEPEDs9"
+firedrill_feequoter = "8y39U4xMcKnPP1NyWdYCEFTuCgZ18STYgeCxsjnSVcHm"
+firedrill_offramp = "5asxTLb5cbDHnNdhTMNfLecMeJHFvbCfrvuqxVjeCqTR"
 
 [programs.mainnet]
-failing_receiver = "2qK8FXM4ri8Fzv1sesxo1PrCS6NqX5AM1qF8Yhh5E3TR"
-firedrill_entrypoint = "2kJTe1XWyb5EUoWFYEp3UwujceJkJ2SNGPjbD5dWEY7n"
-firedrill_feequoter = "6GyN8oxTLKib8qHrNvSby2TT5uAexqWHJ7NoAPZVBwxk"
-firedrill_offramp = "APXXVut5KxNW6bMPwVQtvYTqxY2ZyHMxyUXWnTiQqGvb"
+failing_receiver = "26qpAicnGsqYijAKtKkiD2mRwo3JTaUdDxVwLxT7nujm"
+firedrill_entrypoint = "7QHnC8L6vFK55jj4g6DNDcyfZQboGGMXi7rk8NEPEDs9"
+firedrill_feequoter = "8y39U4xMcKnPP1NyWdYCEFTuCgZ18STYgeCxsjnSVcHm"
+firedrill_offramp = "5asxTLb5cbDHnNdhTMNfLecMeJHFvbCfrvuqxVjeCqTR"
 
 [registry]
 url = "https://api.apr.dev"

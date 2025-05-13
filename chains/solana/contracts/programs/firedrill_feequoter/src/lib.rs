@@ -5,7 +5,7 @@ use shared::seed;
 pub mod state;
 use crate::state::*;
 
-declare_id!("6GyN8oxTLKib8qHrNvSby2TT5uAexqWHJ7NoAPZVBwxk");
+declare_id!("8y39U4xMcKnPP1NyWdYCEFTuCgZ18STYgeCxsjnSVcHm");
 
 #[program]
 pub mod firedrill_feequoter {

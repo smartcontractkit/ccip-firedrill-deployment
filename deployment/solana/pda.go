@@ -18,6 +18,10 @@ func FindFiredrillEntrypointDestChainPDA(firedrillCompoundProgram solana.PublicK
 	return solana.FindProgramAddress([][]byte{[]byte("dest_chain_state"), chainSelectorLE}, firedrillCompoundProgram)
 }
 
+func FindFiredrillEntrypointTokenPDA(firedrillTokenProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
+	return solana.FindProgramAddress([][]byte{[]byte("token")}, firedrillTokenProgram)
+}
+
 func FindFiredrillOfframpPDA(firedrillOfframpProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
 	return solana.FindProgramAddress([][]byte{[]byte("offramp")}, firedrillOfframpProgram)
 }
@@ -46,8 +50,4 @@ func FindFiredrillFeeQuoterConfigPDA(firedrillFeeQuoterProgram solana.PublicKey)
 func FindFiredrillFeeQuoterDestChainPDA(firedrillFeeQuoterProgram solana.PublicKey, chainSelector uint64) (solana.PublicKey, uint8, error) {
 	chainSelectorLE := common.Uint64ToLE(chainSelector)
 	return solana.FindProgramAddress([][]byte{[]byte("dest_chain"), chainSelectorLE}, firedrillFeeQuoterProgram)
-}
-
-func FindFiredrillTokenPDA(firedrillTokenProgram solana.PublicKey) (solana.PublicKey, uint8, error) {
-	return solana.FindProgramAddress([][]byte{[]byte("token")}, firedrillTokenProgram)
 }
