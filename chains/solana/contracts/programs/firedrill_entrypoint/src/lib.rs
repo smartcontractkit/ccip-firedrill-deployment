@@ -136,7 +136,7 @@ pub struct Config {
 }
 
 #[derive(Accounts)]
-#[instruction(chain_selector: u64, token: Pubkey, off_ramp: Pubkey, fee_quoter: Pubkey, receiver: Pubkey)]
+#[instruction(chain_selector: u64, off_ramp: Pubkey, fee_quoter: Pubkey, receiver: Pubkey)]
 pub struct Initialize<'info> {
     #[account(init, seeds = [seed::ENTRYPOINT], bump, payer = authority, space = 8 + 32 + 8 + 32 + 32 + 32 + 32 + 1)]
     pub entrypoint: Account<'info, FiredrillEntrypoint>,

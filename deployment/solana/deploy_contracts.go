@@ -92,7 +92,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	firedrillEntrypointPDA, _, _ := FindFiredrillEntrypointPDA(firedrillEntrypointAddress)
 	firedrillEntrypointConfigPDA, _, _ := FindFiredrillEntrypointConfigPDA(firedrillEntrypointAddress)
 	firedrillEntrypointDestChainPDA, _, _ := FindFiredrillEntrypointDestChainPDA(firedrillEntrypointAddress, config.ChainSelector)
-	firedrillTokenPDA, _, _ := FindFiredrillEntrypointTokenPDA(firedrillEntrypointAddress)
+	firedrillEntrypointTokenPDA, _, _ := FindFiredrillEntrypointTokenPDA(firedrillEntrypointAddress)
 	err = chain.GetAccountDataBorshInto(env.GetContext(), firedrillEntrypointPDA, &firedrillEntrypointAccount)
 	if err != nil {
 		initTx, err2 := firedrill_entrypoint.NewInitializeInstruction(
@@ -103,7 +103,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 			firedrillEntrypointPDA,
 			firedrillEntrypointConfigPDA,
 			firedrillEntrypointDestChainPDA,
-			firedrillTokenPDA,
+			firedrillEntrypointTokenPDA,
 			token.ProgramID,
 			solana.SysVarRentPubkey,
 			chain.DeployerKey.PublicKey(),
@@ -133,7 +133,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 		}
 		initTx, err2 := firedrill_offramp.NewInitializeInstruction(
 			chain.Selector,
-			firedrillTokenPDA,
+			firedrillEntrypointTokenPDA,
 			firedrillFeeQuoterAddress,
 			firedrillEntrypointAddress,
 			firedrillOfframpSourceChainPDA,
@@ -176,7 +176,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 			firedrillFeeQuoterPDA,
 			firedrillFeeQuoterConfigPDA,
 			firedrillFeeQuoterDestChainPDA,
-			firedrillTokenPDA,
+			firedrillEntrypointTokenPDA,
 			chain.DeployerKey.PublicKey(),
 			solana.SystemProgramID,
 		).ValidateAndBuild()
