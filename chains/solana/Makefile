@@ -51,6 +51,10 @@ rematch-ids:
 reclaim-sol:
 	./scripts/reclaim-sol.sh
 
+.PHONY: estimate-rent
+estimate-rent:
+	./scripts/estimate-rent.sh
+
 .PHONY: format
 format:
 	go fmt ./... && cd ./contracts && cargo fmt

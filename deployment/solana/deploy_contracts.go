@@ -13,11 +13,9 @@ import (
 	deploy "github.com/smartcontractkit/chainlink/deployment"
 
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/failing_receiver"
-	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_compound"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_feequoter"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_offramp"
-	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_token"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
@@ -62,13 +60,6 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	ab := deployment.NewMemoryAddressBook()
 	chain := env.SolChains[config.ChainSelector]
 
-	firedrillCompoundProgramID, err := chain.DeployProgram(env.Logger, "firedrill_compound", false, false)
-	if err != nil {
-		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
-	}
-	firedrillCompoundAddress := solana.MustPublicKeyFromBase58(firedrillCompoundProgramID)
-	firedrill_compound.SetProgramID(firedrillCompoundAddress)
-
 	firedrillEntrypointProgramID, err := chain.DeployProgram(env.Logger, "firedrill_entrypoint", false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
@@ -90,13 +81,6 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	firedrillFeeQuoterAddress := solana.MustPublicKeyFromBase58(firedrillFeeQuoterProgramID)
 	firedrill_feequoter.SetProgramID(firedrillFeeQuoterAddress)
 
-	firedrillTokenProgramID, err := chain.DeployProgram(env.Logger, "firedrill_token", false, false)
-	if err != nil {
-		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
-	}
-	firedrillTokenAddress := solana.MustPublicKeyFromBase58(firedrillTokenProgramID)
-	firedrill_token.SetProgramID(firedrillTokenAddress)
-
 	firedrillReceiverProgramID, err := chain.DeployProgram(env.Logger, "failing_receiver", false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
@@ -104,41 +88,24 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	firedrillReceiverAddress := solana.MustPublicKeyFromBase58(firedrillReceiverProgramID)
 	failing_receiver.SetProgramID(firedrillReceiverAddress)
 
-	var firedrillTokenAccount token.Mint
-	firedrillTokenPDA, _, _ := FindFiredrillTokenPDA(firedrillTokenAddress)
-	err = chain.GetAccountDataBorshInto(env.GetContext(), firedrillTokenPDA, &firedrillTokenAccount)
+	var firedrillEntrypointAccount firedrill_entrypoint.FiredrillEntrypoint
+	firedrillEntrypointPDA, _, _ := FindFiredrillEntrypointPDA(firedrillEntrypointAddress)
+	firedrillEntrypointConfigPDA, _, _ := FindFiredrillEntrypointConfigPDA(firedrillEntrypointAddress)
+	firedrillEntrypointDestChainPDA, _, _ := FindFiredrillEntrypointDestChainPDA(firedrillEntrypointAddress, config.ChainSelector)
+	firedrillEntrypointTokenPDA, _, _ := FindFiredrillEntrypointTokenPDA(firedrillEntrypointAddress)
+	err = chain.GetAccountDataBorshInto(env.GetContext(), firedrillEntrypointPDA, &firedrillEntrypointAccount)
 	if err != nil {
-		initTx, err2 := firedrill_token.NewInitializeInstruction(
-			firedrillTokenPDA,
-			chain.DeployerKey.PublicKey(),
-			solana.TokenProgramID,
-			solana.SystemProgramID,
-			solana.SysVarRentPubkey,
-		).ValidateAndBuild()
-		if err2 != nil {
-			return deployment.ChangesetOutput{}, fmt.Errorf("failed to build instruction: %w", err2)
-		}
-		if err2 := chain.Confirm([]solana.Instruction{initTx}); err2 != nil {
-			return deployment.ChangesetOutput{}, fmt.Errorf("failed to confirm token initialization: %w", err2)
-		}
-		env.Logger.Infow("FiredrillToken initialized", "chain", chain.String())
-	} else {
-		env.Logger.Infow("FiredrillToken already initialized, skipping initialization", "chain", chain.String())
-	}
-
-	var firedrillCompoundAccount firedrill_compound.FiredrillCompound
-	firedrillCompoundPDA, _, _ := FindFiredrillCompoundPDA(firedrillCompoundAddress)
-	firedrillCompoundConfigPDA, _, _ := FindFiredrillCompoundConfigPDA(firedrillCompoundAddress)
-	firedrillCompoundDestChainPDA, _, _ := FindFiredrillCompoundDestChainPDA(firedrillCompoundAddress, config.ChainSelector)
-	err = chain.GetAccountDataBorshInto(env.GetContext(), firedrillCompoundPDA, &firedrillCompoundAccount)
-	if err != nil {
-		initTx, err2 := firedrill_compound.NewInitializeInstruction(
+		initTx, err2 := firedrill_entrypoint.NewInitializeInstruction(
 			config.ChainSelector,
+			firedrillOfframpAddress,
 			firedrillFeeQuoterAddress,
-			firedrillTokenPDA,
-			firedrillCompoundPDA,
-			firedrillCompoundConfigPDA,
-			firedrillCompoundDestChainPDA,
+			firedrillReceiverAddress,
+			firedrillEntrypointPDA,
+			firedrillEntrypointConfigPDA,
+			firedrillEntrypointDestChainPDA,
+			firedrillEntrypointTokenPDA,
+			token.ProgramID,
+			solana.SysVarRentPubkey,
 			chain.DeployerKey.PublicKey(),
 			solana.SystemProgramID,
 		).ValidateAndBuild()
@@ -147,32 +114,6 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 		}
 		if err2 := chain.Confirm([]solana.Instruction{initTx}); err2 != nil {
 			return deployment.ChangesetOutput{}, fmt.Errorf("failed to confirm compound initialization: %w", err2)
-		}
-		env.Logger.Infow("FiredrillCompound initialized", "chain", chain.String())
-	} else {
-		env.Logger.Infow("FiredrillCompound already initialized, skipping initialization", "chain", chain.String())
-	}
-
-	var firedrillEntrypointAccount firedrill_entrypoint.FiredrillEntrypoint
-	firedrillEntrypointPDA, _, _ := FindFiredrillEntrypointPDA(firedrillEntrypointAddress)
-	err = chain.GetAccountDataBorshInto(env.GetContext(), firedrillEntrypointPDA, &firedrillEntrypointAccount)
-	if err != nil {
-		initTx, err2 := firedrill_entrypoint.NewInitializeInstruction(
-			chain.Selector,
-			firedrillTokenAddress,
-			firedrillOfframpAddress,
-			firedrillOfframpAddress,
-			firedrillCompoundAddress,
-			firedrillReceiverAddress,
-			firedrillEntrypointPDA,
-			chain.DeployerKey.PublicKey(),
-			solana.SystemProgramID,
-		).ValidateAndBuild()
-		if err2 != nil {
-			return deployment.ChangesetOutput{}, fmt.Errorf("failed to build instruction: %w", err2)
-		}
-		if err2 := chain.Confirm([]solana.Instruction{initTx}); err2 != nil {
-			return deployment.ChangesetOutput{}, fmt.Errorf("failed to confirm entrypoint initialization: %w", err2)
 		}
 		env.Logger.Infow("FiredrillEntrypoint initialized", "chain", chain.String())
 	} else {
@@ -192,9 +133,9 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 		}
 		initTx, err2 := firedrill_offramp.NewInitializeInstruction(
 			chain.Selector,
-			firedrillTokenPDA,
+			firedrillEntrypointTokenPDA,
 			firedrillFeeQuoterAddress,
-			firedrillCompoundAddress,
+			firedrillEntrypointAddress,
 			firedrillOfframpSourceChainPDA,
 			firedrillOfframpReferenceAddressesPDA,
 			firedrillOfframpPDA,
@@ -231,11 +172,11 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	if err != nil {
 		initTx, err2 := firedrill_feequoter.NewInitializeInstruction(
 			chain.Selector,
-			firedrillCompoundAddress,
+			firedrillEntrypointAddress,
 			firedrillFeeQuoterPDA,
 			firedrillFeeQuoterConfigPDA,
 			firedrillFeeQuoterDestChainPDA,
-			firedrillTokenPDA,
+			firedrillEntrypointTokenPDA,
 			chain.DeployerKey.PublicKey(),
 			solana.SystemProgramID,
 		).ValidateAndBuild()

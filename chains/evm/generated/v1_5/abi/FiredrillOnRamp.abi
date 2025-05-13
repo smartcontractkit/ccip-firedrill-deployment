@@ -5,7 +5,7 @@
       {
         "name": "ctrl",
         "type": "address",
-        "internalType": "contract FiredrillEntrypoint"
+        "internalType": "contract FiredrillCompound"
       }
     ],
     "stateMutability": "nonpayable"
@@ -171,19 +171,6 @@
             "internalType": "address"
           }
         ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "isActive",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
       }
     ],
     "stateMutability": "view"

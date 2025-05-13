@@ -6,12 +6,16 @@ seeds = false
 skip-lint = false
 
 [programs.devnet]
-failing_receiver = "Dri11EwVRViqqkjs7SWV3d3ejcanBGMNrcGhD6HVn756"
-firedrill_compound = "Dri11NnBPbx85w8a47ZXBZa3Hi7E2xvHAA9Xpyk7UivQ"
-firedrill_entrypoint = "Dri11c6TXJXELaZUgQtyw3doxbn7bGXQ6z5LRZ8bMPbc"
-firedrill_feequoter = "3d1KhA6K2L6pbzpuhYGHTcsj1B4f3r86wJRE81brYTQW"
-firedrill_offramp = "Dri11kiWR5f1oTn5NLm3wmfaDq3cYauR92wrsTxNaudt"
-firedrill_token = "Dri11r4S1hY8iMpxNh6UoYZ9hsGgmGUUyZ3zxUb2rpc2"
+failing_receiver = "26qpAicnGsqYijAKtKkiD2mRwo3JTaUdDxVwLxT7nujm"
+firedrill_entrypoint = "7QHnC8L6vFK55jj4g6DNDcyfZQboGGMXi7rk8NEPEDs9"
+firedrill_feequoter = "8y39U4xMcKnPP1NyWdYCEFTuCgZ18STYgeCxsjnSVcHm"
+firedrill_offramp = "5asxTLb5cbDHnNdhTMNfLecMeJHFvbCfrvuqxVjeCqTR"
+
+[programs.mainnet]
+failing_receiver = "26qpAicnGsqYijAKtKkiD2mRwo3JTaUdDxVwLxT7nujm"
+firedrill_entrypoint = "7QHnC8L6vFK55jj4g6DNDcyfZQboGGMXi7rk8NEPEDs9"
+firedrill_feequoter = "8y39U4xMcKnPP1NyWdYCEFTuCgZ18STYgeCxsjnSVcHm"
+firedrill_offramp = "5asxTLb5cbDHnNdhTMNfLecMeJHFvbCfrvuqxVjeCqTR"
 
 [registry]
 url = "https://api.apr.dev"

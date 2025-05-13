@@ -5,7 +5,7 @@
       {
         "name": "ctrl",
         "type": "address",
-        "internalType": "contract FiredrillEntrypoint"
+        "internalType": "contract FiredrillCompound"
       }
     ],
     "stateMutability": "nonpayable"
@@ -77,7 +77,7 @@
     "name": "getSourceChainConfig",
     "inputs": [
       {
-        "name": "sourceChainSelector",
+        "name": "",
         "type": "uint64",
         "internalType": "uint64"
       }
@@ -154,19 +154,6 @@
             "internalType": "address"
           }
         ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "isActive",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
       }
     ],
     "stateMutability": "view"
