@@ -50,7 +50,7 @@ func CallDrillPendingCommit(from uint8, to uint8, client deployment.Chain, view 
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.DrillPendingCommitPendingQueueTxSpike(nil, from, to)
+		tx, err := entrypoint.DrillPendingCommitPendingQueueTxSpike(client.DeployerKey, from, to)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
@@ -61,7 +61,7 @@ func CallDrillPendingCommit(from uint8, to uint8, client deployment.Chain, view 
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.DrillPendingCommitPendingQueueTxSpike(nil, from, to)
+		tx, err := entrypoint.DrillPendingCommitPendingQueueTxSpike(client.DeployerKey, from, to)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
@@ -79,7 +79,7 @@ func CallDrillPendingExec(from uint8, to uint8, client deployment.Chain, view sh
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.DrillPendingExecution(nil, from, to)
+		tx, err := entrypoint.DrillPendingExecution(client.DeployerKey, from, to)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
@@ -90,7 +90,7 @@ func CallDrillPendingExec(from uint8, to uint8, client deployment.Chain, view sh
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.DrillPendingExecution(nil, from, to)
+		tx, err := entrypoint.DrillPendingExecution(client.DeployerKey, from, to)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
@@ -108,7 +108,7 @@ func CallDrillPendingBless(from uint8, to uint8, client deployment.Chain, view s
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.DrillPendingExecution(nil, from, to)
+		tx, err := entrypoint.DrillPendingExecution(client.DeployerKey, from, to)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
@@ -126,7 +126,7 @@ func CallDrillPriceRegistry(client deployment.Chain, view shared.FiredrillEntryp
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.DrillPriceRegistries(nil)
+		tx, err := entrypoint.DrillPriceRegistries(client.DeployerKey)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
@@ -137,7 +137,7 @@ func CallDrillPriceRegistry(client deployment.Chain, view shared.FiredrillEntryp
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.DrillPriceRegistries(nil)
+		tx, err := entrypoint.DrillPriceRegistries(client.DeployerKey)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
