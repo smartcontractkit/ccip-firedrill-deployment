@@ -84,9 +84,10 @@ func contractView(contract FiredrillEntrypoint, address common.Address, typeAndV
 			Address:        strings.ToLower(address.String()),
 			Owner:          strings.ToLower(owner.String()),
 		},
-		Token:    strings.ToLower(token.String()),
-		OnRamp:   strings.ToLower(onramp.String()),
-		OffRamp:  strings.ToLower(offramp.String()),
-		Receiver: strings.ToLower(receiver.String()),
+		Token:     strings.ToLower(token.String()),
+		OnRamp:    strings.ToLower(onramp.String()),
+		OffRamp:   strings.ToLower(offramp.String()),
+		FeeQuoter: strings.ToLower(address.String()),
+		Receiver:  strings.ToLower(receiver.String()),
 	}, nil
 }
