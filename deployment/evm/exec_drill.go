@@ -71,6 +71,24 @@ func CallDrillPendingCommit(from uint8, to uint8, client deployment.Chain, view 
 	return nil, fmt.Errorf("unsupported version %s", typeAndVersion.Version)
 }
 
+func CallDrillPendingBless(from uint8, to uint8, client deployment.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
+	typeAndVersion := deployment.MustTypeAndVersionFromString(view.TypeAndVersion)
+	switch typeAndVersion.Version {
+	case deploy.Version1_5_0:
+		entrypoint, err := firedrill_entrypoint.NewFiredrillEntrypoint(common.HexToAddress(view.Address), client.Client)
+		if err != nil {
+			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
+		}
+		tx, err := entrypoint.DrillPendingBless(client.DeployerKey, from, to)
+		_, err = deployment.ConfirmIfNoError(client, tx, err)
+		if err != nil {
+			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
+		}
+		return tx, nil
+	}
+	return nil, fmt.Errorf("unsupported version %s", typeAndVersion.Version)
+}
+
 func CallDrillPendingExec(from uint8, to uint8, client deployment.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
 	typeAndVersion := deployment.MustTypeAndVersionFromString(view.TypeAndVersion)
 	switch typeAndVersion.Version {
@@ -87,24 +105,6 @@ func CallDrillPendingExec(from uint8, to uint8, client deployment.Chain, view sh
 		return tx, nil
 	case deploy.Version1_6_0:
 		entrypoint, err := firedrill_entrypoint_v1_6.NewFiredrillEntrypoint(common.HexToAddress(view.Address), client.Client)
-		if err != nil {
-			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
-		}
-		tx, err := entrypoint.DrillPendingExecution(client.DeployerKey, from, to)
-		_, err = deployment.ConfirmIfNoError(client, tx, err)
-		if err != nil {
-			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
-		}
-		return tx, nil
-	}
-	return nil, fmt.Errorf("unsupported version %s", typeAndVersion.Version)
-}
-
-func CallDrillPendingBless(from uint8, to uint8, client deployment.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
-	typeAndVersion := deployment.MustTypeAndVersionFromString(view.TypeAndVersion)
-	switch typeAndVersion.Version {
-	case deploy.Version1_5_0:
-		entrypoint, err := firedrill_entrypoint.NewFiredrillEntrypoint(common.HexToAddress(view.Address), client.Client)
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
