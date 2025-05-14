@@ -153,8 +153,12 @@ func lookupCCIPv1_6(ccipView view.CCIPView, srcChain chainsel.ChainDetails, dest
 	contracts := GlobalInputContracts{}
 	if chainView, ok := ccipView.Chains[destChain.ChainName]; ok {
 		for _, offRampView := range chainView.OffRamp {
-			sourceChainConfig, ok := offRampView.SourceChainConfigs[srcChain.ChainSelector]
-			if !ok || sourceChainConfig.Router == (common.Address{}) {
+			var router common.Address
+			if sourceChainConfig, ok := offRampView.SourceChainConfigs[srcChain.ChainSelector]; ok && sourceChainConfig.Router != (common.Address{}) {
+				router = sourceChainConfig.Router
+			} else if sourceChainConfigBasedOnTestRouter, ok := offRampView.SourceChainConfigsBasedOnTestRouter[srcChain.ChainSelector]; ok && sourceChainConfigBasedOnTestRouter.Router != (common.Address{}) {
+				router = sourceChainConfigBasedOnTestRouter.Router
+			} else {
 				continue
 			}
 			contracts.OffRamps = append(
@@ -163,7 +167,7 @@ func lookupCCIPv1_6(ccipView view.CCIPView, srcChain chainsel.ChainDetails, dest
 			)
 			// There shouldn't be several matching offramps
 			return GlobalInputContracts{
-				Routers:  []GlobalInputContract{{Address: strings.ToLower(sourceChainConfig.Router.Hex()), Network: destChain.ChainName}},
+				Routers:  []GlobalInputContract{{Address: strings.ToLower(router.Hex()), Network: destChain.ChainName}},
 				OffRamps: []GlobalInputContract{{Address: strings.ToLower(offRampView.Address.Hex()), Network: destChain.ChainName}},
 			}
 		}

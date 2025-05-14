@@ -21,7 +21,7 @@ func CallDrillPrepareRegister(client deployment.Chain, view shared.FiredrillEntr
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.PrepareRegister(nil)
+		tx, err := entrypoint.PrepareRegister(client.DeployerKey)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
@@ -32,7 +32,7 @@ func CallDrillPrepareRegister(client deployment.Chain, view shared.FiredrillEntr
 		if err != nil {
 			return nil, fmt.Errorf("can't instantiate FiredrillEntrypoint: %w", err)
 		}
-		tx, err := entrypoint.PrepareRegister(nil)
+		tx, err := entrypoint.PrepareRegister(client.DeployerKey)
 		_, err = deployment.ConfirmIfNoError(client, tx, err)
 		if err != nil {
 			return nil, fmt.Errorf("can't confirm PrepareRegister: %w", err)
