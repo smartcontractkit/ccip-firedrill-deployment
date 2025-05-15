@@ -16,6 +16,7 @@ import (
 )
 
 type GlobalInput struct {
+	Tag  string             `yaml:"tag,omitempty"`
 	CCIP GlobalInputProduct `yaml:"ccip"`
 }
 
@@ -125,7 +126,9 @@ func AlertsGlobalInput(lggr logger.Logger, destChain chainsel.ChainDetails, vers
 	default:
 		return GlobalInput{}, fmt.Errorf("version %s is not supported", version)
 	}
-	g := GlobalInput{}
+	g := GlobalInput{
+		Tag: destChain.ChainName,
+	}
 	if isTestnet {
 		g.CCIP.Testnet = &network
 	} else {
