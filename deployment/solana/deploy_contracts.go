@@ -60,28 +60,28 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 	ab := deployment.NewMemoryAddressBook()
 	chain := env.SolChains[config.ChainSelector]
 
-	firedrillEntrypointProgramID, err := chain.DeployProgram(env.Logger, "firedrill_entrypoint", false, false)
+	firedrillEntrypointProgramID, err := chain.DeployProgram(env.Logger, deployment.SolProgramInfo{Name: "firedrill_entrypoint"}, false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillEntrypointAddress := solana.MustPublicKeyFromBase58(firedrillEntrypointProgramID)
 	firedrill_entrypoint.SetProgramID(firedrillEntrypointAddress)
 
-	firedrillOfframpProgramID, err := chain.DeployProgram(env.Logger, "firedrill_offramp", false, false)
+	firedrillOfframpProgramID, err := chain.DeployProgram(env.Logger, deployment.SolProgramInfo{Name: "firedrill_offramp"}, false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillOfframpAddress := solana.MustPublicKeyFromBase58(firedrillOfframpProgramID)
 	firedrill_offramp.SetProgramID(firedrillOfframpAddress)
 
-	firedrillFeeQuoterProgramID, err := chain.DeployProgram(env.Logger, "firedrill_feequoter", false, false)
+	firedrillFeeQuoterProgramID, err := chain.DeployProgram(env.Logger, deployment.SolProgramInfo{Name: "firedrill_feequoter"}, false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillFeeQuoterAddress := solana.MustPublicKeyFromBase58(firedrillFeeQuoterProgramID)
 	firedrill_feequoter.SetProgramID(firedrillFeeQuoterAddress)
 
-	firedrillReceiverProgramID, err := chain.DeployProgram(env.Logger, "failing_receiver", false, false)
+	firedrillReceiverProgramID, err := chain.DeployProgram(env.Logger, deployment.SolProgramInfo{Name: "failing_receiver"}, false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
