@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	cldf_evm "github.com/smartcontractkit/chainlink-deployments-framework/chain/evm"
 	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 	deploy "github.com/smartcontractkit/chainlink/deployment"
 
@@ -13,7 +14,7 @@ import (
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
-func CallDrillPrepareRegister(client deployment.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
+func CallDrillPrepareRegister(client cldf_evm.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
 	typeAndVersion := deployment.MustTypeAndVersionFromString(view.TypeAndVersion)
 	switch typeAndVersion.Version {
 	case deploy.Version1_5_0:
@@ -42,7 +43,7 @@ func CallDrillPrepareRegister(client deployment.Chain, view shared.FiredrillEntr
 	return nil, fmt.Errorf("unsupported version %s", typeAndVersion.Version)
 }
 
-func CallDrillPendingCommit(from uint8, to uint8, client deployment.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
+func CallDrillPendingCommit(from uint8, to uint8, client cldf_evm.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
 	typeAndVersion := deployment.MustTypeAndVersionFromString(view.TypeAndVersion)
 	switch typeAndVersion.Version {
 	case deploy.Version1_5_0:
@@ -71,7 +72,7 @@ func CallDrillPendingCommit(from uint8, to uint8, client deployment.Chain, view 
 	return nil, fmt.Errorf("unsupported version %s", typeAndVersion.Version)
 }
 
-func CallDrillPendingBless(from uint8, to uint8, client deployment.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
+func CallDrillPendingBless(from uint8, to uint8, client cldf_evm.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
 	typeAndVersion := deployment.MustTypeAndVersionFromString(view.TypeAndVersion)
 	switch typeAndVersion.Version {
 	case deploy.Version1_5_0:
@@ -89,7 +90,7 @@ func CallDrillPendingBless(from uint8, to uint8, client deployment.Chain, view s
 	return nil, fmt.Errorf("unsupported version %s", typeAndVersion.Version)
 }
 
-func CallDrillPendingExec(from uint8, to uint8, client deployment.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
+func CallDrillPendingExec(from uint8, to uint8, client cldf_evm.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
 	typeAndVersion := deployment.MustTypeAndVersionFromString(view.TypeAndVersion)
 	switch typeAndVersion.Version {
 	case deploy.Version1_5_0:
@@ -118,7 +119,7 @@ func CallDrillPendingExec(from uint8, to uint8, client deployment.Chain, view sh
 	return nil, fmt.Errorf("unsupported version %s", typeAndVersion.Version)
 }
 
-func CallDrillPriceRegistry(client deployment.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
+func CallDrillPriceRegistry(client cldf_evm.Chain, view shared.FiredrillEntrypointView) (*types.Transaction, error) {
 	typeAndVersion := deployment.MustTypeAndVersionFromString(view.TypeAndVersion)
 	switch typeAndVersion.Version {
 	case deploy.Version1_5_0:

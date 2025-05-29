@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	chainsel "github.com/smartcontractkit/chain-selectors"
+	cldf_chain "github.com/smartcontractkit/chainlink-deployments-framework/chain"
 	"github.com/stretchr/testify/require"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/utils/tests"
@@ -19,20 +21,27 @@ import (
 func TestCCIPViewFiredrill(t *testing.T) {
 	lggr := logger.TestLogger(t)
 	chains, _ := memory.NewMemoryChains(t, 3, 1)
-	env := *deployment.NewEnvironment(
+
+	blockChains := make(map[uint64]cldf_chain.BlockChain)
+	for _, chain := range chains {
+		blockChains[chain.ChainSelector()] = chain
+	}
+
+	env := *deployment.NewCLDFEnvironment(
 		memory.Memory,
 		lggr,
 		deployment.NewMemoryAddressBook(),
 		nil,
-		chains,
-		map[uint64]deployment.SolChain{},
-		map[uint64]deployment.AptosChain{},
+		nil, // remove in future , use env.BlockChains going forward
+		nil, // remove in future , use env.BlockChains going forward
+		nil, // remove in future , use env.BlockChains going forward
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
 		deployment.XXXGenerateTestOCRSecrets(),
+		cldf_chain.NewBlockChains(blockChains),
 	)
-	chainSels := env.AllChainSelectors()
+	chainSels := env.BlockChains.ListChainSelectors(cldf_chain.WithFamily(chainsel.FamilyEVM))
 	require.Len(t, chainSels, 3)
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
