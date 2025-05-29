@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	chainsel "github.com/smartcontractkit/chain-selectors"
 	"github.com/smartcontractkit/chainlink-common/pkg/utils/tests"
+	cldf_chain "github.com/smartcontractkit/chainlink-deployments-framework/chain"
 	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 	deploy "github.com/smartcontractkit/chainlink/deployment"
 	"github.com/smartcontractkit/chainlink/deployment/environment/memory"
@@ -24,20 +26,27 @@ import (
 func TestDeployFiredrillContracts(t *testing.T) {
 	lggr := logger.TestLogger(t)
 	chains, _ := memory.NewMemoryChains(t, 2, 1)
-	env := *deployment.NewEnvironment(
+
+	blockChains := make(map[uint64]cldf_chain.BlockChain)
+	for _, chain := range chains {
+		blockChains[chain.ChainSelector()] = chain
+	}
+
+	env := *deployment.NewCLDFEnvironment(
 		memory.Memory,
 		lggr,
 		deployment.NewMemoryAddressBook(),
 		nil,
-		chains,
-		map[uint64]deployment.SolChain{},
-		map[uint64]deployment.AptosChain{},
+		nil, // remove in future , use env.BlockChains going forward
+		nil, // remove in future , use env.BlockChains going forward
+		nil, // remove in future , use env.BlockChains going forward
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
 		deployment.XXXGenerateTestOCRSecrets(),
+		cldf_chain.NewBlockChains(blockChains),
 	)
-	chainSels := env.AllChainSelectors()
+	chainSels := env.BlockChains.ListChainSelectors(cldf_chain.WithFamily(chainsel.FamilyEVM))
 	require.Len(t, chainSels, 2)
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
@@ -60,20 +69,27 @@ func TestDeployFiredrillContracts(t *testing.T) {
 func TestRegisterFiredrill(t *testing.T) {
 	lggr := logger.TestLogger(t)
 	chains, _ := memory.NewMemoryChains(t, 2, 1)
-	env := *deployment.NewEnvironment(
+
+	blockChains := make(map[uint64]cldf_chain.BlockChain)
+	for _, chain := range chains {
+		blockChains[chain.ChainSelector()] = chain
+	}
+
+	env := *deployment.NewCLDFEnvironment(
 		memory.Memory,
 		lggr,
 		deployment.NewMemoryAddressBook(),
 		nil,
-		chains,
-		map[uint64]deployment.SolChain{},
-		map[uint64]deployment.AptosChain{},
+		nil, // remove in future , use env.BlockChains going forward
+		nil, // remove in future , use env.BlockChains going forward
+		nil, // remove in future , use env.BlockChains going forward
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
 		deployment.XXXGenerateTestOCRSecrets(),
+		cldf_chain.NewBlockChains(blockChains),
 	)
-	chainSels := env.AllChainSelectors()
+	chainSels := env.BlockChains.ListChainSelectors(cldf_chain.WithFamily(chainsel.FamilyEVM))
 	require.Len(t, chainSels, 2)
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
@@ -88,19 +104,20 @@ func TestRegisterFiredrill(t *testing.T) {
 	firedrillEntrypointAddrStr, err := deployment.SearchAddressBook(firedrillChangeset.AddressBook, chainSel, shared.FiredrillEntrypointType)
 	firedrillEntrypointAddr := common.HexToAddress(firedrillEntrypointAddrStr)
 	require.NoError(t, err)
-	firedrillEntrypoint, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(firedrillEntrypointAddr, env.Chains[chainSel].Client)
+	evmChains := env.BlockChains.EVMChains()
+	firedrillEntrypoint, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(firedrillEntrypointAddr, evmChains[chainSel].Client)
 	require.NoError(t, err)
 	firedrillOnRampAddr, err := firedrillEntrypoint.OnRamp(nil)
 	require.NoError(t, err)
 	firedrillOffRampAddr, err := firedrillEntrypoint.OffRamp(nil)
 	require.NoError(t, err)
-	firedrillOffRamp, err := firedrill_off_ramp.NewFiredrillOffRamp(firedrillOffRampAddr, env.Chains[chainSel].Client)
+	firedrillOffRamp, err := firedrill_off_ramp.NewFiredrillOffRamp(firedrillOffRampAddr, evmChains[chainSel].Client)
 	require.NoError(t, err)
 	offRampSetSink := make(chan *firedrill_off_ramp.FiredrillOffRampConfigSet)
 	subscription, err := firedrillOffRamp.WatchConfigSet(nil, offRampSetSink)
 	require.NoError(t, err)
 	defer subscription.Unsubscribe()
-	err = FiredrillRegisterContracts(env.Logger, env.ExistingAddresses, env.Chains[chainSel])
+	err = FiredrillRegisterContracts(env.Logger, env.ExistingAddresses, env.BlockChains.EVMChains()[chainSel])
 	require.NoError(t, err)
 	timer := time.NewTimer(1 * time.Second)
 	for {

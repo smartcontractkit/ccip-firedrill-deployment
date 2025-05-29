@@ -16,9 +16,10 @@ func SolViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, e
 	if err != nil {
 		return nil, err
 	}
-	solChains := make(map[string]*shared.ChainView)
+	solChainsViews := make(map[string]*shared.ChainView)
+	solChains := e.BlockChains.SolanaChains()
 	for chainSel, addresses := range ab {
-		if chain, ok := e.SolChains[chainSel]; ok {
+		if chain, ok := solChains[chainSel]; ok {
 			chainView, err := shared.NewChainView(chain.Selector)
 			if err != nil {
 				return nil, err
@@ -41,12 +42,12 @@ func SolViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, e
 				chainView.FiredrillEntrypoint[programID] = view
 			}
 			if len(chainView.FiredrillEntrypoint) > 0 {
-				solChains[chain.Name()] = chainView
+				solChainsViews[chain.Name()] = chainView
 			}
 		}
 
 	}
-	return solChains, nil
+	return solChainsViews, nil
 }
 
 func contractView(contract firedrill_entrypoint2.FiredrillEntrypoint, address solana.PublicKey, typeAndVersion string) (shared.FiredrillEntrypointView, error) {

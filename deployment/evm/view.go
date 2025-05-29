@@ -17,9 +17,10 @@ func EVMViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, e
 	if err != nil {
 		return nil, err
 	}
-	chains := make(map[string]*shared.ChainView)
+	chainsViews := make(map[string]*shared.ChainView)
+	evmChains := e.BlockChains.EVMChains()
 	for chainSel, addresses := range ab {
-		if chain, ok := e.Chains[chainSel]; ok {
+		if chain, ok := evmChains[chainSel]; ok {
 			chainView, err := shared.NewChainView(chain.Selector)
 			if err != nil {
 				return nil, err
@@ -50,11 +51,11 @@ func EVMViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, e
 				}
 			}
 			if len(chainView.FiredrillEntrypoint) > 0 {
-				chains[chain.Name()] = chainView
+				chainsViews[chain.Name()] = chainView
 			}
 		}
 	}
-	return chains, nil
+	return chainsViews, nil
 }
 
 func contractView(contract FiredrillEntrypoint, address common.Address, typeAndVersion string) (shared.FiredrillEntrypointView, error) {

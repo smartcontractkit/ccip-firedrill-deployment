@@ -9,6 +9,7 @@ import (
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	solRpc "github.com/gagliardetto/solana-go/rpc"
+	cldf_solana "github.com/smartcontractkit/chainlink-deployments-framework/chain/solana"
 	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 	deploy "github.com/smartcontractkit/chainlink/deployment"
 
@@ -45,7 +46,7 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 	if config.ChainSelector == 0 {
 		return errors.New("missing ChainSelector")
 	}
-	_, ok := e.SolChains[config.ChainSelector]
+	_, ok := e.BlockChains.SolanaChains()[config.ChainSelector]
 	if !ok {
 		return fmt.Errorf("missing chain for selector %d. If this is first deployment for this chain, "+
 			"you need to specify empty address book, i.e. in addresses.json: `\"%d\": {}`", config.ChainSelector, config.ChainSelector)
@@ -58,30 +59,30 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 
 func DeployAndInitializeFiredrillContracts(env deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
 	ab := deployment.NewMemoryAddressBook()
-	chain := env.SolChains[config.ChainSelector]
+	chain := env.BlockChains.SolanaChains()[config.ChainSelector]
 
-	firedrillEntrypointProgramID, err := chain.DeployProgram(env.Logger, deployment.SolProgramInfo{Name: "firedrill_entrypoint"}, false, false)
+	firedrillEntrypointProgramID, err := chain.DeployProgram(env.Logger, cldf_solana.ProgramInfo{Name: "firedrill_entrypoint"}, false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillEntrypointAddress := solana.MustPublicKeyFromBase58(firedrillEntrypointProgramID)
 	firedrill_entrypoint.SetProgramID(firedrillEntrypointAddress)
 
-	firedrillOfframpProgramID, err := chain.DeployProgram(env.Logger, deployment.SolProgramInfo{Name: "firedrill_offramp"}, false, false)
+	firedrillOfframpProgramID, err := chain.DeployProgram(env.Logger, cldf_solana.ProgramInfo{Name: "firedrill_offramp"}, false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillOfframpAddress := solana.MustPublicKeyFromBase58(firedrillOfframpProgramID)
 	firedrill_offramp.SetProgramID(firedrillOfframpAddress)
 
-	firedrillFeeQuoterProgramID, err := chain.DeployProgram(env.Logger, deployment.SolProgramInfo{Name: "firedrill_feequoter"}, false, false)
+	firedrillFeeQuoterProgramID, err := chain.DeployProgram(env.Logger, cldf_solana.ProgramInfo{Name: "firedrill_feequoter"}, false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
 	firedrillFeeQuoterAddress := solana.MustPublicKeyFromBase58(firedrillFeeQuoterProgramID)
 	firedrill_feequoter.SetProgramID(firedrillFeeQuoterAddress)
 
-	firedrillReceiverProgramID, err := chain.DeployProgram(env.Logger, deployment.SolProgramInfo{Name: "failing_receiver"}, false, false)
+	firedrillReceiverProgramID, err := chain.DeployProgram(env.Logger, cldf_solana.ProgramInfo{Name: "failing_receiver"}, false, false)
 	if err != nil {
 		return deployment.ChangesetOutput{}, fmt.Errorf("failed to deploy program: %w", err)
 	}
@@ -201,7 +202,7 @@ func DeployAndInitializeFiredrillContracts(env deployment.Environment, config sh
 
 }
 
-func solProgramData(e deployment.Environment, chain deployment.SolChain, programID solana.PublicKey) (struct {
+func solProgramData(e deployment.Environment, chain cldf_solana.Chain, programID solana.PublicKey) (struct {
 	DataType uint32
 	Address  solana.PublicKey
 }, error) {

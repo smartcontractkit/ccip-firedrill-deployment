@@ -7,14 +7,14 @@ import (
 	"github.com/gagliardetto/solana-go"
 	solRpc "github.com/gagliardetto/solana-go/rpc"
 	solCommonUtil "github.com/smartcontractkit/chainlink-ccip/chains/solana/utils/common"
-	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
+	cldf_solana "github.com/smartcontractkit/chainlink-deployments-framework/chain/solana"
 
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/solana/gobindings/firedrill_offramp"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
 )
 
-func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
+func CallDrillPrepareRegister(client cldf_solana.Chain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
 	offRampProgram := solana.MustPublicKeyFromBase58(view.OffRamp)
 	firedrill_offramp.SetProgramID(offRampProgram)
 	offRampPDA, _, _ := FindFiredrillOfframpPDA(offRampProgram)
@@ -34,7 +34,7 @@ func CallDrillPrepareRegister(client deployment.SolChain, view shared.FiredrillE
 	return tx, nil
 }
 
-func CallDrillPendingCommit(idx uint64, client deployment.SolChain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
+func CallDrillPendingCommit(idx uint64, client cldf_solana.Chain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
 	entrypointProgram := solana.MustPublicKeyFromBase58(view.Address)
 	entrypointPDA, _, _ := FindFiredrillEntrypointPDA(entrypointProgram)
 	firedrill_entrypoint.SetProgramID(entrypointProgram)
@@ -54,7 +54,7 @@ func CallDrillPendingCommit(idx uint64, client deployment.SolChain, view shared.
 	return tx, nil
 }
 
-func CallDrillPendingExec(from uint64, to uint64, client deployment.SolChain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
+func CallDrillPendingExec(from uint64, to uint64, client cldf_solana.Chain, view shared.FiredrillEntrypointView) (*solana.Transaction, error) {
 	offRampProgram := solana.MustPublicKeyFromBase58(view.OffRamp)
 	firedrill_offramp.SetProgramID(offRampProgram)
 	offRampPDA, _, _ := FindFiredrillOfframpPDA(offRampProgram)
@@ -73,7 +73,7 @@ func CallDrillPendingExec(from uint64, to uint64, client deployment.SolChain, vi
 	return tx, nil
 }
 
-func Confirm(chain deployment.SolChain, ix solana.Instruction) (*solana.Transaction, error) {
+func Confirm(chain cldf_solana.Chain, ix solana.Instruction) (*solana.Transaction, error) {
 	txReceipt, err := solCommonUtil.SendAndConfirm(
 		context.Background(), chain.Client, []solana.Instruction{ix}, *chain.DeployerKey, solRpc.CommitmentConfirmed,
 	)
