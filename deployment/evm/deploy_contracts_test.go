@@ -32,14 +32,11 @@ func TestDeployFiredrillContracts(t *testing.T) {
 		blockChains[chain.ChainSelector()] = chain
 	}
 
-	env := *deployment.NewCLDFEnvironment(
+	env := *deployment.NewEnvironment(
 		memory.Memory,
 		lggr,
 		deployment.NewMemoryAddressBook(),
 		nil,
-		nil, // remove in future , use env.BlockChains going forward
-		nil, // remove in future , use env.BlockChains going forward
-		nil, // remove in future , use env.BlockChains going forward
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
@@ -75,14 +72,11 @@ func TestRegisterFiredrill(t *testing.T) {
 		blockChains[chain.ChainSelector()] = chain
 	}
 
-	env := *deployment.NewCLDFEnvironment(
+	env := *deployment.NewEnvironment(
 		memory.Memory,
 		lggr,
 		deployment.NewMemoryAddressBook(),
 		nil,
-		nil, // remove in future , use env.BlockChains going forward
-		nil, // remove in future , use env.BlockChains going forward
-		nil, // remove in future , use env.BlockChains going forward
 		[]string{},
 		nil,
 		func() context.Context { return tests.Context(t) },
