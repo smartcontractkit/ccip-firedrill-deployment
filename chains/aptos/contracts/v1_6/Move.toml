@@ -1,0 +1,15 @@
+[package]
+name = "CCIPFiredrillV1_6"
+version = "1.0.0"
+authors = ["Chainlink Labs"]
+
+[addresses]
+firedrill = "_"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "837d04bd9bd0dd7156da4252bcfc1d080ed591ec", subdir = "aptos-move/framework/aptos-framework" }
+
+[dev-dependencies]
+
+[dev-addresses]
+firedrill = "0x100"
