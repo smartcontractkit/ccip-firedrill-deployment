@@ -5,18 +5,11 @@ authors = ["Chainlink Labs"]
 
 [addresses]
 firedrill = "_"
-ccip = "_"
-mcms = "_"
-mcms_register_entrypoints = "_"
 
 [dependencies]
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "837d04bd9bd0dd7156da4252bcfc1d080ed591ec", subdir = "aptos-move/framework/aptos-framework" }
-ChainlinkCCIP = { git = "https://github.com/smartcontractkit/chainlink-aptos", rev = "develop", subdir = "contracts/ccip/ccip" }
 
 [dev-dependencies]
 
 [dev-addresses]
 firedrill = "0x100"
-ccip = "0x85d5520ea6a8b1501502651040c6f61238b281142ccbafdc205d40258f0bec10"
-mcms = "0x4000"
-mcms_register_entrypoints = "0x4001"

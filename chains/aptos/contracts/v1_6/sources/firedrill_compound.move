@@ -10,6 +10,7 @@ module firedrill::firedrill_compound {
     friend firedrill::firedrill_entrypoint;
 
     const COMPOUND_SEED: vector<u8> = b"FiredrillCompound";
+    const CHAIN_SELECTOR: u64 = 10;
 
     struct StaticConfig has copy, drop, store {
         max_fee_juels_per_msg: u128,
@@ -41,27 +42,21 @@ module firedrill::firedrill_compound {
         timestamp: u64
     }
 
-    const E_INVALID_CHAIN_SELECTOR: u64 = 1;
-
-    /// Only owner of this code object can initialize the compound state
-    fun initialize(admin: &signer, chain_selector: u64) {
-        assert!(chain_selector > 0, E_INVALID_CHAIN_SELECTOR);
-
-        let constructor_ref = object::create_named_object(admin, COMPOUND_SEED);
+    fun init_module(deployer: &signer) {
+        let constructor_ref = object::create_named_object(deployer, COMPOUND_SEED);
         let extend_ref = object::generate_extend_ref(&constructor_ref);
         let object_signer = &object::generate_signer(&constructor_ref);
 
         account::create_account_if_does_not_exist(signer::address_of(object_signer));
 
         let ownable_state = ownable::new(object_signer, @firedrill);
-        ownable::assert_only_owner(signer::address_of(admin), &ownable_state);
 
         move_to(
             object_signer,
             CompoundState {
                 extend_ref,
                 ownable_state,
-                chain_selector,
+                chain_selector: CHAIN_SELECTOR,
                 token_address: firedrill_token::token_address(),
                 onramp_address: @firedrill,
                 offramp_address: @firedrill,
@@ -69,6 +64,12 @@ module firedrill::firedrill_compound {
                 usd_per_token_updated_events: account::new_event_handle(object_signer)
             }
         );
+    }
+
+    /// Update receiver address
+    public entry fun set_receiver(caller: &signer, receiver: address) acquires CompoundState {
+        assert_only_owner(caller);
+        borrow_mut().receiver_address = receiver;
     }
 
     public(friend) fun emit_usd_per_token_updated() acquires CompoundState {
