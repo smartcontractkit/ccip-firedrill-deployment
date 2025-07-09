@@ -29,6 +29,7 @@ module firedrill::firedrill_entrypoint {
 
     public entry fun prepare_register(admin: &signer) {
         firedrill_compound::assert_only_owner(admin);
+
         firedrill_offramp::emit_source_chain_config_set(); // register OffRamp
     }
 
@@ -68,13 +69,28 @@ module firedrill::firedrill_entrypoint {
 
     public entry fun drill_offramp_initialize(admin: &signer) {
         firedrill_compound::assert_only_owner(admin);
+
         firedrill_offramp::emit_static_config_set();
         firedrill_offramp::emit_dynamic_config_set();
         firedrill_offramp::emit_source_chain_config_set();
     }
 
+    public entry fun drill_onramp_initialize(admin: &signer) {
+        firedrill_compound::assert_only_owner(admin);
+
+        firedrill_onramp::emit_dest_chain_config_set();
+    }
+
+    public entry fun drill_allowlist_senders_added_removed(admin: &signer) {
+        firedrill_compound::assert_only_owner(admin);
+
+        firedrill_onramp::emit_allowlist_senders_added();
+        firedrill_onramp::emit_allowlist_senders_removed();
+    }
+
     public entry fun drill_offramp_execute(admin: &signer) {
         firedrill_compound::assert_only_owner(admin);
+
         firedrill_offramp::emit_skipped_already_executed();
         firedrill_offramp::emit_skipped_report_execution();
     }

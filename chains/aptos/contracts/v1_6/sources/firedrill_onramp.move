@@ -171,7 +171,57 @@ module firedrill::firedrill_onramp {
         );
     }
 
-    // ========== View Functions ==========
+    public(friend) fun emit_dest_chain_config_set() acquires OnRampState {
+        event::emit_event(
+            &mut borrow_mut().dest_chain_config_set_events,
+            DestChainConfigSet {
+                dest_chain_selector: firedrill_compound::chain_selector(),
+                sequence_number: 0,
+                router: @firedrill,
+                allowlist_enabled: false
+            }
+        );
+        event::emit(
+            DestChainConfigSet {
+                dest_chain_selector: firedrill_compound::chain_selector(),
+                sequence_number: 0,
+                router: @firedrill,
+                allowlist_enabled: false
+            }
+        );
+    }
+
+    public(friend) fun emit_allowlist_senders_added() acquires OnRampState {
+        event::emit_event(
+            &mut borrow_mut().allowlist_senders_added_events,
+            AllowlistSendersAdded {
+                dest_chain_selector: firedrill_compound::chain_selector(),
+                senders: vector[]
+            }
+        );
+        event::emit(
+            AllowlistSendersAdded {
+                dest_chain_selector: firedrill_compound::chain_selector(),
+                senders: vector[]
+            }
+        );
+    }
+
+    public(friend) fun emit_allowlist_senders_removed() acquires OnRampState {
+        event::emit_event(
+            &mut borrow_mut().allowlist_senders_removed_events,
+            AllowlistSendersRemoved {
+                dest_chain_selector: firedrill_compound::chain_selector(),
+                senders: vector[]
+            }
+        );
+        event::emit(
+            AllowlistSendersRemoved {
+                dest_chain_selector: firedrill_compound::chain_selector(),
+                senders: vector[]
+            }
+        );
+    }
 
     #[view]
     public fun get_static_config(): StaticConfig {
