@@ -1,21 +1,19 @@
-module firedrill::firedrill_onramp {
+module firedrill::onramp {
     use std::signer;
     use std::string::{Self, String};
     use std::event::{Self, EventHandle};
-    use std::object::{Self, Object, ExtendRef};
+    use std::object::{Self, Object};
     use std::bcs;
     use std::account;
 
-    use firedrill::firedrill_compound::{Self};
+    use firedrill::compound::{Self};
     use firedrill::ownable::{Self, OwnableState};
+    use firedrill::state_object;
 
-    friend firedrill::firedrill_entrypoint;
-
-    const ONRAMP_SEED: vector<u8> = b"firedrill_onramp";
+    friend firedrill::entrypoint;
 
     #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
     struct OnRampState has key {
-        extend_ref: ExtendRef,
         ownable_state: OwnableState,
 
         /// Events
@@ -115,13 +113,8 @@ module firedrill::firedrill_onramp {
     fun init_module(deployer: &signer) {
         assert!(signer::address_of(deployer) == @firedrill, E_NOT_CODE_OBJECT);
 
-        let constructor_ref = &object::create_named_object(deployer, ONRAMP_SEED);
-        let object_signer = &object::generate_signer(constructor_ref);
-
-        account::create_account_if_does_not_exist(signer::address_of(object_signer));
-
+        let object_signer = &state_object::object_signer();
         let state = OnRampState {
-            extend_ref: object::generate_extend_ref(constructor_ref),
             ownable_state: ownable::new(object_signer, @firedrill),
             config_set_events: account::new_event_handle(object_signer),
             dest_chain_config_set_events: account::new_event_handle(object_signer),
@@ -132,7 +125,9 @@ module firedrill::firedrill_onramp {
         move_to(object_signer, state);
     }
 
-    public(friend) fun emit_ccip_message_sent(sender: address, index: u64) acquires OnRampState {
+    public(friend) fun emit_ccip_message_sent(
+        sender: address, index: u64
+    ) acquires OnRampState {
         let message_id = vector[];
         message_id.append(bcs::to_bytes(&sender));
         message_id.append(bcs::to_bytes(&index));
@@ -140,8 +135,8 @@ module firedrill::firedrill_onramp {
         let message = Aptos2AnyRampMessage {
             header: RampMessageHeader {
                 message_id,
-                source_chain_selector: firedrill_compound::chain_selector(),
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                source_chain_selector: compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 sequence_number: index,
                 nonce: 1
             },
@@ -149,7 +144,7 @@ module firedrill::firedrill_onramp {
             data: b"123",
             receiver: bcs::to_bytes(&sender),
             extra_args: b"123",
-            fee_token: firedrill_compound::token_address(),
+            fee_token: compound::token_address(),
             fee_token_amount: 0,
             fee_value_juels: 0,
             token_amounts: vector[]
@@ -157,14 +152,14 @@ module firedrill::firedrill_onramp {
         event::emit_event(
             &mut borrow_mut().ccip_message_sent_events,
             CCIPMessageSent {
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 sequence_number: index,
                 message
             }
         );
         event::emit(
             CCIPMessageSent {
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 sequence_number: index,
                 message
             }
@@ -175,7 +170,7 @@ module firedrill::firedrill_onramp {
         event::emit_event(
             &mut borrow_mut().dest_chain_config_set_events,
             DestChainConfigSet {
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 sequence_number: 0,
                 router: @firedrill,
                 allowlist_enabled: false
@@ -183,7 +178,7 @@ module firedrill::firedrill_onramp {
         );
         event::emit(
             DestChainConfigSet {
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 sequence_number: 0,
                 router: @firedrill,
                 allowlist_enabled: false
@@ -195,13 +190,13 @@ module firedrill::firedrill_onramp {
         event::emit_event(
             &mut borrow_mut().allowlist_senders_added_events,
             AllowlistSendersAdded {
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 senders: vector[]
             }
         );
         event::emit(
             AllowlistSendersAdded {
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 senders: vector[]
             }
         );
@@ -211,13 +206,13 @@ module firedrill::firedrill_onramp {
         event::emit_event(
             &mut borrow_mut().allowlist_senders_removed_events,
             AllowlistSendersRemoved {
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 senders: vector[]
             }
         );
         event::emit(
             AllowlistSendersRemoved {
-                dest_chain_selector: firedrill_compound::chain_selector(),
+                dest_chain_selector: compound::chain_selector(),
                 senders: vector[]
             }
         );
@@ -225,7 +220,7 @@ module firedrill::firedrill_onramp {
 
     #[view]
     public fun get_static_config(): StaticConfig {
-        StaticConfig { chain_selector: firedrill_compound::chain_selector() }
+        StaticConfig { chain_selector: compound::chain_selector() }
     }
 
     #[view]
@@ -250,12 +245,12 @@ module firedrill::firedrill_onramp {
 
     #[view]
     public fun onramp_state_object(): Object<OnRampState> {
-        object::address_to_object<OnRampState>(onramp_state_address())
+        object::address_to_object<OnRampState>(get_state_address())
     }
 
     #[view]
-    public fun onramp_state_address(): address {
-        object::create_object_address(&@firedrill, ONRAMP_SEED)
+    public fun get_state_address(): address {
+        state_object::object_address()
     }
 
     // ======================== Ownable ========================
@@ -275,10 +270,10 @@ module firedrill::firedrill_onramp {
     }
 
     inline fun borrow_mut(): &mut OnRampState {
-        borrow_global_mut<OnRampState>(onramp_state_address())
+        borrow_global_mut<OnRampState>(get_state_address())
     }
 
     inline fun borrow(): &OnRampState {
-        borrow_global<OnRampState>(onramp_state_address())
+        borrow_global<OnRampState>(get_state_address())
     }
 }

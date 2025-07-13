@@ -1,4 +1,4 @@
-module firedrill::firedrill_token {
+module firedrill::token {
     use std::option;
     use std::string::{Self, String};
     use std::fungible_asset::{Self, Metadata, MintRef, BurnRef, TransferRef};

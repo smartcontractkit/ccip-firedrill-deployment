@@ -1,24 +1,23 @@
-module firedrill::firedrill_offramp {
+module firedrill::offramp {
     use std::signer;
     use std::string::{Self, String};
     use std::vector;
     use std::event::{Self, EventHandle};
-    use std::object::{Self, Object, ExtendRef};
+    use std::object::{Self, Object};
+    use std::account;
     use std::bcs;
-    use std::account::{Self};
 
-    use firedrill::firedrill_compound::{Self};
+    use firedrill::compound::{Self};
     use firedrill::ownable::{Self, OwnableState};
+    use firedrill::state_object;
 
-    friend firedrill::firedrill_entrypoint;
+    friend firedrill::entrypoint;
 
-    const OFFRAMP_SEED: vector<u8> = b"firedrill_offramp";
     const EXECUTION_STATE_UNTOUCHED: u8 = 0;
     const EXECUTION_STATE_SUCCESS: u8 = 2;
 
     #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
     struct OffRampState has key {
-        extend_ref: ExtendRef,
         ownable_state: OwnableState,
 
         /// Events
@@ -170,15 +169,10 @@ module firedrill::firedrill_offramp {
     fun init_module(deployer: &signer) {
         assert!(signer::address_of(deployer) == @firedrill, E_NOT_CODE_OBJECT);
 
-        let constructor_ref = &object::create_named_object(deployer, OFFRAMP_SEED);
-        let object_signer = &object::generate_signer(constructor_ref);
-
-        account::create_account_if_does_not_exist(signer::address_of(object_signer));
-
+        let object_signer = &state_object::object_signer();
         move_to(
             object_signer,
             OffRampState {
-                extend_ref: object::generate_extend_ref(constructor_ref),
                 ownable_state: ownable::new(object_signer, @firedrill),
                 static_config_set_events: account::new_event_handle(object_signer),
                 dynamic_config_set_events: account::new_event_handle(object_signer),
@@ -194,8 +188,8 @@ module firedrill::firedrill_offramp {
     public(friend) fun emit_commit_report_accepted(
         min_seq_nr: u64, max_seq_nr: u64
     ) acquires OffRampState {
-        let chain_selector = firedrill_compound::chain_selector();
-        let on_ramp_address = bcs::to_bytes(&firedrill_compound::onramp_address());
+        let chain_selector = compound::chain_selector();
+        let on_ramp_address = bcs::to_bytes(&compound::onramp_address());
 
         let merkle_root = vector[];
         vector::append(&mut merkle_root, on_ramp_address);
@@ -256,18 +250,18 @@ module firedrill::firedrill_offramp {
             is_enabled: true,
             min_seq_nr: 0,
             is_rmn_verification_disabled: false,
-            on_ramp: bcs::to_bytes(&firedrill_compound::onramp_address())
+            on_ramp: bcs::to_bytes(&compound::onramp_address())
         };
         event::emit_event(
             &mut borrow_mut().source_chain_config_set_events,
             SourceChainConfigSet {
-                source_chain_selector: firedrill_compound::chain_selector(),
+                source_chain_selector: compound::chain_selector(),
                 source_chain_config
             }
         );
         event::emit(
             SourceChainConfigSet {
-                source_chain_selector: firedrill_compound::chain_selector(),
+                source_chain_selector: compound::chain_selector(),
                 source_chain_config
             }
         );
@@ -276,19 +270,15 @@ module firedrill::firedrill_offramp {
     public(friend) fun emit_skipped_report_execution() acquires OffRampState {
         event::emit_event(
             &mut borrow_mut().skipped_report_execution_events,
-            SkippedReportExecution {
-                source_chain_selector: firedrill_compound::chain_selector()
-            }
+            SkippedReportExecution { source_chain_selector: compound::chain_selector() }
         );
         event::emit(
-            SkippedReportExecution {
-                source_chain_selector: firedrill_compound::chain_selector()
-            }
+            SkippedReportExecution { source_chain_selector: compound::chain_selector() }
         );
     }
 
     public(friend) fun emit_skipped_already_executed() acquires OffRampState {
-        let source_chain_selector = firedrill_compound::chain_selector();
+        let source_chain_selector = compound::chain_selector();
         let sequence_number = 0;
 
         event::emit_event(
@@ -312,7 +302,7 @@ module firedrill::firedrill_offramp {
         event::emit_event(
             &mut borrow_mut().execution_state_changed_events,
             ExecutionStateChanged {
-                source_chain_selector: firedrill_compound::chain_selector(),
+                source_chain_selector: compound::chain_selector(),
                 sequence_number: index,
                 message_id,
                 message_hash,
@@ -321,7 +311,7 @@ module firedrill::firedrill_offramp {
         );
         event::emit(
             ExecutionStateChanged {
-                source_chain_selector: firedrill_compound::chain_selector(),
+                source_chain_selector: compound::chain_selector(),
                 sequence_number: index,
                 message_id,
                 message_hash,
@@ -333,7 +323,7 @@ module firedrill::firedrill_offramp {
     #[view]
     public fun get_static_config(): StaticConfig {
         StaticConfig {
-            chain_selector: firedrill_compound::chain_selector(),
+            chain_selector: compound::chain_selector(),
             rmn_remote: @firedrill,
             token_admin_registry: @firedrill,
             nonce_manager: @firedrill
@@ -349,13 +339,13 @@ module firedrill::firedrill_offramp {
     }
 
     #[view]
-    public fun get_source_chain_config(): SourceChainConfig {
+    public fun get_source_chain_config(_source_chain_selector: u64): SourceChainConfig {
         SourceChainConfig {
             router: @firedrill,
             is_enabled: true,
             min_seq_nr: 0,
             is_rmn_verification_disabled: false,
-            on_ramp: bcs::to_bytes(&firedrill_compound::onramp_address())
+            on_ramp: bcs::to_bytes(&compound::onramp_address())
         }
     }
 
@@ -365,13 +355,13 @@ module firedrill::firedrill_offramp {
     }
 
     #[view]
-    public fun offramp_state_object(): Object<OffRampState> {
-        object::address_to_object<OffRampState>(offramp_state_address())
+    public fun get_state_object(): Object<OffRampState> {
+        object::address_to_object<OffRampState>(get_state_address())
     }
 
     #[view]
-    public fun offramp_state_address(): address {
-        object::create_object_address(&@firedrill, OFFRAMP_SEED)
+    public fun get_state_address(): address {
+        state_object::object_address()
     }
 
     // ======================== Ownable ========================
@@ -391,10 +381,10 @@ module firedrill::firedrill_offramp {
     }
 
     inline fun borrow_mut(): &mut OffRampState {
-        borrow_global_mut<OffRampState>(offramp_state_address())
+        borrow_global_mut<OffRampState>(get_state_address())
     }
 
     inline fun borrow(): &OffRampState {
-        borrow_global<OffRampState>(offramp_state_address())
+        borrow_global<OffRampState>(get_state_address())
     }
 }
