@@ -29,6 +29,7 @@ module firedrill::entrypoint {
         compound::assert_only_owner(admin);
 
         offramp::emit_source_chain_config_set(); // register OffRamp
+        offramp::emit_ocr3_base_config_set(); // register OCR3Base
     }
 
     public entry fun drill_pending_commit_pending_queue_tx_spike(

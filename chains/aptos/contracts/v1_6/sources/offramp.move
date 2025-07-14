@@ -27,7 +27,10 @@ module firedrill::offramp {
         skipped_already_executed_events: EventHandle<SkippedAlreadyExecuted>,
         execution_state_changed_events: EventHandle<ExecutionStateChanged>,
         commit_report_accepted_events: EventHandle<CommitReportAccepted>,
-        skipped_report_execution_events: EventHandle<SkippedReportExecution>
+        skipped_report_execution_events: EventHandle<SkippedReportExecution>,
+
+        /// OCR3Base
+        config_set_events: EventHandle<ConfigSet>
     }
 
     struct SourceChainConfig has store, drop, copy {
@@ -164,6 +167,15 @@ module firedrill::offramp {
         source_chain_selector: u64
     }
 
+    #[event]
+    struct ConfigSet has store, drop {
+        ocr_plugin_type: u8,
+        config_digest: vector<u8>,
+        signers: vector<vector<u8>>,
+        transmitters: vector<address>,
+        big_f: u8
+    }
+
     const E_NOT_CODE_OBJECT: u64 = 1;
 
     fun init_module(deployer: &signer) {
@@ -180,7 +192,8 @@ module firedrill::offramp {
                 skipped_already_executed_events: account::new_event_handle(object_signer),
                 execution_state_changed_events: account::new_event_handle(object_signer),
                 commit_report_accepted_events: account::new_event_handle(object_signer),
-                skipped_report_execution_events: account::new_event_handle(object_signer)
+                skipped_report_execution_events: account::new_event_handle(object_signer),
+                config_set_events: account::new_event_handle(object_signer)
             }
         );
     }
@@ -316,6 +329,28 @@ module firedrill::offramp {
                 message_id,
                 message_hash,
                 state: EXECUTION_STATE_SUCCESS
+            }
+        );
+    }
+
+    public(friend) fun emit_ocr3_base_config_set() acquires OffRampState {
+        event::emit_event(
+            &mut borrow_mut().config_set_events,
+            ConfigSet {
+                ocr_plugin_type: 0,
+                config_digest: vector[],
+                signers: vector[],
+                transmitters: vector[],
+                big_f: 0
+            }
+        );
+        event::emit(
+            ConfigSet {
+                ocr_plugin_type: 0,
+                config_digest: vector[],
+                signers: vector[],
+                transmitters: vector[],
+                big_f: 0
             }
         );
     }
