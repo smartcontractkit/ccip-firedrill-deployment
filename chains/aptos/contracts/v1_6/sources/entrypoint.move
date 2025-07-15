@@ -2,7 +2,7 @@ module firedrill::entrypoint {
     use std::signer;
     use std::string::{Self, String};
     use std::object::{Self, Object};
-    use firedrill::compound::{Self};
+    use firedrill::fee_quoter::{Self};
     use firedrill::onramp::{Self};
     use firedrill::offramp::{Self};
     use firedrill::state_object;
@@ -26,7 +26,7 @@ module firedrill::entrypoint {
     }
 
     public entry fun prepare_register(admin: &signer) {
-        compound::assert_only_owner(admin);
+        // fee_quoter::assert_only_owner(admin);
 
         offramp::emit_source_chain_config_set(); // register OffRamp
         offramp::emit_ocr3_base_config_set(); // register OCR3Base
@@ -35,7 +35,7 @@ module firedrill::entrypoint {
     public entry fun drill_pending_commit_pending_queue_tx_spike(
         admin: &signer, from: u8, to: u8
     ) acquires EntrypointState {
-        compound::assert_only_owner(admin);
+        // fee_quoter::assert_only_owner(admin);
 
         let state = borrow_mut();
         assert!(from <= to, E_NOTHING_TO_SEND);
@@ -51,7 +51,7 @@ module firedrill::entrypoint {
     public entry fun drill_pending_execution(
         admin: &signer, from: u8, to: u8
     ) acquires EntrypointState {
-        compound::assert_only_owner(admin);
+        // fee_quoter::assert_only_owner(admin);
 
         assert!(from <= to, E_NOTHING_TO_SEND);
         assert!((to as u64) <= borrow().s_send_last, E_MESSAGE_NOT_SENT);
@@ -60,14 +60,14 @@ module firedrill::entrypoint {
     }
 
     public entry fun drill_price_registries(admin: &signer) {
-        compound::assert_only_owner(admin);
+        // fee_quoter::assert_only_owner(admin);
 
-        compound::emit_usd_per_token_updated();
-        compound::emit_usd_per_unit_gas_updated();
+        fee_quoter::emit_usd_per_token_updated();
+        fee_quoter::emit_usd_per_unit_gas_updated();
     }
 
     public entry fun drill_offramp_initialize(admin: &signer) {
-        compound::assert_only_owner(admin);
+        // fee_quoter::assert_only_owner(admin);
 
         offramp::emit_static_config_set();
         offramp::emit_dynamic_config_set();
@@ -75,20 +75,20 @@ module firedrill::entrypoint {
     }
 
     public entry fun drill_onramp_initialize(admin: &signer) {
-        compound::assert_only_owner(admin);
+        // fee_quoter::assert_only_owner(admin);
 
         onramp::emit_dest_chain_config_set();
     }
 
     public entry fun drill_allowlist_senders_added_removed(admin: &signer) {
-        compound::assert_only_owner(admin);
+        // fee_quoter::assert_only_owner(admin);
 
         onramp::emit_allowlist_senders_added();
         onramp::emit_allowlist_senders_removed();
     }
 
     public entry fun drill_offramp_execute(admin: &signer) {
-        compound::assert_only_owner(admin);
+        // fee_quoter::assert_only_owner(admin);
 
         offramp::emit_skipped_already_executed();
         offramp::emit_skipped_report_execution();

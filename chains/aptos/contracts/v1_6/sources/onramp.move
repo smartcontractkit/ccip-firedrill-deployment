@@ -6,7 +6,7 @@ module firedrill::onramp {
     use std::bcs;
     use std::account;
 
-    use firedrill::compound::{Self};
+    use firedrill::fee_quoter::{Self};
     use firedrill::ownable::{Self, OwnableState};
     use firedrill::state_object;
 
@@ -135,8 +135,8 @@ module firedrill::onramp {
         let message = Aptos2AnyRampMessage {
             header: RampMessageHeader {
                 message_id,
-                source_chain_selector: compound::chain_selector(),
-                dest_chain_selector: compound::chain_selector(),
+                source_chain_selector: fee_quoter::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 sequence_number: index,
                 nonce: 1
             },
@@ -144,7 +144,7 @@ module firedrill::onramp {
             data: b"123",
             receiver: bcs::to_bytes(&sender),
             extra_args: b"123",
-            fee_token: compound::token_address(),
+            fee_token: fee_quoter::token_address(),
             fee_token_amount: 0,
             fee_value_juels: 0,
             token_amounts: vector[]
@@ -152,14 +152,14 @@ module firedrill::onramp {
         event::emit_event(
             &mut borrow_mut().ccip_message_sent_events,
             CCIPMessageSent {
-                dest_chain_selector: compound::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 sequence_number: index,
                 message
             }
         );
         event::emit(
             CCIPMessageSent {
-                dest_chain_selector: compound::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 sequence_number: index,
                 message
             }
@@ -170,7 +170,7 @@ module firedrill::onramp {
         event::emit_event(
             &mut borrow_mut().dest_chain_config_set_events,
             DestChainConfigSet {
-                dest_chain_selector: compound::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 sequence_number: 0,
                 router: @firedrill,
                 allowlist_enabled: false
@@ -178,7 +178,7 @@ module firedrill::onramp {
         );
         event::emit(
             DestChainConfigSet {
-                dest_chain_selector: compound::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 sequence_number: 0,
                 router: @firedrill,
                 allowlist_enabled: false
@@ -190,13 +190,13 @@ module firedrill::onramp {
         event::emit_event(
             &mut borrow_mut().allowlist_senders_added_events,
             AllowlistSendersAdded {
-                dest_chain_selector: compound::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 senders: vector[]
             }
         );
         event::emit(
             AllowlistSendersAdded {
-                dest_chain_selector: compound::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 senders: vector[]
             }
         );
@@ -206,13 +206,13 @@ module firedrill::onramp {
         event::emit_event(
             &mut borrow_mut().allowlist_senders_removed_events,
             AllowlistSendersRemoved {
-                dest_chain_selector: compound::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 senders: vector[]
             }
         );
         event::emit(
             AllowlistSendersRemoved {
-                dest_chain_selector: compound::chain_selector(),
+                dest_chain_selector: fee_quoter::chain_selector(),
                 senders: vector[]
             }
         );
@@ -220,7 +220,7 @@ module firedrill::onramp {
 
     #[view]
     public fun get_static_config(): StaticConfig {
-        StaticConfig { chain_selector: compound::chain_selector() }
+        StaticConfig { chain_selector: fee_quoter::chain_selector() }
     }
 
     #[view]

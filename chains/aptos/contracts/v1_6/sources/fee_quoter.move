@@ -1,4 +1,4 @@
-module firedrill::compound {
+module firedrill::fee_quoter {
     use std::signer;
     use std::event::{Self, EventHandle};
     use std::account::{Self};
@@ -10,8 +10,8 @@ module firedrill::compound {
 
     friend firedrill::entrypoint;
 
-    const COMPOUND_SEED: vector<u8> = b"FiredrillCompound";
-    const CHAIN_SELECTOR: u64 = 10;
+    const FEE_QUOTER_SEED: vector<u8> = b"FiredrillFeeQuoter";
+    const CHAIN_SELECTOR: u64 = 743186221051783445;
 
     struct StaticConfig has copy, drop, store {
         max_fee_juels_per_msg: u128,
@@ -39,7 +39,7 @@ module firedrill::compound {
     #[event]
     struct UsdPerTokenUpdated has drop, store {
         token: address,
-        value: u256,
+        usd_per_token: u256,
         timestamp: u64
     }
 
@@ -82,14 +82,14 @@ module firedrill::compound {
             &mut state.usd_per_token_updated_events,
             UsdPerTokenUpdated {
                 token: state.token_address,
-                value: 1,
+                usd_per_token: 1,
                 timestamp: timestamp::now_seconds()
             }
         );
         event::emit(
             UsdPerTokenUpdated {
                 token: state.token_address,
-                value: 1,
+                usd_per_token: 1,
                 timestamp: timestamp::now_seconds()
             }
         )
@@ -181,6 +181,11 @@ module firedrill::compound {
     #[view]
     public fun get_state_address(): address {
         state_object::object_address()
+    }
+
+    public entry fun set_chain_selector(caller: &signer, chain_selector: u64) acquires FeeQuoterState {
+        // assert_only_owner(caller);
+        borrow_fee_quoter_state_mut().chain_selector = chain_selector;
     }
 
     // ======================== Ownable ========================

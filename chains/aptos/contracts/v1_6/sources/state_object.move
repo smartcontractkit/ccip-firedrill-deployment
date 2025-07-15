@@ -17,7 +17,7 @@ module firedrill::state_object {
     friend firedrill::entrypoint;
     friend firedrill::offramp;
     friend firedrill::onramp;
-    friend firedrill::compound;
+    friend firedrill::fee_quoter;
 
     const STATE_OBJECT_SEED: vector<u8> = b"FiredrillStateObject";
 

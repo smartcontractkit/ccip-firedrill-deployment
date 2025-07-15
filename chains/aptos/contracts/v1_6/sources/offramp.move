@@ -7,10 +7,11 @@ module firedrill::offramp {
     use std::account;
     use std::bcs;
 
-    use firedrill::compound::{Self};
+    use firedrill::fee_quoter::{Self};
     use firedrill::ownable::{Self, OwnableState};
     use firedrill::state_object;
-
+    use firedrill::ocr3_base;
+    
     friend firedrill::entrypoint;
 
     const EXECUTION_STATE_UNTOUCHED: u8 = 0;
@@ -19,6 +20,7 @@ module firedrill::offramp {
     #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
     struct OffRampState has key {
         ownable_state: OwnableState,
+        ocr3_base_state: ocr3_base::OCR3BaseState,
 
         /// Events
         static_config_set_events: EventHandle<StaticConfigSet>,
@@ -28,9 +30,6 @@ module firedrill::offramp {
         execution_state_changed_events: EventHandle<ExecutionStateChanged>,
         commit_report_accepted_events: EventHandle<CommitReportAccepted>,
         skipped_report_execution_events: EventHandle<SkippedReportExecution>,
-
-        /// OCR3Base
-        config_set_events: EventHandle<ConfigSet>
     }
 
     struct SourceChainConfig has store, drop, copy {
@@ -186,6 +185,7 @@ module firedrill::offramp {
             object_signer,
             OffRampState {
                 ownable_state: ownable::new(object_signer, @firedrill),
+                ocr3_base_state: ocr3_base::new(object_signer),
                 static_config_set_events: account::new_event_handle(object_signer),
                 dynamic_config_set_events: account::new_event_handle(object_signer),
                 source_chain_config_set_events: account::new_event_handle(object_signer),
@@ -193,7 +193,6 @@ module firedrill::offramp {
                 execution_state_changed_events: account::new_event_handle(object_signer),
                 commit_report_accepted_events: account::new_event_handle(object_signer),
                 skipped_report_execution_events: account::new_event_handle(object_signer),
-                config_set_events: account::new_event_handle(object_signer)
             }
         );
     }
@@ -201,8 +200,8 @@ module firedrill::offramp {
     public(friend) fun emit_commit_report_accepted(
         min_seq_nr: u64, max_seq_nr: u64
     ) acquires OffRampState {
-        let chain_selector = compound::chain_selector();
-        let on_ramp_address = bcs::to_bytes(&compound::onramp_address());
+        let chain_selector = fee_quoter::chain_selector();
+        let on_ramp_address = bcs::to_bytes(&fee_quoter::onramp_address());
 
         let merkle_root = vector[];
         vector::append(&mut merkle_root, on_ramp_address);
@@ -263,18 +262,18 @@ module firedrill::offramp {
             is_enabled: true,
             min_seq_nr: 0,
             is_rmn_verification_disabled: false,
-            on_ramp: bcs::to_bytes(&compound::onramp_address())
+            on_ramp: bcs::to_bytes(&fee_quoter::onramp_address())
         };
         event::emit_event(
             &mut borrow_mut().source_chain_config_set_events,
             SourceChainConfigSet {
-                source_chain_selector: compound::chain_selector(),
+                source_chain_selector: fee_quoter::chain_selector(),
                 source_chain_config
             }
         );
         event::emit(
             SourceChainConfigSet {
-                source_chain_selector: compound::chain_selector(),
+                source_chain_selector: fee_quoter::chain_selector(),
                 source_chain_config
             }
         );
@@ -283,15 +282,15 @@ module firedrill::offramp {
     public(friend) fun emit_skipped_report_execution() acquires OffRampState {
         event::emit_event(
             &mut borrow_mut().skipped_report_execution_events,
-            SkippedReportExecution { source_chain_selector: compound::chain_selector() }
+            SkippedReportExecution { source_chain_selector: fee_quoter::chain_selector() }
         );
         event::emit(
-            SkippedReportExecution { source_chain_selector: compound::chain_selector() }
+            SkippedReportExecution { source_chain_selector: fee_quoter::chain_selector() }
         );
     }
 
     public(friend) fun emit_skipped_already_executed() acquires OffRampState {
-        let source_chain_selector = compound::chain_selector();
+        let source_chain_selector = fee_quoter::chain_selector();
         let sequence_number = 0;
 
         event::emit_event(
@@ -315,7 +314,7 @@ module firedrill::offramp {
         event::emit_event(
             &mut borrow_mut().execution_state_changed_events,
             ExecutionStateChanged {
-                source_chain_selector: compound::chain_selector(),
+                source_chain_selector: fee_quoter::chain_selector(),
                 sequence_number: index,
                 message_id,
                 message_hash,
@@ -324,7 +323,7 @@ module firedrill::offramp {
         );
         event::emit(
             ExecutionStateChanged {
-                source_chain_selector: compound::chain_selector(),
+                source_chain_selector: fee_quoter::chain_selector(),
                 sequence_number: index,
                 message_id,
                 message_hash,
@@ -334,31 +333,21 @@ module firedrill::offramp {
     }
 
     public(friend) fun emit_ocr3_base_config_set() acquires OffRampState {
-        event::emit_event(
-            &mut borrow_mut().config_set_events,
-            ConfigSet {
-                ocr_plugin_type: 0,
-                config_digest: vector[],
-                signers: vector[],
-                transmitters: vector[],
-                big_f: 0
-            }
-        );
-        event::emit(
-            ConfigSet {
-                ocr_plugin_type: 0,
-                config_digest: vector[],
-                signers: vector[],
-                transmitters: vector[],
-                big_f: 0
-            }
-        );
+        ocr3_base::emit_config_set(&mut borrow_mut().ocr3_base_state);
+    }
+
+    #[view]
+    public fun get_all_source_chain_configs(): (vector<u64>, vector<SourceChainConfig>) {
+        let source_chain_selectors = vector[fee_quoter::chain_selector()];
+        let source_chain_configs = vector[get_source_chain_config(fee_quoter::chain_selector())];
+
+        (source_chain_selectors, source_chain_configs)
     }
 
     #[view]
     public fun get_static_config(): StaticConfig {
         StaticConfig {
-            chain_selector: compound::chain_selector(),
+            chain_selector: fee_quoter::chain_selector(),
             rmn_remote: @firedrill,
             token_admin_registry: @firedrill,
             nonce_manager: @firedrill
@@ -369,7 +358,7 @@ module firedrill::offramp {
     public fun get_dynamic_config(): DynamicConfig {
         DynamicConfig {
             fee_quoter: @firedrill,
-            permissionless_execution_threshold_seconds: 10
+            permissionless_execution_threshold_seconds: 10 as u32
         }
     }
 
@@ -380,7 +369,7 @@ module firedrill::offramp {
             is_enabled: true,
             min_seq_nr: 0,
             is_rmn_verification_disabled: false,
-            on_ramp: bcs::to_bytes(&compound::onramp_address())
+            on_ramp: bcs::to_bytes(&fee_quoter::onramp_address())
         }
     }
 
