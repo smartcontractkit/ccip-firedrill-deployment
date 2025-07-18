@@ -228,14 +228,19 @@ module firedrill::onramp {
         DynamicConfig { fee_aggregator: @firedrill, allowlist_admin: @0x0 }
     }
 
+    // #[view]
+    // public fun get_dest_chain_config(_dest_chain_selector: u64): DestChainConfig {
+    //     DestChainConfig {
+    //         sequence_number: 0,
+    //         allowlist_enabled: false,
+    //         router: @firedrill,
+    //         allowed_senders: vector[]
+    //     }
+    // }
+
     #[view]
-    public fun get_dest_chain_config(_dest_chain_selector: u64): DestChainConfig {
-        DestChainConfig {
-            sequence_number: 0,
-            allowlist_enabled: false,
-            router: @firedrill,
-            allowed_senders: vector[]
-        }
+    public fun get_dest_chain_config(_dest_chain_selector: u64): (u64, bool, address) {
+        (0, false, @firedrill)
     }
 
     #[view]

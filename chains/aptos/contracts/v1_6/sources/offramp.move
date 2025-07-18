@@ -11,7 +11,7 @@ module firedrill::offramp {
     use firedrill::ownable::{Self, OwnableState};
     use firedrill::state_object;
     use firedrill::ocr3_base;
-    
+
     friend firedrill::entrypoint;
 
     const EXECUTION_STATE_UNTOUCHED: u8 = 0;
@@ -29,7 +29,7 @@ module firedrill::offramp {
         skipped_already_executed_events: EventHandle<SkippedAlreadyExecuted>,
         execution_state_changed_events: EventHandle<ExecutionStateChanged>,
         commit_report_accepted_events: EventHandle<CommitReportAccepted>,
-        skipped_report_execution_events: EventHandle<SkippedReportExecution>,
+        skipped_report_execution_events: EventHandle<SkippedReportExecution>
     }
 
     struct SourceChainConfig has store, drop, copy {
@@ -192,7 +192,7 @@ module firedrill::offramp {
                 skipped_already_executed_events: account::new_event_handle(object_signer),
                 execution_state_changed_events: account::new_event_handle(object_signer),
                 commit_report_accepted_events: account::new_event_handle(object_signer),
-                skipped_report_execution_events: account::new_event_handle(object_signer),
+                skipped_report_execution_events: account::new_event_handle(object_signer)
             }
         );
     }
@@ -257,23 +257,25 @@ module firedrill::offramp {
     }
 
     public(friend) fun emit_source_chain_config_set() acquires OffRampState {
+        let evm_address = x"4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97";
         let source_chain_config = SourceChainConfig {
             router: @firedrill,
             is_enabled: true,
             min_seq_nr: 0,
             is_rmn_verification_disabled: false,
-            on_ramp: bcs::to_bytes(&fee_quoter::onramp_address())
+            on_ramp: evm_address
         };
+        let fuji_seletor = 14767482510784806043;
         event::emit_event(
             &mut borrow_mut().source_chain_config_set_events,
             SourceChainConfigSet {
-                source_chain_selector: fee_quoter::chain_selector(),
+                source_chain_selector: fuji_seletor,
                 source_chain_config
             }
         );
         event::emit(
             SourceChainConfigSet {
-                source_chain_selector: fee_quoter::chain_selector(),
+                source_chain_selector: fuji_seletor,
                 source_chain_config
             }
         );
@@ -338,8 +340,9 @@ module firedrill::offramp {
 
     #[view]
     public fun get_all_source_chain_configs(): (vector<u64>, vector<SourceChainConfig>) {
-        let source_chain_selectors = vector[fee_quoter::chain_selector()];
-        let source_chain_configs = vector[get_source_chain_config(fee_quoter::chain_selector())];
+        let fuji_seletor = 14767482510784806043;
+        let source_chain_selectors = vector[fuji_seletor];
+        let source_chain_configs = vector[get_source_chain_config(fuji_seletor)];
 
         (source_chain_selectors, source_chain_configs)
     }
@@ -364,12 +367,13 @@ module firedrill::offramp {
 
     #[view]
     public fun get_source_chain_config(_source_chain_selector: u64): SourceChainConfig {
+        let evm_address = x"4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97";
         SourceChainConfig {
             router: @firedrill,
             is_enabled: true,
             min_seq_nr: 0,
             is_rmn_verification_disabled: false,
-            on_ramp: bcs::to_bytes(&fee_quoter::onramp_address())
+            on_ramp: evm_address
         }
     }
 

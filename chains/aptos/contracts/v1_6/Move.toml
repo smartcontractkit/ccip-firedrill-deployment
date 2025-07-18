@@ -2,6 +2,7 @@
 name = "CCIPFiredrillV1_6"
 version = "1.0.0"
 authors = ["Chainlink Labs"]
+upgrade_policy = "compatible"
 
 [addresses]
 firedrill = "_"
