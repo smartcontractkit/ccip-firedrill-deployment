@@ -11,7 +11,7 @@ module firedrill::fee_quoter {
     friend firedrill::entrypoint;
 
     const FEE_QUOTER_SEED: vector<u8> = b"FiredrillFeeQuoter";
-    const CHAIN_SELECTOR: u64 = 14767482510784806043; // Fuji selector
+    const APTOS_CHAIN_SELECTOR: u64 = 4741433654826277614; // aptos selector
 
     struct StaticConfig has copy, drop, store {
         max_fee_juels_per_msg: u128,
@@ -58,7 +58,7 @@ module firedrill::fee_quoter {
             object_signer,
             FeeQuoterState {
                 ownable_state,
-                chain_selector: CHAIN_SELECTOR,
+                chain_selector: APTOS_CHAIN_SELECTOR,
                 token_address: token::token_address(),
                 onramp_address: @firedrill,
                 offramp_address: @firedrill,

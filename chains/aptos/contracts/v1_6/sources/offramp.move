@@ -257,25 +257,24 @@ module firedrill::offramp {
     }
 
     public(friend) fun emit_source_chain_config_set() acquires OffRampState {
-        let evm_address = x"4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97";
         let source_chain_config = SourceChainConfig {
             router: @firedrill,
             is_enabled: true,
             min_seq_nr: 0,
             is_rmn_verification_disabled: false,
-            on_ramp: evm_address
+            on_ramp: bcs::to_bytes(&@firedrill)
         };
-        let fuji_seletor = 14767482510784806043;
+        let aptos_selector = 4741433654826277614;
         event::emit_event(
             &mut borrow_mut().source_chain_config_set_events,
             SourceChainConfigSet {
-                source_chain_selector: fuji_seletor,
+                source_chain_selector: aptos_selector,
                 source_chain_config
             }
         );
         event::emit(
             SourceChainConfigSet {
-                source_chain_selector: fuji_seletor,
+                source_chain_selector: aptos_selector,
                 source_chain_config
             }
         );
@@ -340,9 +339,9 @@ module firedrill::offramp {
 
     #[view]
     public fun get_all_source_chain_configs(): (vector<u64>, vector<SourceChainConfig>) {
-        let fuji_seletor = 14767482510784806043;
-        let source_chain_selectors = vector[fuji_seletor];
-        let source_chain_configs = vector[get_source_chain_config(fuji_seletor)];
+        let aptos_selector = 4741433654826277614;
+        let source_chain_selectors = vector[aptos_selector];
+        let source_chain_configs = vector[get_source_chain_config(aptos_selector)];
 
         (source_chain_selectors, source_chain_configs)
     }
@@ -367,13 +366,12 @@ module firedrill::offramp {
 
     #[view]
     public fun get_source_chain_config(_source_chain_selector: u64): SourceChainConfig {
-        let evm_address = x"4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97";
         SourceChainConfig {
             router: @firedrill,
             is_enabled: true,
             min_seq_nr: 0,
             is_rmn_verification_disabled: false,
-            on_ramp: evm_address
+            on_ramp: bcs::to_bytes(&@firedrill)
         }
     }
 
