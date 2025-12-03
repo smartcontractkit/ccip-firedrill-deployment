@@ -1,0 +1,20 @@
+[package]
+name = "firedrill"
+edition = "2024.beta"
+
+[dependencies]
+CCIP_OFFRAMP = { local = "../ccip_offramp" }
+CCIP_ONRAMP = { local = "../ccip_onramp" }
+ChainlinkCCIP = { local = "../ccip" }
+
+[addresses]
+firedrill = "0x0"
+ccip_offramp = "0x5518e4fd4a96b81157d4565e00eb6fdf87a2337fae5b283a3eaecce14283e104"
+ccip = "0x13628ef518ad287a2e26aa37581f98759b7de2af85eaf4aa7e4d4e1f6a8ec068"
+ccip_onramp = "0x467c9ac6ea0c279abe85c53f5f629f54a49d1050ec044492cc31075691386e38"
+
+[dev-addresses]
+ccip_offramp = "0x1000"
+firedrill = "0x2000"
+ccip = "0x3000"
+ccip_onramp = "0x4000"

@@ -1,0 +1,14 @@
+[package]
+name = "CCIP_OFFRAMP"
+edition = "2024.beta"
+
+[dependencies]
+ChainlinkCCIP = { local = "../ccip" }
+
+[addresses]
+ccip_offramp = "0x0"
+ccip = "0x13628ef518ad287a2e26aa37581f98759b7de2af85eaf4aa7e4d4e1f6a8ec068"
+
+[dev-addresses]
+ccip_offramp = "0x1000"
+ccip = "0x3000"
