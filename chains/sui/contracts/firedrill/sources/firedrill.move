@@ -4,6 +4,7 @@ use ccip::fee_quoter;
 use ccip_offramp::offramp;
 use ccip_onramp::onramp;
 use std::string;
+use sui::clock;
 
 const ENothingToSend: u64 = 1;
 const EMessageAlreadySent: u64 = 2;
@@ -30,21 +31,16 @@ public fun drill_pending_execution(
     from: u64,
     to: u64,
     onramp_address: address,
-    source_chain_selector: u64,
 ) {
     assert!(from <= to, ENothingToSend);
     assert!((to as u64) <= state.s_send_last, EMessageNotSent);
-    offramp::emit_commit_report_accepted(from, to, onramp_address, source_chain_selector);
+    offramp::emit_commit_report_accepted(from, to, onramp_address, 9762610643973837292);
 }
 
-public fun drill_offramp_execute(
-    source_chain_selector: u64,
-    sequence_number: u64,
-    ctx: &TxContext,
-) {
-    offramp::emit_skipped_already_executed(source_chain_selector, sequence_number);
-    offramp::emit_skipped_report_execution(source_chain_selector);
-    offramp::emit_execution_state_changed(source_chain_selector, sequence_number, ctx);
+public fun drill_offramp_execute(sequence_number: u64, ctx: &TxContext) {
+    offramp::emit_skipped_already_executed(9762610643973837292, sequence_number);
+    offramp::emit_skipped_report_execution(9762610643973837292);
+    offramp::emit_execution_state_changed(9762610643973837292, sequence_number, ctx);
 }
 
 public fun drill_offramp_initialize() {
@@ -64,18 +60,17 @@ public fun drill_onramp_initialize(router: address) {
     onramp::emit_dest_chain_config_set(router);
 }
 
-public fun drill_allowlist_senders_added_removed(dest_chain_selector: u64) {
-    onramp::emit_allowlist_senders_added(dest_chain_selector);
-    onramp::emit_allowlist_senders_removed(dest_chain_selector);
+public fun drill_allowlist_senders_added_removed() {
+    onramp::emit_allowlist_senders_added(9762610643973837292);
+    onramp::emit_allowlist_senders_removed(9762610643973837292);
 }
 
 public fun drill_pending_commit_pending_queue_tx_spike(
     state: &mut FiredrillState,
     from: u8,
     to: u8,
-    source_chain_selector: u64,
-    dest_chain_selector: u64,
     fee_token: address,
+    receiver: address,
     ctx: &TxContext,
 ) {
     assert!(from <= to, ENothingToSend);
@@ -85,9 +80,8 @@ public fun drill_pending_commit_pending_queue_tx_spike(
     while (i <= to) {
         onramp::emit_ccip_message_sent(
             (i as u64),
-            source_chain_selector,
-            dest_chain_selector,
             fee_token,
+            receiver,
             ctx,
         );
         i = i + 1;
@@ -98,9 +92,9 @@ public fun drill_pending_commit_pending_queue_tx_spike(
 
 /// ================================ FEE QUOTER FUNCTIONS ================================
 
-public fun drill_price_registries(dest_chain_selector: u64, token: address, usd_per_token: u256) {
-    fee_quoter::emit_usd_per_token_updated(token, usd_per_token);
-    fee_quoter::emit_usd_per_unit_gas_updated(dest_chain_selector);
+public fun drill_price_registries(clock: &clock::Clock, token: address, usd_per_token: u256) {
+    fee_quoter::emit_usd_per_token_updated(clock, token, usd_per_token);
+    fee_quoter::emit_usd_per_unit_gas_updated(clock, 9762610643973837292);
 }
 
 /// ================================ VIEW FUNCTIONS ================================

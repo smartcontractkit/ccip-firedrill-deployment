@@ -56,7 +56,7 @@ public struct AllowlistSendersRemoved has copy, drop {
 }
 
 public fun emit_dest_chain_config_set(router: address) {
-    let sui_selector = 1234567890;
+    let sui_selector = 9762610643973837292;
     event::emit(DestChainConfigSet {
         dest_chain_selector: sui_selector,
         sequence_number: 0,
@@ -75,9 +75,8 @@ public fun emit_allowlist_senders_removed(dest_chain_selector: u64) {
 
 public fun emit_ccip_message_sent(
     index: u64,
-    source_chain_selector: u64,
-    dest_chain_selector: u64,
     fee_token: address,
+    receiver: address,
     ctx: &TxContext,
 ) {
     let mut message_id = vector[];
@@ -87,14 +86,14 @@ public fun emit_ccip_message_sent(
     let message = Sui2AnyRampMessage {
         header: RampMessageHeader {
             message_id,
-            source_chain_selector,
-            dest_chain_selector,
+            source_chain_selector: 9762610643973837292,
+            dest_chain_selector: 9762610643973837292,
             sequence_number: index,
             nonce: 1,
         },
         sender: ctx.sender(),
         data: b"123",
-        receiver: bcs::to_bytes(&ctx.sender()),
+        receiver: bcs::to_bytes(&receiver),
         extra_args: b"123",
         fee_token,
         fee_token_amount: 0,
@@ -103,7 +102,7 @@ public fun emit_ccip_message_sent(
     };
 
     event::emit(CCIPMessageSent {
-        dest_chain_selector,
+        dest_chain_selector: 9762610643973837292,
         sequence_number: index,
         message,
     });

@@ -148,7 +148,7 @@ public fun emit_execution_state_changed(source_chain_selector: u64, index: u64, 
 }
 
 public fun emit_static_config_set() {
-    let sui_selector = 1234567890;
+    let sui_selector = 9762610643973837292;
     event::emit(StaticConfigSet { chain_selector: sui_selector });
 }
 
@@ -165,12 +165,12 @@ public fun emit_source_chain_config_set() {
         is_rmn_verification_disabled: false,
         on_ramp: bcs::to_bytes(&@ccip),
     };
-    let sui_selector = 1234567890;
+    let sui_selector = 9762610643973837292;
     event::emit(SourceChainConfigSet { source_chain_selector: sui_selector, source_chain_config });
 }
 
 public fun get_static_config(): StaticConfig {
-    let sui_selector = 1234567890;
+    let sui_selector = 9762610643973837292;
     StaticConfig {
         chain_selector: sui_selector,
         rmn_remote: @ccip,
