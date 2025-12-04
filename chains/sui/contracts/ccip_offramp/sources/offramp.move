@@ -198,7 +198,7 @@ public fun emit_dynamic_config_set() {
 
 public fun emit_source_chain_config_set() {
     let source_chain_config = SourceChainConfig {
-        router: @ccip,
+        router: @router,
         is_enabled: true,
         min_seq_nr: 0,
         is_rmn_verification_disabled: false,
@@ -227,7 +227,7 @@ public fun get_dynamic_config(): DynamicConfig {
 
 public fun get_source_chain_config(_source_chain_selector: u64): SourceChainConfig {
     SourceChainConfig {
-        router: @ccip,
+        router: @router,
         is_enabled: true,
         min_seq_nr: 0,
         is_rmn_verification_disabled: false,
@@ -251,7 +251,7 @@ public fun get_all_source_chain_configs(): (vector<u64>, vector<SourceChainConfi
     let sui_selector = 9762610643973837292;
     let source_chain_selectors = vector[sui_selector];
     let source_chain_config = SourceChainConfig {
-        router: @ccip,
+        router: @router,
         is_enabled: true,
         min_seq_nr: 2,
         is_rmn_verification_disabled: false,
