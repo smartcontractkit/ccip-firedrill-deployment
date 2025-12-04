@@ -1,7 +1,34 @@
 module ccip_onramp::onramp;
 
+use std::ascii;
 use std::bcs;
+use std::string::{Self, String};
+use std::type_name;
+use sui::address;
+use sui::derived_object;
 use sui::event;
+use sui::object;
+use sui::transfer;
+
+public fun type_and_version(): String {
+    string::utf8(b"OnRamp 1.6.0")
+}
+
+public struct ONRAMP has drop {}
+
+public struct OnRampState has key, store {
+    id: UID,
+    package_ids: vector<address>,
+}
+
+public struct OnRampObject has key {
+    id: UID,
+}
+
+public struct OnRampStatePointer has key, store {
+    id: UID,
+    on_ramp_object_id: address,
+}
 
 public struct RampMessageHeader has copy, drop, store {
     message_id: vector<u8>,
@@ -55,6 +82,29 @@ public struct AllowlistSendersRemoved has copy, drop {
     senders: vector<address>,
 }
 
+fun init(otw: ONRAMP, ctx: &mut TxContext) {
+    let mut on_ramp_object = OnRampObject { id: object::new(ctx) };
+
+    let pointer = OnRampStatePointer {
+        id: object::new(ctx),
+        on_ramp_object_id: object::id_address(&on_ramp_object),
+    };
+
+    let tn = type_name::with_original_ids<ONRAMP>();
+    let package_bytes = ascii::into_bytes(tn.address_string());
+    let package_id = address::from_ascii_bytes(&package_bytes);
+
+    let state = OnRampState {
+        id: derived_object::claim(&mut on_ramp_object.id, b"OnRampState"),
+        package_ids: vector[package_id],
+    };
+
+    transfer::share_object(state);
+    transfer::share_object(on_ramp_object);
+
+    transfer::transfer(pointer, package_id);
+}
+
 public fun emit_dest_chain_config_set(router: address) {
     let sui_selector = 9762610643973837292;
     event::emit(DestChainConfigSet {
@@ -106,4 +156,8 @@ public fun emit_ccip_message_sent(
         sequence_number: index,
         message,
     });
+}
+
+public fun get_ccip_package_id(): address {
+    @ccip
 }

@@ -16,6 +16,15 @@ use sui::vec_map::{Self, VecMap};
 
 const EXECUTION_STATE_SUCCESS: u8 = 2;
 
+public struct OffRampObject has key {
+    id: UID,
+}
+
+public struct OffRampStatePointer has key, store {
+    id: UID,
+    off_ramp_object_id: address,
+}
+
 public struct StaticConfigSet has copy, drop {
     chain_selector: u64,
 }
@@ -93,6 +102,36 @@ public struct CommitReportAccepted has copy, drop {
 
 public struct SkippedReportExecution has copy, drop {
     source_chain_selector: u64,
+}
+
+public struct OffRampState has key, store {
+    id: UID,
+    package_ids: vector<address>,
+}
+
+public struct OFFRAMP has drop {}
+
+fun init(otw: OFFRAMP, ctx: &mut TxContext) {
+    let mut off_ramp_object = OffRampObject { id: object::new(ctx) };
+
+    let pointer = OffRampStatePointer {
+        id: object::new(ctx),
+        off_ramp_object_id: object::id_address(&off_ramp_object),
+    };
+
+    let tn = type_name::with_original_ids<OFFRAMP>();
+    let package_bytes = ascii::into_bytes(tn.address_string());
+    let package_id = address::from_ascii_bytes(&package_bytes);
+
+    let state = OffRampState {
+        id: derived_object::claim(&mut off_ramp_object.id, b"OffRampState"),
+        package_ids: vector[package_id],
+    };
+
+    transfer::share_object(state);
+    transfer::share_object(off_ramp_object);
+
+    transfer::transfer(pointer, package_id);
 }
 
 public fun emit_commit_report_accepted(
@@ -202,4 +241,32 @@ public fun type_and_version(): String {
 
 public fun emit_ocr3_base_config_set() {
     ocr3_base::emit_config_set();
+}
+
+public fun get_ccip_package_id(): address {
+    @ccip
+}
+
+public fun get_all_source_chain_configs(): (vector<u64>, vector<SourceChainConfig>) {
+    let sui_selector = 9762610643973837292;
+    let source_chain_selectors = vector[sui_selector];
+    let source_chain_config = SourceChainConfig {
+        router: @ccip,
+        is_enabled: true,
+        min_seq_nr: 2,
+        is_rmn_verification_disabled: false,
+        on_ramp: bcs::to_bytes(&@ccip),
+    };
+
+    (source_chain_selectors, vector[source_chain_config])
+}
+
+public fun add_package_id(state: &mut OffRampState, package_id: address) {
+    state.package_ids.push_back(package_id);
+}
+
+public fun remove_package_id(state: &mut OffRampState, package_id: address) {
+    let (found, idx) = state.package_ids.index_of(&package_id);
+    assert!(found, 1);
+    state.package_ids.swap_remove(idx);
 }
