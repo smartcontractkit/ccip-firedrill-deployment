@@ -1,5 +1,6 @@
 module ccip_offramp::offramp;
 
+use ccip::state_object;
 use ccip_offramp::ocr3_base;
 use std::ascii;
 use std::bcs;
@@ -191,8 +192,8 @@ public fun emit_static_config_set() {
     event::emit(StaticConfigSet { chain_selector: sui_selector });
 }
 
-public fun emit_dynamic_config_set() {
-    let dynamic_config = get_dynamic_config();
+public fun emit_dynamic_config_set(ref: &state_object::CCIPObjectRef, state: &OffRampState) {
+    let dynamic_config = get_dynamic_config(ref, state);
     event::emit(DynamicConfigSet { dynamic_config });
 }
 
@@ -202,13 +203,16 @@ public fun emit_source_chain_config_set() {
         is_enabled: true,
         min_seq_nr: 0,
         is_rmn_verification_disabled: false,
-        on_ramp: bcs::to_bytes(&@ccip),
+        on_ramp: bcs::to_bytes(&@onramp),
     };
     let sui_selector = 9762610643973837292;
     event::emit(SourceChainConfigSet { source_chain_selector: sui_selector, source_chain_config });
 }
 
-public fun get_static_config(): StaticConfig {
+public fun get_static_config(
+    ref: &state_object::CCIPObjectRef,
+    state: &OffRampState,
+): StaticConfig {
     let sui_selector = 9762610643973837292;
     StaticConfig {
         chain_selector: sui_selector,
@@ -218,20 +222,27 @@ public fun get_static_config(): StaticConfig {
     }
 }
 
-public fun get_dynamic_config(): DynamicConfig {
+public fun get_dynamic_config(
+    ref: &state_object::CCIPObjectRef,
+    state: &OffRampState,
+): DynamicConfig {
     DynamicConfig {
         fee_quoter: @ccip,
         permissionless_execution_threshold_seconds: 10 as u32,
     }
 }
 
-public fun get_source_chain_config(_source_chain_selector: u64): SourceChainConfig {
+public fun get_source_chain_config(
+    ref: &state_object::CCIPObjectRef,
+    state: &OffRampState,
+    source_chain_selector: u64,
+): SourceChainConfig {
     SourceChainConfig {
         router: @router,
         is_enabled: true,
         min_seq_nr: 0,
         is_rmn_verification_disabled: false,
-        on_ramp: bcs::to_bytes(&@ccip),
+        on_ramp: bcs::to_bytes(&@onramp),
     }
 }
 
@@ -247,7 +258,10 @@ public fun get_ccip_package_id(): address {
     @ccip
 }
 
-public fun get_all_source_chain_configs(): (vector<u64>, vector<SourceChainConfig>) {
+public fun get_all_source_chain_configs(
+    ref: &state_object::CCIPObjectRef,
+    state: &OffRampState,
+): (vector<u64>, vector<SourceChainConfig>) {
     let sui_selector = 9762610643973837292;
     let source_chain_selectors = vector[sui_selector];
     let source_chain_config = SourceChainConfig {
@@ -255,7 +269,7 @@ public fun get_all_source_chain_configs(): (vector<u64>, vector<SourceChainConfi
         is_enabled: true,
         min_seq_nr: 2,
         is_rmn_verification_disabled: false,
-        on_ramp: bcs::to_bytes(&@ccip),
+        on_ramp: bcs::to_bytes(&@onramp),
     };
 
     (source_chain_selectors, vector[source_chain_config])

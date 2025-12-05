@@ -9,6 +9,7 @@ ChainlinkCCIP = { local = "../ccip" }
 ccip_offramp = "0x0"
 ccip = "0x324c505732fadfa5ac2877cdca28a6be28910009e100de8e6e16eb33ed1218dc"
 router = "0x0479e1ecffb87e08cb858d2eda418ad1a8bcf074589a7fd226b38f4fa02f0571"
+onramp = "0x3c766ec5108e6fa83da070599a2c28f58aea0960319bce2d9c020983a8ce122b"
 
 [dev-addresses]
 ccip_offramp = "0x1000"

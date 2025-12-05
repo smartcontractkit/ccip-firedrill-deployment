@@ -161,3 +161,10 @@ public fun emit_ccip_message_sent(
 public fun get_ccip_package_id(): address {
     @ccip
 }
+
+public fun get_dest_chain_config(
+    state: &OnRampState,
+    dest_chain_selector: u64,
+): (u64, bool, address) {
+    (1, false, @router)
+}
