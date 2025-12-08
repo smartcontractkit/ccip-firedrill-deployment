@@ -10,6 +10,9 @@ use sui::event;
 use sui::object;
 use sui::transfer;
 
+const ENothingToSend: u64 = 1;
+const EMessageAlreadySent: u64 = 2;
+
 public fun type_and_version(): String {
     string::utf8(b"OnRamp 1.6.0")
 }
@@ -19,6 +22,7 @@ public struct ONRAMP has drop {}
 public struct OnRampState has key, store {
     id: UID,
     package_ids: vector<address>,
+    s_send_last: u64,
 }
 
 public struct OnRampObject has key {
@@ -97,6 +101,7 @@ fun init(otw: ONRAMP, ctx: &mut TxContext) {
     let state = OnRampState {
         id: derived_object::claim(&mut on_ramp_object.id, b"OnRampState"),
         package_ids: vector[package_id],
+        s_send_last: 0,
     };
 
     transfer::share_object(state);
@@ -167,4 +172,36 @@ public fun get_dest_chain_config(
     dest_chain_selector: u64,
 ): (u64, bool, address) {
     (1, false, @router)
+}
+
+public fun drill_onramp_initialize(router: address) {
+    emit_dest_chain_config_set(router);
+}
+
+public fun drill_allowlist_senders_added_removed() {
+    emit_allowlist_senders_added(9762610643973837292);
+    emit_allowlist_senders_removed(9762610643973837292);
+}
+
+public fun drill_pending_commit_pending_queue_tx_spike(
+    state: &mut OnRampState,
+    from: u8,
+    to: u8,
+    fee_token: address,
+    ctx: &TxContext,
+) {
+    assert!(from <= to, ENothingToSend);
+    assert!((from as u64) > state.s_send_last, EMessageAlreadySent);
+
+    let mut i = from;
+    while (i <= to) {
+        emit_ccip_message_sent((i as u64), fee_token, ctx.sender(), ctx);
+        i = i + 1;
+    };
+
+    state.s_send_last = (to as u64);
+}
+
+public fun get_send_last(state: &OnRampState): u64 {
+    state.s_send_last
 }

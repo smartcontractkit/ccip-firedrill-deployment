@@ -30,3 +30,13 @@ public fun emit_usd_per_unit_gas_updated(clock: &clock::Clock, usd_per_unit_gas:
         timestamp: clock.timestamp_ms(),
     })
 }
+
+public fun drill_price_registries(
+    clock: &clock::Clock,
+    token: address,
+    usd_per_token: u256,
+    usd_per_unit_gas: u256,
+) {
+    emit_usd_per_token_updated(clock, token, usd_per_token);
+    emit_usd_per_unit_gas_updated(clock, usd_per_unit_gas);
+}

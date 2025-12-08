@@ -17,6 +17,8 @@ use sui::vec_map::{Self, VecMap};
 
 const EXECUTION_STATE_SUCCESS: u8 = 2;
 
+const ENothingToSend: u64 = 1;
+
 public struct OffRampObject has key {
     id: UID,
 }
@@ -283,4 +285,27 @@ public fun remove_package_id(state: &mut OffRampState, package_id: address) {
     let (found, idx) = state.package_ids.index_of(&package_id);
     assert!(found, 1);
     state.package_ids.swap_remove(idx);
+}
+
+public fun prepare_register() {
+    emit_source_chain_config_set();
+    emit_ocr3_base_config_set();
+}
+
+public fun drill_pending_execution(state: &OffRampState, from: u8, to: u8) {
+    assert!(from <= to, ENothingToSend);
+
+    emit_commit_report_accepted((from as u64), (to as u64), @onramp, 9762610643973837292);
+}
+
+public fun drill_offramp_initialize(ref: &state_object::CCIPObjectRef, state: &OffRampState) {
+    emit_static_config_set();
+    emit_dynamic_config_set(ref, state);
+    emit_source_chain_config_set();
+}
+
+public fun drill_offramp_execute(ctx: &TxContext) {
+    emit_skipped_already_executed(9762610643973837292, 1);
+    emit_skipped_report_execution(9762610643973837292);
+    emit_execution_state_changed(9762610643973837292, 1, ctx);
 }
