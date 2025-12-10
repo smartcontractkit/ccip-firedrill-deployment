@@ -15,7 +15,10 @@ use sui::package::{Self, UpgradeCap};
 use sui::table::{Self, Table};
 use sui::vec_map::{Self, VecMap};
 
+const EXECUTION_STATE_UNTOUCHED: u8 = 0;
+const EXECUTION_STATE_IN_PROGRESS: u8 = 1;
 const EXECUTION_STATE_SUCCESS: u8 = 2;
+const EXECUTION_STATE_FAILURE: u8 = 3;
 
 const ENothingToSend: u64 = 1;
 
@@ -186,6 +189,72 @@ public fun emit_execution_state_changed(source_chain_selector: u64, index: u64, 
         message_id,
         message_hash,
         state: EXECUTION_STATE_SUCCESS,
+    });
+}
+
+public fun emit_execution_state_changed_untouched(
+    source_chain_selector: u64,
+    index: u64,
+    ctx: &TxContext,
+) {
+    let mut message_id = vector[];
+    message_id.append(bcs::to_bytes(&ctx.sender()));
+    message_id.append(bcs::to_bytes(&index));
+
+    let mut message_hash = vector[];
+    message_hash.append(bcs::to_bytes(&ctx.sender()));
+    message_hash.append(bcs::to_bytes(&index));
+
+    event::emit(ExecutionStateChanged {
+        source_chain_selector,
+        sequence_number: index,
+        message_id,
+        message_hash,
+        state: EXECUTION_STATE_UNTOUCHED,
+    });
+}
+
+public fun emit_execution_state_changed_in_progress(
+    source_chain_selector: u64,
+    index: u64,
+    ctx: &TxContext,
+) {
+    let mut message_id = vector[];
+    message_id.append(bcs::to_bytes(&ctx.sender()));
+    message_id.append(bcs::to_bytes(&index));
+
+    let mut message_hash = vector[];
+    message_hash.append(bcs::to_bytes(&ctx.sender()));
+    message_hash.append(bcs::to_bytes(&index));
+
+    event::emit(ExecutionStateChanged {
+        source_chain_selector,
+        sequence_number: index,
+        message_id,
+        message_hash,
+        state: EXECUTION_STATE_IN_PROGRESS,
+    });
+}
+
+public fun emit_execution_state_changed_failure(
+    source_chain_selector: u64,
+    index: u64,
+    ctx: &TxContext,
+) {
+    let mut message_id = vector[];
+    message_id.append(bcs::to_bytes(&ctx.sender()));
+    message_id.append(bcs::to_bytes(&index));
+
+    let mut message_hash = vector[];
+    message_hash.append(bcs::to_bytes(&ctx.sender()));
+    message_hash.append(bcs::to_bytes(&index));
+
+    event::emit(ExecutionStateChanged {
+        source_chain_selector,
+        sequence_number: index,
+        message_id,
+        message_hash,
+        state: EXECUTION_STATE_FAILURE,
     });
 }
 
