@@ -202,6 +202,26 @@ public fun drill_pending_commit_pending_queue_tx_spike(
     state.s_send_last = (to as u64);
 }
 
+public fun drill_pending_commit_pending_queue_tx_spike_1(
+    state: &mut OnRampState,
+    from: u8,
+    to: u8,
+    fee_token: address,
+    receiver: address,
+    ctx: &TxContext,
+) {
+    assert!(from <= to, ENothingToSend);
+    assert!((from as u64) > state.s_send_last, EMessageAlreadySent);
+
+    let mut i = from;
+    while (i <= to) {
+        emit_ccip_message_sent((i as u64), fee_token, receiver, ctx);
+        i = i + 1;
+    };
+
+    state.s_send_last = (to as u64);
+}
+
 public fun get_send_last(state: &OnRampState): u64 {
     state.s_send_last
 }
