@@ -10,12 +10,53 @@ import (
 
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	cldf_evm "github.com/smartcontractkit/chainlink-deployments-framework/chain/evm"
+	"github.com/smartcontractkit/chainlink-deployments-framework/datastore"
 	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 	deploy "github.com/smartcontractkit/chainlink/deployment"
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
+
+	"github.com/smartcontractkit/chainlink-deployments-framework/operations"
+	"github.com/smartcontractkit/chainlink/deployment/common/opsutils"
+)
+
+type DeployFiredrillInput struct {
+	ChainSelector uint64
+}
+
+var (
+	DeployFiredrillV1_5 = opsutils.NewEVMDeployOperation[DeployFiredrillInput](
+		"DeployFiredrill",
+		&deploy.Version1_5_0,
+		"",
+		shared.FiredrillEntrypointType,
+		firedrill_entrypoint_v1_5.FiredrillEntrypointMetaData,
+		&opsutils.ContractOpts{
+			Version:          &deploy.Version1_5_0,
+			EVMBytecode:      common.FromHex(firedrill_entrypoint_v1_5.FiredrillEntrypointMetaData.Bin),
+			ZkSyncVMBytecode: []byte{},
+		},
+		func(input DeployFiredrillInput) []any {
+			return []any{input.ChainSelector}
+		},
+	)
+	DeployFiredrillV1_6 = opsutils.NewEVMDeployOperation[DeployFiredrillInput](
+		"DeployFiredrill",
+		&deploy.Version1_6_0,
+		"",
+		shared.FiredrillEntrypointType,
+		firedrill_entrypoint.FiredrillEntrypointMetaData,
+		&opsutils.ContractOpts{
+			Version:          &deploy.Version1_6_0,
+			EVMBytecode:      common.FromHex(firedrill_entrypoint.FiredrillEntrypointMetaData.Bin),
+			ZkSyncVMBytecode: []byte{},
+		},
+		func(input DeployFiredrillInput) []any {
+			return []any{input.ChainSelector}
+		},
+	)
 )
 
 type FiredrillEntrypoint interface {
@@ -31,15 +72,11 @@ var _ deployment.ChangeSetV2[shared.FiredrillConfig] = FiredrillDeployRegisterCh
 type FiredrillDeployRegisterChangeSet struct{}
 
 func (c FiredrillDeployRegisterChangeSet) Apply(e deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
-	changesetOutput, err := DeployFiredrillContracts(e, config)
+	firedrillRef, changesetOutput, err := DeployFiredrillContracts(e, config)
 	if err != nil {
 		return deployment.ChangesetOutput{}, err
 	}
-	err = e.ExistingAddresses.Merge(changesetOutput.AddressBook)
-	if err != nil {
-		return deployment.ChangesetOutput{}, err
-	}
-	err = FiredrillRegisterContracts(e.Logger, changesetOutput.AddressBook, e.BlockChains.EVMChains()[config.ChainSelector])
+	err = FiredrillRegisterContracts(e.Logger, firedrillRef, e.BlockChains.EVMChains()[config.ChainSelector])
 	if err != nil {
 		return deployment.ChangesetOutput{}, err
 	}
@@ -67,56 +104,66 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 	return nil
 }
 
-func DeployFiredrillContracts(e deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
-	ds := deployment.NewMemoryAddressBook()
-	evmChains := e.BlockChains.EVMChains()
+func DeployFiredrillContracts(e deployment.Environment, config shared.FiredrillConfig) (datastore.AddressRef, deployment.ChangesetOutput, error) {
+	ds := datastore.NewMemoryDataStore()
+	var ref datastore.AddressRef
 	switch config.Version {
 	case deploy.Version1_5_0:
-		_, err := deployment.DeployContract(e.Logger, evmChains[config.ChainSelector], ds, deployFiredrillEntrypointV1_5)
+		op, err := operations.ExecuteOperation(
+			e.OperationsBundle,
+			DeployFiredrillV1_5,
+			e.BlockChains.EVMChains()[config.ChainSelector],
+			opsutils.EVMDeployInput[DeployFiredrillInput]{
+				ChainSelector: config.ChainSelector,
+				DeployInput: DeployFiredrillInput{
+					ChainSelector: config.ChainSelector,
+				},
+			},
+		)
 		if err != nil {
-			return deployment.ChangesetOutput{}, err
+			return datastore.AddressRef{}, deployment.ChangesetOutput{}, err
+		}
+		ref = datastore.AddressRef{
+			Address:       op.Output.Address.Hex(),
+			ChainSelector: config.ChainSelector,
+			Type:          datastore.ContractType(shared.FiredrillEntrypointType),
+			Version:       &deploy.Version1_5_0,
 		}
 	case deploy.Version1_6_0:
-		_, err := deployment.DeployContract(e.Logger, evmChains[config.ChainSelector], ds, deployFiredrillEntrypoint)
+		op, err := operations.ExecuteOperation(
+			e.OperationsBundle,
+			DeployFiredrillV1_6,
+			e.BlockChains.EVMChains()[config.ChainSelector],
+			opsutils.EVMDeployInput[DeployFiredrillInput]{
+				ChainSelector: config.ChainSelector,
+				DeployInput: DeployFiredrillInput{
+					ChainSelector: config.ChainSelector,
+				},
+			},
+		)
 		if err != nil {
-			return deployment.ChangesetOutput{}, err
+			return datastore.AddressRef{}, deployment.ChangesetOutput{}, err
+		}
+		ref = datastore.AddressRef{
+			Address:       op.Output.Address.Hex(),
+			ChainSelector: config.ChainSelector,
+			Type:          datastore.ContractType(shared.FiredrillEntrypointType),
+			Version:       &deploy.Version1_6_0,
 		}
 	default:
-		return deployment.ChangesetOutput{}, fmt.Errorf("unknown version %s", config.Version.String())
+		return datastore.AddressRef{}, deployment.ChangesetOutput{}, fmt.Errorf("unknown version %s", config.Version.String())
 	}
-	return deployment.ChangesetOutput{
-		AddressBook: ds,
+	err := ds.AddressRefStore.Add(ref)
+	if err != nil {
+		return datastore.AddressRef{}, deployment.ChangesetOutput{}, err
+	}
+	return ref, deployment.ChangesetOutput{
+		DataStore: ds,
 	}, nil
 }
 
-func deployFiredrillEntrypointV1_5(chain cldf_evm.Chain) deployment.ContractDeploy[*firedrill_entrypoint_v1_5.FiredrillEntrypoint] {
-	address, tx, inst, err := firedrill_entrypoint_v1_5.DeployFiredrillEntrypoint(chain.DeployerKey, chain.Client, chain.Selector)
-	return deployment.ContractDeploy[*firedrill_entrypoint_v1_5.FiredrillEntrypoint]{
-		Address:  address,
-		Contract: inst,
-		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_5_0),
-		Err:      err,
-	}
-}
-
-func deployFiredrillEntrypoint(chain cldf_evm.Chain) deployment.ContractDeploy[*firedrill_entrypoint.FiredrillEntrypoint] {
-	address, tx, inst, err := firedrill_entrypoint.DeployFiredrillEntrypoint(chain.DeployerKey, chain.Client, chain.Selector)
-	return deployment.ContractDeploy[*firedrill_entrypoint.FiredrillEntrypoint]{
-		Address:  address,
-		Contract: inst,
-		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_6_0),
-		Err:      err,
-	}
-}
-
-func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.AddressBook, chain cldf_evm.Chain) error {
-	firedrillEntrypointAddr, err := deployment.SearchAddressBook(addressBook, chain.Selector, shared.FiredrillEntrypointType)
-	if err != nil {
-		return err
-	}
-	firedrillEntrypoint, err := firedrill_entrypoint.NewFiredrillEntrypoint(common.HexToAddress(firedrillEntrypointAddr), chain.Client)
+func FiredrillRegisterContracts(lggr logger.Logger, firedrillRef datastore.AddressRef, chain cldf_evm.Chain) error {
+	firedrillEntrypoint, err := firedrill_entrypoint.NewFiredrillEntrypoint(common.HexToAddress(firedrillRef.Address), chain.Client)
 	if err != nil {
 		return err
 	}
@@ -150,6 +197,6 @@ func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.Addre
 	if err != nil {
 		return err
 	}
-	lggr.Infof("FiredrillEntrypoint register events mined. Address: %s, tx: %s, blockNum: %d", firedrillEntrypointAddr, tx.Hash(), blockNum)
+	lggr.Infof("FiredrillEntrypoint register events mined. Address: %s, tx: %s, blockNum: %d", firedrillRef.Address, tx.Hash(), blockNum)
 	return nil
 }
