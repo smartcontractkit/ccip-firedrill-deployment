@@ -30,7 +30,7 @@ func EVMViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, e
 			if addressRef.Type.String() != shared.FiredrillEntrypointType.String() {
 				continue
 			}
-			typeAndVersion := deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_5_0)
+			typeAndVersion := deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, *addressRef.Version)
 			switch addressRef.Version.String() {
 			case deploy.Version1_5_0.String():
 				contract, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(address, chain.Client)

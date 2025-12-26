@@ -64,7 +64,7 @@ func TestRegisterFiredrill(t *testing.T) {
 	require.Len(t, chainSels, 2)
 	chainSel := chainSels[0]
 	sourceChainSel := chainSels[1]
-	firedrillRef, _, err := DeployFiredrillContracts(*env, shared.FiredrillConfig{
+	firedrillRef, output, err := DeployFiredrillContracts(*env, shared.FiredrillConfig{
 		Version:             deploy.Version1_5_0,
 		ChainSelector:       chainSel,
 		SourceChainSelector: sourceChainSel,
@@ -83,7 +83,7 @@ func TestRegisterFiredrill(t *testing.T) {
 	subscription, err := firedrillOffRamp.WatchConfigSet(nil, offRampSetSink)
 	require.NoError(t, err)
 	defer subscription.Unsubscribe()
-	err = FiredrillRegisterContracts(env.Logger, firedrillRef, env.BlockChains.EVMChains()[chainSel])
+	err = FiredrillRegisterContracts(env.Logger, output.DataStore.Addresses(), env.BlockChains.EVMChains()[chainSel])
 	require.NoError(t, err)
 	timer := time.NewTimer(1 * time.Second)
 	for {
