@@ -7,6 +7,7 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	cldf_evm "github.com/smartcontractkit/chainlink-deployments-framework/chain/evm"
 	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
@@ -67,16 +68,16 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 }
 
 func DeployFiredrillContracts(e deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
-	ab := deployment.NewMemoryAddressBook()
+	ds := deployment.NewMemoryAddressBook()
 	evmChains := e.BlockChains.EVMChains()
 	switch config.Version {
 	case deploy.Version1_5_0:
-		_, err := deployment.DeployContract(e.Logger, evmChains[config.ChainSelector], ab, deployFiredrillEntrypointV1_5)
+		_, err := deployment.DeployContract(e.Logger, evmChains[config.ChainSelector], ds, deployFiredrillEntrypointV1_5)
 		if err != nil {
 			return deployment.ChangesetOutput{}, err
 		}
 	case deploy.Version1_6_0:
-		_, err := deployment.DeployContract(e.Logger, evmChains[config.ChainSelector], ab, deployFiredrillEntrypoint)
+		_, err := deployment.DeployContract(e.Logger, evmChains[config.ChainSelector], ds, deployFiredrillEntrypoint)
 		if err != nil {
 			return deployment.ChangesetOutput{}, err
 		}
@@ -84,7 +85,7 @@ func DeployFiredrillContracts(e deployment.Environment, config shared.FiredrillC
 		return deployment.ChangesetOutput{}, fmt.Errorf("unknown version %s", config.Version.String())
 	}
 	return deployment.ChangesetOutput{
-		AddressBook: ab,
+		AddressBook: ds,
 	}, nil
 }
 
