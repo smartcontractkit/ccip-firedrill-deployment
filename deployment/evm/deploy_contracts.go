@@ -7,14 +7,56 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	cldf_evm "github.com/smartcontractkit/chainlink-deployments-framework/chain/evm"
+	"github.com/smartcontractkit/chainlink-deployments-framework/datastore"
 	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 	deploy "github.com/smartcontractkit/chainlink/deployment"
 
 	firedrill_entrypoint_v1_5 "github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_5/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/chains/evm/generated/v1_6/gethwrappers/firedrill_entrypoint"
 	"github.com/smartcontractkit/ccip-firedrill-deployment/deployment/shared"
+
+	"github.com/smartcontractkit/chainlink-deployments-framework/operations"
+	"github.com/smartcontractkit/chainlink/deployment/common/opsutils"
+)
+
+type DeployFiredrillInput struct {
+	ChainSelector uint64
+}
+
+var (
+	DeployFiredrillV1_5 = opsutils.NewEVMDeployOperation[DeployFiredrillInput](
+		"DeployFiredrill",
+		&deploy.Version1_5_0,
+		"",
+		shared.FiredrillEntrypointType,
+		firedrill_entrypoint_v1_5.FiredrillEntrypointMetaData,
+		&opsutils.ContractOpts{
+			Version:          &deploy.Version1_5_0,
+			EVMBytecode:      common.FromHex(firedrill_entrypoint_v1_5.FiredrillEntrypointMetaData.Bin),
+			ZkSyncVMBytecode: []byte{},
+		},
+		func(input DeployFiredrillInput) []any {
+			return []any{input.ChainSelector}
+		},
+	)
+	DeployFiredrillV1_6 = opsutils.NewEVMDeployOperation[DeployFiredrillInput](
+		"DeployFiredrill",
+		&deploy.Version1_6_0,
+		"",
+		shared.FiredrillEntrypointType,
+		firedrill_entrypoint.FiredrillEntrypointMetaData,
+		&opsutils.ContractOpts{
+			Version:          &deploy.Version1_6_0,
+			EVMBytecode:      common.FromHex(firedrill_entrypoint.FiredrillEntrypointMetaData.Bin),
+			ZkSyncVMBytecode: []byte{},
+		},
+		func(input DeployFiredrillInput) []any {
+			return []any{input.ChainSelector}
+		},
+	)
 )
 
 type FiredrillEntrypoint interface {
@@ -30,15 +72,11 @@ var _ deployment.ChangeSetV2[shared.FiredrillConfig] = FiredrillDeployRegisterCh
 type FiredrillDeployRegisterChangeSet struct{}
 
 func (c FiredrillDeployRegisterChangeSet) Apply(e deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
-	changesetOutput, err := DeployFiredrillContracts(e, config)
+	_, changesetOutput, err := DeployFiredrillContracts(e, config)
 	if err != nil {
 		return deployment.ChangesetOutput{}, err
 	}
-	err = e.ExistingAddresses.Merge(changesetOutput.AddressBook)
-	if err != nil {
-		return deployment.ChangesetOutput{}, err
-	}
-	err = FiredrillRegisterContracts(e.Logger, changesetOutput.AddressBook, e.BlockChains.EVMChains()[config.ChainSelector])
+	err = FiredrillRegisterContracts(e.Logger, changesetOutput.DataStore.Addresses(), e.BlockChains.EVMChains()[config.ChainSelector])
 	if err != nil {
 		return deployment.ChangesetOutput{}, err
 	}
@@ -66,89 +104,111 @@ func (c FiredrillDeployRegisterChangeSet) VerifyPreconditions(e deployment.Envir
 	return nil
 }
 
-func DeployFiredrillContracts(e deployment.Environment, config shared.FiredrillConfig) (deployment.ChangesetOutput, error) {
-	ab := deployment.NewMemoryAddressBook()
-	evmChains := e.BlockChains.EVMChains()
+func DeployFiredrillContracts(e deployment.Environment, config shared.FiredrillConfig) (datastore.AddressRef, deployment.ChangesetOutput, error) {
+	ds := datastore.NewMemoryDataStore()
+	var ref datastore.AddressRef
 	switch config.Version {
 	case deploy.Version1_5_0:
-		_, err := deployment.DeployContract(e.Logger, evmChains[config.ChainSelector], ab, deployFiredrillEntrypointV1_5)
+		op, err := operations.ExecuteOperation(
+			e.OperationsBundle,
+			DeployFiredrillV1_5,
+			e.BlockChains.EVMChains()[config.ChainSelector],
+			opsutils.EVMDeployInput[DeployFiredrillInput]{
+				ChainSelector: config.ChainSelector,
+				DeployInput: DeployFiredrillInput{
+					ChainSelector: config.ChainSelector,
+				},
+			},
+		)
 		if err != nil {
-			return deployment.ChangesetOutput{}, err
+			return datastore.AddressRef{}, deployment.ChangesetOutput{}, err
+		}
+		ref = datastore.AddressRef{
+			Address:       op.Output.Address.Hex(),
+			ChainSelector: config.ChainSelector,
+			Type:          datastore.ContractType(shared.FiredrillEntrypointType),
+			Version:       &deploy.Version1_5_0,
 		}
 	case deploy.Version1_6_0:
-		_, err := deployment.DeployContract(e.Logger, evmChains[config.ChainSelector], ab, deployFiredrillEntrypoint)
+		op, err := operations.ExecuteOperation(
+			e.OperationsBundle,
+			DeployFiredrillV1_6,
+			e.BlockChains.EVMChains()[config.ChainSelector],
+			opsutils.EVMDeployInput[DeployFiredrillInput]{
+				ChainSelector: config.ChainSelector,
+				DeployInput: DeployFiredrillInput{
+					ChainSelector: config.ChainSelector,
+				},
+			},
+		)
 		if err != nil {
-			return deployment.ChangesetOutput{}, err
+			return datastore.AddressRef{}, deployment.ChangesetOutput{}, err
+		}
+		ref = datastore.AddressRef{
+			Address:       op.Output.Address.Hex(),
+			ChainSelector: config.ChainSelector,
+			Type:          datastore.ContractType(shared.FiredrillEntrypointType),
+			Version:       &deploy.Version1_6_0,
 		}
 	default:
-		return deployment.ChangesetOutput{}, fmt.Errorf("unknown version %s", config.Version.String())
+		return datastore.AddressRef{}, deployment.ChangesetOutput{}, fmt.Errorf("unknown version %s", config.Version.String())
 	}
-	return deployment.ChangesetOutput{
-		AddressBook: ab,
+	err := ds.AddressRefStore.Add(ref)
+	if err != nil {
+		return datastore.AddressRef{}, deployment.ChangesetOutput{}, err
+	}
+	return ref, deployment.ChangesetOutput{
+		DataStore: ds,
 	}, nil
 }
 
-func deployFiredrillEntrypointV1_5(chain cldf_evm.Chain) deployment.ContractDeploy[*firedrill_entrypoint_v1_5.FiredrillEntrypoint] {
-	address, tx, inst, err := firedrill_entrypoint_v1_5.DeployFiredrillEntrypoint(chain.DeployerKey, chain.Client, chain.Selector)
-	return deployment.ContractDeploy[*firedrill_entrypoint_v1_5.FiredrillEntrypoint]{
-		Address:  address,
-		Contract: inst,
-		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_5_0),
-		Err:      err,
+func FiredrillRegisterContracts(lggr logger.Logger, ab datastore.AddressRefStore, chain cldf_evm.Chain) error {
+	firedrillRefs := ab.Filter(func(refs []datastore.AddressRef) []datastore.AddressRef {
+		res := make([]datastore.AddressRef, 0, len(refs))
+		for _, ref := range refs {
+			if ref.ChainSelector == chain.Selector && ref.Type == datastore.ContractType(shared.FiredrillEntrypointType) {
+				res = append(res, ref)
+			}
+		}
+		return res
+	})
+	for _, ref := range firedrillRefs {
+		firedrillAddress := common.HexToAddress(ref.Address)
+		firedrillEntrypoint, err := firedrill_entrypoint.NewFiredrillEntrypoint(firedrillAddress, chain.Client)
+		if err != nil {
+			return err
+		}
+		entrypointTokenAddr, err1 := firedrillEntrypoint.Token(nil)
+		entrypointOnRampAddr, err2 := firedrillEntrypoint.OnRamp(nil)
+		entrypointOffRampAddr, err3 := firedrillEntrypoint.OffRamp(nil)
+		entrypointReceiverAddr, err4 := firedrillEntrypoint.Receiver(nil)
+		if err := errors.Join(err1, err2, err3, err4); err != nil {
+			return err
+		}
+		if (entrypointTokenAddr == common.Address{}) {
+			err = errors.New("FiredrillToken address from address book does not match FiredrillEntrypoint.Token()")
+		}
+		if (entrypointOnRampAddr == common.Address{}) {
+			err = errors.Join(err, errors.New("firedrill onramp on entrypoint can't be 0-address"))
+		}
+		if (entrypointOffRampAddr == common.Address{}) {
+			err = errors.Join(err, errors.New("firedrill offramp on entrypoint can't be 0-address"))
+		}
+		if (entrypointReceiverAddr == common.Address{}) {
+			err = errors.Join(err, errors.New("firedrill receiver on entrypoint can't be 0-address"))
+		}
+		if err != nil {
+			return err
+		}
+		tx, err := firedrillEntrypoint.PrepareRegister(chain.DeployerKey)
+		if err != nil {
+			return err
+		}
+		blockNum, err := chain.Confirm(tx)
+		if err != nil {
+			return err
+		}
+		lggr.Infof("FiredrillEntrypoint register events mined. Address: %s, tx: %s, blockNum: %d", firedrillAddress.Hex(), tx.Hash(), blockNum)
 	}
-}
-
-func deployFiredrillEntrypoint(chain cldf_evm.Chain) deployment.ContractDeploy[*firedrill_entrypoint.FiredrillEntrypoint] {
-	address, tx, inst, err := firedrill_entrypoint.DeployFiredrillEntrypoint(chain.DeployerKey, chain.Client, chain.Selector)
-	return deployment.ContractDeploy[*firedrill_entrypoint.FiredrillEntrypoint]{
-		Address:  address,
-		Contract: inst,
-		Tx:       tx,
-		Tv:       deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_6_0),
-		Err:      err,
-	}
-}
-
-func FiredrillRegisterContracts(lggr logger.Logger, addressBook deployment.AddressBook, chain cldf_evm.Chain) error {
-	firedrillEntrypointAddr, err := deployment.SearchAddressBook(addressBook, chain.Selector, shared.FiredrillEntrypointType)
-	if err != nil {
-		return err
-	}
-	firedrillEntrypoint, err := firedrill_entrypoint.NewFiredrillEntrypoint(common.HexToAddress(firedrillEntrypointAddr), chain.Client)
-	if err != nil {
-		return err
-	}
-	entrypointTokenAddr, err1 := firedrillEntrypoint.Token(nil)
-	entrypointOnRampAddr, err2 := firedrillEntrypoint.OnRamp(nil)
-	entrypointOffRampAddr, err3 := firedrillEntrypoint.OffRamp(nil)
-	entrypointReceiverAddr, err4 := firedrillEntrypoint.Receiver(nil)
-	if err := errors.Join(err1, err2, err3, err4); err != nil {
-		return err
-	}
-	if (entrypointTokenAddr == common.Address{}) {
-		err = errors.New("FiredrillToken address from address book does not match FiredrillEntrypoint.Token()")
-	}
-	if (entrypointOnRampAddr == common.Address{}) {
-		err = errors.Join(err, errors.New("firedrill onramp on entrypoint can't be 0-address"))
-	}
-	if (entrypointOffRampAddr == common.Address{}) {
-		err = errors.Join(err, errors.New("firedrill offramp on entrypoint can't be 0-address"))
-	}
-	if (entrypointReceiverAddr == common.Address{}) {
-		err = errors.Join(err, errors.New("firedrill receiver on entrypoint can't be 0-address"))
-	}
-	if err != nil {
-		return err
-	}
-	tx, err := firedrillEntrypoint.PrepareRegister(chain.DeployerKey)
-	if err != nil {
-		return err
-	}
-	blockNum, err := chain.Confirm(tx)
-	if err != nil {
-		return err
-	}
-	lggr.Infof("FiredrillEntrypoint register events mined. Address: %s, tx: %s, blockNum: %d", firedrillEntrypointAddr, tx.Hash(), blockNum)
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 	deploy "github.com/smartcontractkit/chainlink/deployment"
 
@@ -13,42 +14,44 @@ import (
 )
 
 func EVMViewFiredrill(e deployment.Environment) (map[string]*shared.ChainView, error) {
-	ab, err := e.ExistingAddresses.Addresses()
+	ab, err := e.DataStore.Addresses().Fetch()
 	if err != nil {
 		return nil, err
 	}
 	chainsViews := make(map[string]*shared.ChainView)
 	evmChains := e.BlockChains.EVMChains()
-	for chainSel, addresses := range ab {
-		if chain, ok := evmChains[chainSel]; ok {
+	for _, addressRef := range ab {
+		if chain, ok := evmChains[addressRef.ChainSelector]; ok {
 			chainView, err := shared.NewChainView(chain.Selector)
 			if err != nil {
 				return nil, err
 			}
-			for addressStr, typeAndVersion := range addresses {
-				address := common.HexToAddress(addressStr)
-				switch typeAndVersion.String() {
-				case deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_5_0).String():
-					contract, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(address, chain.Client)
-					if err != nil {
-						return nil, err
-					}
-					view, err := contractView(contract, address, typeAndVersion.String())
-					if err != nil {
-						return nil, err
-					}
-					chainView.FiredrillEntrypoint[addressStr] = view
-				case deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, deploy.Version1_6_0).String():
-					contract, err := firedrill_entrypoint.NewFiredrillEntrypoint(address, chain.Client)
-					if err != nil {
-						return nil, err
-					}
-					view, err := contractView(contract, address, typeAndVersion.String())
-					if err != nil {
-						return nil, err
-					}
-					chainView.FiredrillEntrypoint[addressStr] = view
+			address := common.HexToAddress(addressRef.Address)
+			if addressRef.Type.String() != shared.FiredrillEntrypointType.String() {
+				continue
+			}
+			typeAndVersion := deployment.NewTypeAndVersion(shared.FiredrillEntrypointType, *addressRef.Version)
+			switch addressRef.Version.String() {
+			case deploy.Version1_5_0.String():
+				contract, err := firedrill_entrypoint_v1_5.NewFiredrillEntrypoint(address, chain.Client)
+				if err != nil {
+					return nil, err
 				}
+				view, err := contractView(contract, address, typeAndVersion.String())
+				if err != nil {
+					return nil, err
+				}
+				chainView.FiredrillEntrypoint[addressRef.Address] = view
+			case deploy.Version1_6_0.String():
+				contract, err := firedrill_entrypoint.NewFiredrillEntrypoint(address, chain.Client)
+				if err != nil {
+					return nil, err
+				}
+				view, err := contractView(contract, address, typeAndVersion.String())
+				if err != nil {
+					return nil, err
+				}
+				chainView.FiredrillEntrypoint[addressRef.Address] = view
 			}
 			if len(chainView.FiredrillEntrypoint) > 0 {
 				chainsViews[chain.Name()] = chainView
