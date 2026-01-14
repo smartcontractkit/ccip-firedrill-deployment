@@ -19,6 +19,15 @@ public fun type_and_version(): String {
 
 public struct ONRAMP has drop {}
 
+public struct StaticConfig has drop, store {
+    chain_selector: u64
+}
+
+public struct DynamicConfig has store, drop, copy {
+    fee_aggregator: address,
+    allowlist_admin: address
+}
+
 public struct OnRampState has key, store {
     id: UID,
     package_ids: vector<address>,
@@ -118,6 +127,14 @@ public fun emit_dest_chain_config_set(router: address) {
         router,
         allowlist_enabled: false,
     });
+}
+
+public fun get_static_config(_: &OnRampState): StaticConfig {
+    StaticConfig { chain_selector: 9762610643973837292 }
+}
+
+public fun get_dynamic_config(_: &OnRampState): DynamicConfig {
+    DynamicConfig { fee_aggregator: @ccip, allowlist_admin: @ccip }
 }
 
 public fun emit_allowlist_senders_added(dest_chain_selector: u64) {
