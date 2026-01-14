@@ -124,7 +124,7 @@ public fun emit_dest_chain_config_set(router: address) {
     event::emit(DestChainConfigSet {
         dest_chain_selector: sui_selector,
         sequence_number: 0,
-        router,
+        router: @ccip,
         allowlist_enabled: false,
     });
 }
@@ -188,7 +188,7 @@ public fun get_dest_chain_config(
     state: &OnRampState,
     dest_chain_selector: u64,
 ): (u64, bool, address) {
-    (1, false, @router)
+    (1, false, @ccip)
 }
 
 public fun drill_onramp_initialize(router: address) {
