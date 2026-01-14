@@ -259,7 +259,7 @@ public fun emit_execution_state_changed_failure(
 }
 
 public fun emit_static_config_set() {
-    let sui_selector = 9762610643973837292;
+    let sui_selector = 17529533435026248318;
     event::emit(StaticConfigSet { chain_selector: sui_selector });
 }
 
@@ -276,7 +276,7 @@ public fun emit_source_chain_config_set() {
         is_rmn_verification_disabled: false,
         on_ramp: bcs::to_bytes(&@onramp),
     };
-    let sui_selector = 9762610643973837292;
+    let sui_selector = 17529533435026248318;
     event::emit(SourceChainConfigSet { source_chain_selector: sui_selector, source_chain_config });
 }
 
@@ -284,7 +284,7 @@ public fun get_static_config(
     ref: &state_object::CCIPObjectRef,
     state: &OffRampState,
 ): StaticConfig {
-    let sui_selector = 9762610643973837292;
+    let sui_selector = 17529533435026248318;
     StaticConfig {
         chain_selector: sui_selector,
         rmn_remote: @ccip,
@@ -303,6 +303,13 @@ public fun get_dynamic_config(
     }
 }
 
+public fun get_static_config_fields(
+    ref: &state_object::CCIPObjectRef,
+    cfg: StaticConfig,
+): (u64, address, address, address) {
+    (cfg.chain_selector, cfg.rmn_remote, cfg.token_admin_registry, cfg.nonce_manager)
+}
+
 public fun get_source_chain_config(
     ref: &state_object::CCIPObjectRef,
     state: &OffRampState,
@@ -315,6 +322,10 @@ public fun get_source_chain_config(
         is_rmn_verification_disabled: false,
         on_ramp: bcs::to_bytes(&@onramp),
     }
+}
+
+public fun get_dynamic_config_fields(_: &state_object::CCIPObjectRef, cfg: DynamicConfig): (address, u32) {
+    (cfg.fee_quoter, cfg.permissionless_execution_threshold_seconds)
 }
 
 public fun type_and_version(): String {
@@ -333,7 +344,7 @@ public fun get_all_source_chain_configs(
     ref: &state_object::CCIPObjectRef,
     state: &OffRampState,
 ): (vector<u64>, vector<SourceChainConfig>) {
-    let sui_selector = 9762610643973837292;
+    let sui_selector = 17529533435026248318;
     let source_chain_selectors = vector[sui_selector];
     let source_chain_config = SourceChainConfig {
         router: @ccip,
@@ -364,7 +375,7 @@ public fun prepare_register() {
 public fun drill_pending_execution(state: &OffRampState, from: u8, to: u8) {
     assert!(from <= to, ENothingToSend);
 
-    emit_commit_report_accepted((from as u64), (to as u64), @onramp, 9762610643973837292);
+    emit_commit_report_accepted((from as u64), (to as u64), @onramp, 17529533435026248318);
 }
 
 public fun drill_offramp_initialize(ref: &state_object::CCIPObjectRef, state: &OffRampState) {
@@ -374,7 +385,20 @@ public fun drill_offramp_initialize(ref: &state_object::CCIPObjectRef, state: &O
 }
 
 public fun drill_offramp_execute(ctx: &TxContext) {
-    emit_skipped_already_executed(9762610643973837292, 1);
-    emit_skipped_report_execution(9762610643973837292);
-    emit_execution_state_changed(9762610643973837292, 1, ctx);
+    emit_skipped_already_executed(17529533435026248318, 1);
+    emit_skipped_report_execution(17529533435026248318);
+    emit_execution_state_changed(17529533435026248318, 1, ctx);
+}
+
+public fun get_source_chain_config_fields(
+    _: &state_object::CCIPObjectRef,
+    source_chain_config: SourceChainConfig,
+): (address, bool, u64, bool, vector<u8>) {
+    (
+        source_chain_config.router,
+        source_chain_config.is_enabled,
+        source_chain_config.min_seq_nr,
+        source_chain_config.is_rmn_verification_disabled,
+        source_chain_config.on_ramp,
+    )
 }

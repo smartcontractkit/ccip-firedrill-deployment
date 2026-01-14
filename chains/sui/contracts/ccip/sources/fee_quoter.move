@@ -25,7 +25,7 @@ public fun emit_usd_per_token_updated(clock: &clock::Clock, token: address, usd_
 
 public fun emit_usd_per_unit_gas_updated(clock: &clock::Clock, usd_per_unit_gas: u256) {
     event::emit(UsdPerUnitGasUpdated {
-        dest_chain_selector: 9762610643973837292,
+        dest_chain_selector: 17529533435026248318,
         usd_per_unit_gas,
         timestamp: clock.timestamp_ms(),
     })

@@ -120,7 +120,7 @@ fun init(otw: ONRAMP, ctx: &mut TxContext) {
 }
 
 public fun emit_dest_chain_config_set(router: address) {
-    let sui_selector = 9762610643973837292;
+    let sui_selector = 17529533435026248318;
     event::emit(DestChainConfigSet {
         dest_chain_selector: sui_selector,
         sequence_number: 0,
@@ -130,7 +130,15 @@ public fun emit_dest_chain_config_set(router: address) {
 }
 
 public fun get_static_config(_: &OnRampState): StaticConfig {
-    StaticConfig { chain_selector: 9762610643973837292 }
+    StaticConfig { chain_selector: 17529533435026248318 }
+}
+
+public fun get_static_config_fields(cfg: StaticConfig): u64 {
+    cfg.chain_selector
+}
+
+public fun get_dynamic_config_fields(cfg: DynamicConfig): (address, address) {
+    (cfg.fee_aggregator, cfg.allowlist_admin)
 }
 
 public fun get_dynamic_config(_: &OnRampState): DynamicConfig {
@@ -158,8 +166,8 @@ public fun emit_ccip_message_sent(
     let message = Sui2AnyRampMessage {
         header: RampMessageHeader {
             message_id,
-            source_chain_selector: 9762610643973837292,
-            dest_chain_selector: 9762610643973837292,
+            source_chain_selector: 17529533435026248318,
+            dest_chain_selector: 17529533435026248318,
             sequence_number: index,
             nonce: 1,
         },
@@ -174,7 +182,7 @@ public fun emit_ccip_message_sent(
     };
 
     event::emit(CCIPMessageSent {
-        dest_chain_selector: 9762610643973837292,
+        dest_chain_selector: 17529533435026248318,
         sequence_number: index,
         message,
     });
@@ -196,8 +204,8 @@ public fun drill_onramp_initialize(router: address) {
 }
 
 public fun drill_allowlist_senders_added_removed() {
-    emit_allowlist_senders_added(9762610643973837292);
-    emit_allowlist_senders_removed(9762610643973837292);
+    emit_allowlist_senders_added(17529533435026248318);
+    emit_allowlist_senders_removed(17529533435026248318);
 }
 
 public fun drill_pending_commit_pending_queue_tx_spike(
